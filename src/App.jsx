@@ -3,6 +3,8 @@ import Collection from './components/Collection'
 
 export default function App() {
   const [importedJson, setImportedJson] = useState(null)
+  // Example: You can pass availableModules from your server
+  // const [availableModules, setAvailableModules] = useState(null)
 
   function handleFileImport(e) {
     const file = e.target.files?.[0]
@@ -29,7 +31,10 @@ export default function App() {
         <small className="hint">You can also pass JSON directly as a prop to the component.</small>
       </div>
 
-      <Collection initialJson={importedJson} />
+      <Collection 
+        initialJson={importedJson} 
+        // availableModules={availableModules} // Optional: pass server modules here
+      />
     </div>
   )
 }

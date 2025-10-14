@@ -44,10 +44,25 @@ body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Rob
 /* Property section styles */
 .property-section{margin-top:16px;padding:12px}
 .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.property-item{padding:12px;margin-bottom:12px}
+.section-body{display:flex;flex-direction:column;gap:12px}
+.property-item{padding:12px;margin-bottom:12px;border:1px solid #e6e9ef;border-radius:8px;background:#fafbfc}
+.property-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.property-item-header h4{margin:0;font-size:14px;font-weight:600;color:#333}
+.property-item-body{display:flex;flex-direction:column;gap:12px}
 .property-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.btn{padding:6px 10px;border-radius:6px;border:1px solid #e6e9ef;background:transparent;cursor:pointer}
+.btn{padding:6px 10px;border-radius:6px;border:1px solid #e6e9ef;background:transparent;cursor:pointer;font-size:13px;font-weight:500}
 .btn-primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn-primary:hover{background:#1d4ed8}
 .btn-danger{background:#fee2e2;color:#9b1c1c;border-color:transparent}
+.btn-danger:hover{background:#fca5a5}
+.btn-sm{padding:4px 8px;font-size:12px}
+
+/* Select dropdown styles */
+.field select{padding:8px 10px;border:1px solid #e6e9ef;border-radius:6px;font-size:14px;background:#fff;cursor:pointer}
+.field select:focus{outline:2px solid rgba(37,99,235,0.3);border-color:var(--accent)}
+
+/* Link styles */
+.field a{color:var(--accent);text-decoration:none}
+.field a:hover{text-decoration:underline}
 

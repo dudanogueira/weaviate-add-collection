@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import PropertySection from './PropertySection'
+import VectorConfigSection from './VectorConfigSection'
 
 // Contract:
 // Inputs: optional `initialJson` object with { name, description }
+//         optional `availableModules` object with available vectorizer modules
 // Outputs: none for now; component displays generated JSON and allows editing fields.
 
-export default function Collection({ initialJson = null }) {
+export default function Collection({ initialJson = null, availableModules = null }) {
   const [name, setName] = useState(initialJson?.name || '')
   const [description, setDescription] = useState(initialJson?.description || '')
   const [generatedJson, setGeneratedJson] = useState({})
   const [openBasic, setOpenBasic] = useState(true)
   const [openProperties, setOpenProperties] = useState(true)
+  const [openVectorConfig, setOpenVectorConfig] = useState(true)
 
   useEffect(() => {
     setName(initialJson?.name || '')
@@ -40,6 +43,9 @@ export default function Collection({ initialJson = null }) {
 
   // properties state managed here and merged into generated JSON
   const [properties, setProperties] = useState([])
+  
+  // vectorConfig state managed here and merged into generated JSON
+  const [vectorConfigs, setVectorConfigs] = useState([])
 
   useEffect(() => {
     // Transform properties into final JSON shape:
@@ -84,6 +90,33 @@ export default function Collection({ initialJson = null }) {
 
     setGeneratedJson((prev) => ({ ...prev, properties: transformed }))
   }, [properties])
+
+  // Transform vectorConfigs into vectorConfig object for JSON
+  useEffect(() => {
+    if (!vectorConfigs || vectorConfigs.length === 0) {
+      setGeneratedJson((prev) => {
+        const { vectorConfig, ...rest } = prev
+        return rest
+      })
+      return
+    }
+
+    const vectorConfigObject = {}
+    vectorConfigs.forEach((config, idx) => {
+      const configName = config.name && config.name.trim() !== '' 
+        ? config.name 
+        : `vector_config_${idx + 1}`
+      
+      vectorConfigObject[configName] = {
+        vectorizer: {
+          [config.vectorizer || 'none']: {}
+        },
+        vectorIndexType: config.indexType || 'hnsw'
+      }
+    })
+
+    setGeneratedJson((prev) => ({ ...prev, vectorConfig: vectorConfigObject }))
+  }, [vectorConfigs])
 
   function prettyJson() {
     return JSON.stringify(generatedJson, null, 2)
@@ -152,6 +185,28 @@ export default function Collection({ initialJson = null }) {
         {openProperties && (
           <div className="collapsible-panel">
             <PropertySection properties={properties} onChange={setProperties} />
+          </div>
+        )}
+      </div>
+
+      {/* Vector Config collapsible section */}
+      <div className="collapsible" style={{ marginTop: 12 }}>
+        <button
+          className="collapsible-toggle"
+          aria-expanded={openVectorConfig}
+          onClick={() => setOpenVectorConfig((s) => !s)}
+        >
+          <span>Vectorizer Configuration</span>
+          <span className="chev">{openVectorConfig ? '\u25be' : '\u25b8'}</span>
+        </button>
+
+        {openVectorConfig && (
+          <div className="collapsible-panel">
+            <VectorConfigSection 
+              vectorConfigs={vectorConfigs} 
+              onChange={setVectorConfigs}
+              availableModules={availableModules}
+            />
           </div>
         )}
       </div>
