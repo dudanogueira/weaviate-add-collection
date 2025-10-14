@@ -15,6 +15,19 @@ export default function Collection({ initialJson = null }) {
   useEffect(() => {
     setName(initialJson?.name || '')
     setDescription(initialJson?.description || '')
+    // Also load properties from imported JSON
+    if (initialJson?.properties && Array.isArray(initialJson.properties)) {
+      setProperties(initialJson.properties.map(p => ({
+        name: p.name || '',
+        dataType: Array.isArray(p.dataType) ? p.dataType[0]?.replace('[]', '') : (p.dataType || 'text'),
+        description: p.description || '',
+        indexFilterable: p.indexFilterable ?? true,
+        indexRangeFilters: p.indexRangeFilters ?? false,
+        indexSearchable: p.indexSearchable ?? true,
+        isArray: Array.isArray(p.dataType) ? p.dataType[0]?.includes('[]') : false,
+        tokenization: p.tokenization || 'word'
+      })))
+    }
   }, [initialJson])
 
   useEffect(() => {
@@ -42,15 +55,31 @@ export default function Collection({ initialJson = null }) {
 
       const finalBaseType = baseType || placeholderDataType
 
-      return {
+      const result = {
         name: p.name && p.name.trim() !== '' ? p.name : placeholderName,
         dataType: [typeValue || (p.isArray ? `${placeholderDataType}[]` : placeholderDataType)],
         description: p.description && p.description.trim() !== '' ? p.description : placeholderDescription,
-        indexFilterable: typeof p.indexFilterable === 'boolean' ? p.indexFilterable : true,
-        indexRangeFilters: typeof p.indexRangeFilters === 'boolean' ? p.indexRangeFilters : false,
-        indexSearchable: typeof p.indexSearchable === 'boolean' ? p.indexSearchable : false,
-        tokenization: finalBaseType === 'text' ? (p.tokenization || placeholderTokenization) : undefined
+        indexFilterable: typeof p.indexFilterable === 'boolean' ? p.indexFilterable : true
       }
+
+      // Add indexSearchable only for text type
+      if (finalBaseType === 'text') {
+        result.indexSearchable = typeof p.indexSearchable === 'boolean' ? p.indexSearchable : true
+        result.tokenization = p.tokenization || placeholderTokenization
+      } else {
+        // If not text type, set indexSearchable to false
+        result.indexSearchable = false
+      }
+
+      // Add indexRangeFilters only for int, number, date types
+      if (finalBaseType === 'int' || finalBaseType === 'number' || finalBaseType === 'date') {
+        result.indexRangeFilters = typeof p.indexRangeFilters === 'boolean' ? p.indexRangeFilters : false
+      } else {
+        // If not a range-filterable type, set to false
+        result.indexRangeFilters = false
+      }
+
+      return result
     })
 
     setGeneratedJson((prev) => ({ ...prev, properties: transformed }))

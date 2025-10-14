@@ -7,13 +7,30 @@ export default function PropertyItem({ value, onChange, onDelete, index }) {
   }
 
   function updateDataType(val) {
-    update('dataType', val)
+    // When changing data type, reset type-specific properties
+    const newValue = {
+      name: value.name,
+      description: value.description,
+      dataType: val,
+      isArray: value.isArray,
+      indexFilterable: value.indexFilterable
+    }
+    
+    // Only add properties relevant to the new data type
+    if (val === 'text') {
+      newValue.tokenization = 'word'
+      newValue.indexSearchable = true
+    } else if (val === 'int' || val === 'number' || val === 'date') {
+      newValue.indexRangeFilters = false
+    }
+    
+    onChange(newValue)
   }
 
   return (
     <div className="property-item card">
       <div className="property-header">
-        <strong>Property {index + 1}</strong>
+        <strong>{value.name && value.name.trim() !== '' ? value.name : `Property ${index + 1}`}</strong>
         <div>
           <button
             type="button"
@@ -59,6 +76,9 @@ export default function PropertyItem({ value, onChange, onDelete, index }) {
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
+          <small className="help-text">
+            {tokenizationOptions.find(opt => opt.value === (value.tokenization || 'word'))?.description}
+          </small>
         </div>
       )}
 

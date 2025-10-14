@@ -7,7 +7,7 @@ const emptyProperty = () => ({
   description: '',
   indexFilterable: true,
   indexRangeFilters: false,
-    indexSearchable: false,
+    indexSearchable: true,
     isArray: false,
   tokenization: 'word'
 })
