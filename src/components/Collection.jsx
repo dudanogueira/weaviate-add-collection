@@ -107,12 +107,36 @@ export default function Collection({ initialJson = null, availableModules = null
         ? config.name 
         : `vector_config_${idx + 1}`
       
-      vectorConfigObject[configName] = {
+      // Include moduleConfig if it exists and is not empty
+      const moduleConfig = config.moduleConfig || {}
+      const hasModuleConfig = Object.keys(moduleConfig).length > 0
+      
+      // Build the vectorizer config with optional vectorizeClassName
+      const vectorizerConfig = hasModuleConfig ? { ...moduleConfig } : {}
+      
+      // Add vectorizeClassName if it's set (and not undefined)
+      if (config.vectorizeClassName !== undefined) {
+        vectorizerConfig.vectorizeClassName = config.vectorizeClassName
+      }
+      
+      const vectorConfigEntry = {
         vectorizer: {
-          [config.vectorizer || 'none']: {}
+          [config.vectorizer || 'none']: vectorizerConfig
         },
         vectorIndexType: config.indexType || 'hnsw'
       }
+      
+      // Add indexConfig if it exists
+      if (config.indexConfig && Object.keys(config.indexConfig).length > 0) {
+        vectorConfigEntry.vectorIndexConfig = config.indexConfig
+      }
+      
+      // Add quantization if it exists and type is not 'none'
+      if (config.quantization && config.quantization.type && config.quantization.type !== 'none') {
+        vectorConfigEntry.quantizer = config.quantization
+      }
+      
+      vectorConfigObject[configName] = vectorConfigEntry
     })
 
     setGeneratedJson((prev) => ({ ...prev, vectorConfig: vectorConfigObject }))

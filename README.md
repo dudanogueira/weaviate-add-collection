@@ -90,41 +90,125 @@ Each vector configuration has the following fields:
 - **Purpose:** Unique identifier for this vector configuration
 - **Examples:** `default`, `semantic`, `contextual`
 
-#### **Vectorizer Module**
-- **Type:** Dropdown select
-- **Required:** Yes
-- **Purpose:** Selects which vectorizer module to use for this configuration
-- **Available modules:** Can be passed as a prop (`availableModules`), otherwise uses all default modules
-- **Module categories:**
-  - **Text2Vec modules:** text2vec-openai, text2vec-cohere, text2vec-huggingface, etc.
-  - **Multi2Vec modules:** multi2vec-google
-  - **Generative modules:** generative-openai, generative-anthropic, generative-cohere, etc.
-  - **Reranker modules:** reranker-cohere, reranker-jinaai, reranker-voyageai
-  - **Other modules:** qna-openai, ref2vec-centroid
+#### **Vectorize Class Name**
+- **Type:** Checkbox
+- **Default:** false
+- **Purpose:** Whether to include the collection/class name in vectorization
+- **Note:** Common to all vectorizer modules
 
-**Note:** Backup modules (e.g., `backup-filesystem`) are automatically filtered out from the selection.
+### Tabbed Interface
 
-#### **Index Type**
-- **Type:** Dropdown select
-- **Options:**
-  - **HNSW (Recommended)** - Hierarchical Navigable Small World graph
-  - **Flat** - Flat index for brute-force search
-  - **Dynamic** - Dynamically switches between HNSW and Flat
-- **Default:** HNSW
-- **Purpose:** Determines the vector index algorithm used
+The vector configuration is organized into **three tabs** for better organization:
+
+#### Tab 1: Vectorizer Module
+Configure which embedding model to use and its specific settings.
+
+- **Vectorizer Module** (Dropdown)
+  - Select from 40+ available modules
+  - Categories: text2vec-*, multi2vec-*, ref2vec-*, etc.
+  
+- **Module Configuration** (Dynamic)
+  - Automatically shows relevant fields based on selected module
+  - Examples: model, dimensions, projectId, baseURL, etc.
+  - Required fields marked with *
+
+**Note:** Backup, generative, and reranker modules are filtered out.
+
+#### Tab 2: Index Configuration
+Configure the vector index type and optimization parameters.
+
+- **Index Types:**
+  - **HNSW** - Fast approximate search (recommended)
+  - **Flat** - Exact search for small datasets
+  - **Dynamic** - Auto-switches based on collection size
+
+- **HNSW Parameters:**
+  - Distance Metric (cosine, dot, l2-squared, manhattan, hamming)
+  - ef Construction (build quality)
+  - ef (search quality)
+  - Max Connections (graph density)
+
+- **Flat Parameters:**
+  - Distance Metric only
+
+- **Dynamic Parameters:**
+  - Distance Metric
+  - Threshold (when to switch from flat to HNSW)
+
+#### Tab 3: Compression/Quantization
+Reduce memory usage by compressing vectors.
+
+- **Quantization Types:**
+  - **None** - Full precision (default)
+  - **PQ** - Product Quantization (8x-32x compression)
+  - **BQ** - Binary Quantization (32x compression)
+  - **SQ** - Scalar Quantization (4x compression)
+
+- **PQ Parameters:**
+  - Segments, Centroids, Training Limit, Distribution
+
+- **BQ/SQ Parameters:**
+  - Rescore Limit, Training Limit
+
+See [TABS_DOCUMENTATION.md](TABS_DOCUMENTATION.md) for detailed information about each tab.
+
+### Dynamic Module Configuration
+
+When you select a vectorizer module, the application automatically infers the available configuration options for that module directly from the Weaviate client library. This ensures that the configuration form always matches the actual API requirements.
+
+#### How It Works
+
+1. **Type Definition Extraction:** The application reads the TypeScript type definitions from `weaviate-client` to understand what configuration fields are available for each module.
+
+2. **Dynamic Form Generation:** Based on the selected module, a configuration form is automatically generated with the appropriate fields.
+
+3. **Field Types:** The form intelligently renders different input types:
+   - **String fields:** Text inputs
+   - **Number fields:** Numeric inputs
+   - **Boolean fields:** Checkboxes
+   - **Array fields:** Comma-separated text inputs
+   - **Object fields:** JSON textarea editors
+
+4. **Required Fields:** Fields marked as required in the type definitions are indicated with a red asterisk (*).
+
+#### Example Module Configurations
+
+**text2vec-openai:**
+- `model` (string) - The model to use (e.g., text-embedding-ada-002)
+- `modelVersion` (string) - The model version
+- `type` (string) - The type of embeddings (text, code)
+- `baseURL` (string) - The base URL for OpenAI API
+- `dimensions` (number) - The dimensionality of the vector
+- `vectorizeClassName` (boolean) - Whether to vectorize the class name
+
+**text2vec-google:**
+- `projectId` (string) * - The project ID of the model in GCP
+- `location` (string) - The location where the model runs
+- `model` (string) - The model to use
+- `dimensions` (number) - The dimensionality of the vector
+- `vectorizeClassName` (boolean) - Whether to vectorize the class name
+
+**multi2vec-clip:**
+- `imageFields` (string[]) - The image fields used when vectorizing
+- `inferenceUrl` (string) - The URL where inference requests are sent
+- `textFields` (string[]) - The text fields used when vectorizing
+- `vectorizeCollectionName` (boolean) - Whether the collection name is vectorized
+- `weights` (object) - The weights of the fields used for vectorization
 
 ### Usage
 
 1. Click "Add Vector Config" to create a new configuration
 2. Enter a unique name for the configuration
 3. Select a vectorizer module from the dropdown
-4. Choose an index type (default is HNSW)
-5. Click the documentation link (if available) to learn more about the selected module
-6. Repeat to add multiple vector configurations
+4. **Configure module settings:** Once a module is selected, a dynamic configuration form will appear with module-specific options
+5. Fill in the module configuration fields as needed (required fields are marked with *)
+6. Choose an index type (default is HNSW)
+7. Click the documentation link (if available) to learn more about the selected module
+8. Repeat to add multiple vector configurations
 
 ### Generated JSON Structure
 
-The vector configurations are output in the `vectorConfig` object:
+The vector configurations are output in the `vectorConfig` object with module-specific settings:
 
 ```json
 {
@@ -133,13 +217,22 @@ The vector configurations are output in the `vectorConfig` object:
   "vectorConfig": {
     "default": {
       "vectorizer": {
-        "text2vec-openai": {}
+        "text2vec-openai": {
+          "model": "text-embedding-ada-002",
+          "vectorizeClassName": false,
+          "dimensions": 1536
+        }
       },
       "vectorIndexType": "hnsw"
     },
     "semantic": {
       "vectorizer": {
-        "text2vec-cohere": {}
+        "text2vec-google": {
+          "projectId": "my-gcp-project",
+          "location": "us-central1",
+          "model": "textembedding-gecko@001",
+          "vectorizeClassName": true
+        }
       },
       "vectorIndexType": "flat"
     }
@@ -159,4 +252,77 @@ Example usage with custom available modules:
 ```jsx
 <Collection availableModules={serverModules} />
 ```
+
+## Architecture
+
+### Module Configuration System
+
+The module configuration system is designed to automatically extract and utilize the type definitions from the `weaviate-client` library, ensuring that the UI always stays in sync with the API.
+
+#### Components
+
+1. **moduleConfigExtractor.js** (`src/utils/`)
+   - Extracts configuration field definitions for each vectorizer module
+   - Based on TypeScript type definitions from `weaviate-client`
+   - Provides validation and helper functions
+   - Contains metadata about each field (name, type, description, required)
+
+2. **ModuleConfigForm.jsx** (`src/components/`)
+   - Dynamically renders configuration forms based on module selection
+   - Handles different field types (string, number, boolean, array, object)
+   - Provides appropriate input controls for each type
+   - Displays field descriptions and marks required fields
+
+3. **VectorConfigItem.jsx** (`src/components/`)
+   - Manages individual vector configuration items
+   - Integrates the ModuleConfigForm component
+   - Handles state updates for module configuration
+
+4. **Collection.jsx** (`src/components/`)
+   - Orchestrates the entire collection configuration
+   - Merges module configurations into the final JSON output
+   - Maintains state for all vector configurations
+
+#### Data Flow
+
+```
+User selects module
+    ↓
+VectorConfigItem detects change
+    ↓
+ModuleConfigForm queries moduleConfigExtractor
+    ↓
+Form fields are rendered based on module type
+    ↓
+User fills in configuration
+    ↓
+Config stored in vectorConfig state
+    ↓
+Collection.jsx merges into final JSON
+```
+
+#### Type Mapping
+
+The system maps TypeScript types to form inputs:
+
+| TypeScript Type | Form Input | Example |
+|----------------|------------|---------|
+| `string` | Text input | `model: "text-embedding-ada-002"` |
+| `number` | Number input | `dimensions: 1536` |
+| `boolean` | Checkbox | `vectorizeClassName: false` |
+| `string[]` | Comma-separated text | `imageFields: ["image1", "image2"]` |
+| `object` | JSON textarea | `weights: {"imageFields": [0.7]}` |
+
+#### Benefits
+
+1. **Type Safety:** Configurations match the actual API requirements
+2. **Automatic Updates:** When new modules are added to weaviate-client, they automatically become available
+3. **Self-Documenting:** Field descriptions are embedded in the UI
+4. **Validation:** Required fields are enforced
+5. **Maintainability:** Single source of truth (weaviate-client types)
+
+### Examples
+
+See `examples/moduleConfigExamples.js` for complete working examples of different vectorizer configurations.
+
 
