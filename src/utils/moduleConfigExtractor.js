@@ -116,41 +116,33 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'region', type: 'string', description: 'The AWS region where the model runs.' },
       { name: 'service', type: 'string', description: 'The AWS service to use (bedrock, sagemaker).' },
       { name: 'endpoint', type: 'string', description: 'The endpoint URL for SageMaker.' },
-      { name: 'targetModel', type: 'string', description: 'The target model for Bedrock.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'targetModel', type: 'string', description: 'The target model for Bedrock.' }
     ]
   },
   'text2vec-azure-openai': {
     fields: [
       { name: 'resourceName', type: 'string', required: true, description: 'The Azure resource name.' },
       { name: 'deploymentId', type: 'string', required: true, description: 'The deployment ID.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Azure OpenAI.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'baseURL', type: 'string', description: 'The base URL for Azure OpenAI.' }
     ]
   },
   'text2vec-cohere': {
     fields: [
       { name: 'model', type: 'string', description: 'The model to use.' },
       { name: 'truncate', type: 'string', description: 'The truncation strategy (NONE, START, END).' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Cohere API.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'baseURL', type: 'string', description: 'The base URL for Cohere API.' }
     ]
   },
   'text2vec-contextionary': {
-    fields: [
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
-    ]
+    fields: []
   },
   'text2vec-databricks': {
     fields: [
-      { name: 'endpoint', type: 'string', required: true, description: 'The Databricks endpoint URL.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'endpoint', type: 'string', required: true, description: 'The Databricks endpoint URL.' }
     ]
   },
   'text2vec-gpt4all': {
-    fields: [
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
-    ]
+    fields: []
   },
   'text2vec-huggingface': {
     fields: [
@@ -160,43 +152,37 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'endpointURL', type: 'string', description: 'The endpoint URL for the model.' },
       { name: 'waitForModel', type: 'boolean', description: 'Whether to wait for the model to be ready.' },
       { name: 'useGPU', type: 'boolean', description: 'Whether to use GPU.' },
-      { name: 'useCache', type: 'boolean', description: 'Whether to use cache.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'useCache', type: 'boolean', description: 'Whether to use cache.' }
     ]
   },
   'text2vec-jinaai': {
     fields: [
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Jina AI API.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'baseURL', type: 'string', description: 'The base URL for Jina AI API.' }
     ]
   },
   'text2vec-nvidia': {
     fields: [
       { name: 'model', type: 'string', description: 'The model to use.' },
       { name: 'baseURL', type: 'string', description: 'The base URL for NVIDIA API.' },
-      { name: 'truncation', type: 'boolean', description: 'Whether to apply truncation.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'truncation', type: 'boolean', description: 'Whether to apply truncation.' }
     ]
   },
   'text2vec-mistral': {
     fields: [
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Mistral API.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'baseURL', type: 'string', description: 'The base URL for Mistral API.' }
     ]
   },
   'text2vec-model2vec': {
     fields: [
-      { name: 'inferenceUrl', type: 'string', description: 'The URL where inference requests are sent.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'inferenceUrl', type: 'string', description: 'The URL where inference requests are sent.' }
     ]
   },
   'text2vec-ollama': {
     fields: [
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'apiEndpoint', type: 'string', description: 'The Ollama API endpoint.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'apiEndpoint', type: 'string', description: 'The Ollama API endpoint.' }
     ]
   },
   'text2vec-openai': {
@@ -205,8 +191,7 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'modelVersion', type: 'string', description: 'The model version.' },
       { name: 'type', type: 'string', description: 'The type of embeddings (text, code).' },
       { name: 'baseURL', type: 'string', description: 'The base URL for OpenAI API.' },
-      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector.' }
     ]
   },
   'text2vec-google': {
@@ -214,35 +199,30 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'projectId', type: 'string', required: true, description: 'The project ID of the model in GCP.' },
       { name: 'location', type: 'string', description: 'The location where the model runs.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector.' }
     ]
   },
   'text2vec-google-ai-studio': {
     fields: [
-      { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'model', type: 'string', description: 'The model to use.' }
     ]
   },
   'text2vec-transformers': {
     fields: [
       { name: 'poolingStrategy', type: 'string', description: 'The pooling strategy (masked_mean, cls).' },
-      { name: 'inferenceUrl', type: 'string', description: 'The URL where inference requests are sent.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'inferenceUrl', type: 'string', description: 'The URL where inference requests are sent.' }
     ]
   },
   'text2vec-voyageai': {
     fields: [
       { name: 'model', type: 'string', description: 'The model to use.' },
       { name: 'baseURL', type: 'string', description: 'The base URL for Voyage AI API.' },
-      { name: 'truncate', type: 'boolean', description: 'Whether to truncate input.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'truncate', type: 'boolean', description: 'Whether to truncate input.' }
     ]
   },
   'text2vec-weaviate': {
     fields: [
-      { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'vectorizeClassName', type: 'boolean', description: 'Whether to vectorize the class name.' }
+      { name: 'model', type: 'string', description: 'The model to use.' }
     ]
   },
   'text2multivec-jinaai': {

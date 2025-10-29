@@ -2,7 +2,7 @@
 
 A minimal React app (Vite) with a Collection component to compose a Weaviate collection JSON.
 
-Quick start (macOS, zsh):
+## Quick Start (macOS, zsh)
 
 ```bash
 # install deps
@@ -12,10 +12,28 @@ npm install
 npm run dev
 ```
 
-How it works:
+## Testing
+
+This project includes integration tests that work with a local Weaviate instance.
+
+```bash
+# Run tests (requires Weaviate running on localhost:8080)
+npm test
+
+# Run tests once
+npm run test:run
+
+# Run tests with UI
+npm run test:ui
+```
+
+See [TESTING.md](./TESTING.md) for detailed testing documentation.
+
+## How it Works
 - Open the app at http://localhost:5173 (default Vite port).
 - Fill the name and description fields. The generated JSON will update live below the form.
 - You can also import a JSON file with `name` and `description` keys to prepopulate the form.
+ - Use the "Copy" button to copy the generated JSON, or "Download" to save it as `{CollectionName}_weaviate_schema.json`.
 
 # UI Rules
 

@@ -16,20 +16,37 @@ export default function Collection({ initialJson = null, availableModules = null
   const [openVectorConfig, setOpenVectorConfig] = useState(true)
 
   useEffect(() => {
-    setName(initialJson?.name || '')
+    // Handle both 'name' and 'class' fields for backwards compatibility
+    setName(initialJson?.name || initialJson?.class || '')
     setDescription(initialJson?.description || '')
     // Also load properties from imported JSON
     if (initialJson?.properties && Array.isArray(initialJson.properties)) {
-      setProperties(initialJson.properties.map(p => ({
-        name: p.name || '',
-        dataType: Array.isArray(p.dataType) ? p.dataType[0]?.replace('[]', '') : (p.dataType || 'text'),
-        description: p.description || '',
-        indexFilterable: p.indexFilterable ?? true,
-        indexRangeFilters: p.indexRangeFilters ?? false,
-        indexSearchable: p.indexSearchable ?? true,
-        isArray: Array.isArray(p.dataType) ? p.dataType[0]?.includes('[]') : false,
-        tokenization: p.tokenization || 'word'
-      })))
+      setProperties(initialJson.properties.map(p => {
+        // Extract the base data type and check if it's an array
+        // Handle both array format ['text[]'] and string format 'text[]'
+        let dataTypeValue
+        if (Array.isArray(p.dataType)) {
+          dataTypeValue = p.dataType[0]
+        } else if (typeof p.dataType === 'string') {
+          dataTypeValue = p.dataType
+        } else {
+          dataTypeValue = 'text'
+        }
+        
+        const isArrayType = dataTypeValue ? dataTypeValue.includes('[]') : false
+        const baseDataType = dataTypeValue ? dataTypeValue.replace('[]', '') : 'text'
+        
+        return {
+          name: p.name || '',
+          dataType: baseDataType,
+          description: p.description || '',
+          indexFilterable: p.indexFilterable ?? true,
+          indexRangeFilters: p.indexRangeFilters ?? false,
+          indexSearchable: p.indexSearchable ?? true,
+          isArray: isArrayType,
+          tokenization: p.tokenization || 'word'
+        }
+      }))
     }
   }, [initialJson])
 
@@ -50,7 +67,9 @@ export default function Collection({ initialJson = null, availableModules = null
   useEffect(() => {
     // Transform properties into final JSON shape:
     const transformed = (properties || []).map((p, idx) => {
-      const baseType = typeof p.dataType === 'string' ? p.dataType : (Array.isArray(p.dataType) ? p.dataType[0] : 'text')
+      // Extract base type and ensure it doesn't contain []
+      let rawBaseType = typeof p.dataType === 'string' ? p.dataType : (Array.isArray(p.dataType) ? p.dataType[0] : 'text')
+      const baseType = rawBaseType ? rawBaseType.replace('[]', '') : 'text'
       const typeValue = p.isArray ? `${baseType}[]` : baseType
       // placeholders when not provided
   // placeholder name per-property: new_property1, new_property2, ...
@@ -63,23 +82,39 @@ export default function Collection({ initialJson = null, availableModules = null
 
       const result = {
         name: p.name && p.name.trim() !== '' ? p.name : placeholderName,
-        dataType: [typeValue || (p.isArray ? `${placeholderDataType}[]` : placeholderDataType)],
-        description: p.description && p.description.trim() !== '' ? p.description : placeholderDescription,
-        indexFilterable: typeof p.indexFilterable === 'boolean' ? p.indexFilterable : true
+        dataType: [typeValue || (p.isArray ? `${placeholderDataType}[]` : placeholderDataType)]
+      }
+
+      // Only add description if it's not empty and not the placeholder
+      if (p.description && p.description.trim() !== '' && p.description !== placeholderDescription) {
+        result.description = p.description
+      }
+
+      // Only add indexFilterable if it's explicitly set to false (true is default)
+      if (p.indexFilterable === false) {
+        result.indexFilterable = false
       }
 
       // Add indexSearchable only for text type
       if (finalBaseType === 'text') {
-        result.indexSearchable = typeof p.indexSearchable === 'boolean' ? p.indexSearchable : true
-        result.tokenization = p.tokenization || placeholderTokenization
+        // Only add if it's explicitly set to false (true is default)
+        if (p.indexSearchable === false) {
+          result.indexSearchable = false
+        }
+        // Only add tokenization if it's not the default 'word'
+        if (p.tokenization && p.tokenization !== 'word') {
+          result.tokenization = p.tokenization
+        }
       } else {
         // If not text type, set indexSearchable to false
         result.indexSearchable = false
       }
 
-      // Add indexRangeFilters only for int, number, date types
+      // Add indexRangeFilters only for int, number, date types and only if true
       if (finalBaseType === 'int' || finalBaseType === 'number' || finalBaseType === 'date') {
-        result.indexRangeFilters = typeof p.indexRangeFilters === 'boolean' ? p.indexRangeFilters : false
+        if (p.indexRangeFilters === true) {
+          result.indexRangeFilters = true
+        }
       } else {
         // If not a range-filterable type, set to false
         result.indexRangeFilters = false
@@ -107,33 +142,66 @@ export default function Collection({ initialJson = null, availableModules = null
         ? config.name 
         : `vector_config_${idx + 1}`
       
-      // Include moduleConfig if it exists and is not empty
+      // Build the vectorizer config only with non-empty values
       const moduleConfig = config.moduleConfig || {}
-      const hasModuleConfig = Object.keys(moduleConfig).length > 0
+      const vectorizerConfig = {}
       
-      // Build the vectorizer config with optional vectorizeClassName
-      const vectorizerConfig = hasModuleConfig ? { ...moduleConfig } : {}
+      // Only add moduleConfig fields that have values
+      Object.keys(moduleConfig).forEach(key => {
+        const value = moduleConfig[key]
+        // Include the field if it has a meaningful value
+        if (value !== undefined && value !== null && value !== '' && 
+            !(Array.isArray(value) && value.length === 0)) {
+          vectorizerConfig[key] = value
+        }
+      })
       
-      // Add vectorizeClassName if it's set (and not undefined)
-      if (config.vectorizeClassName !== undefined) {
+      // Add vectorizeClassName if it's explicitly set to true
+      if (config.vectorizeClassName === true) {
         vectorizerConfig.vectorizeClassName = config.vectorizeClassName
       }
       
       const vectorConfigEntry = {
         vectorizer: {
-          [config.vectorizer || 'none']: vectorizerConfig
+          [config.vectorizer || 'none']: Object.keys(vectorizerConfig).length > 0 ? vectorizerConfig : {}
         },
         vectorIndexType: config.indexType || 'hnsw'
       }
       
-      // Add indexConfig if it exists
+      // Build indexConfig only with non-default/non-empty values
       if (config.indexConfig && Object.keys(config.indexConfig).length > 0) {
-        vectorConfigEntry.vectorIndexConfig = config.indexConfig
+        const indexConfig = {}
+        Object.keys(config.indexConfig).forEach(key => {
+          const value = config.indexConfig[key]
+          // Only include non-default values
+          if (value !== undefined && value !== null && value !== '') {
+            // Skip default values
+            if (key === 'distance' && value === 'cosine') return
+            if (key === 'efConstruction' && value === 128) return
+            if (key === 'ef' && value === -1) return
+            if (key === 'maxConnections' && value === 64) return
+            if (key === 'threshold' && value === 10000) return
+            indexConfig[key] = value
+          }
+        })
+        if (Object.keys(indexConfig).length > 0) {
+          vectorConfigEntry.vectorIndexConfig = indexConfig
+        }
       }
       
       // Add quantization if it exists and type is not 'none'
       if (config.quantization && config.quantization.type && config.quantization.type !== 'none') {
-        vectorConfigEntry.quantizer = config.quantization
+        const quantization = { type: config.quantization.type }
+        // Only add other quantization fields if they have values
+        Object.keys(config.quantization).forEach(key => {
+          if (key !== 'type') {
+            const value = config.quantization[key]
+            if (value !== undefined && value !== null && value !== '' && value !== 0) {
+              quantization[key] = value
+            }
+          }
+        })
+        vectorConfigEntry.quantizer = quantization
       }
       
       vectorConfigObject[configName] = vectorConfigEntry
@@ -155,6 +223,33 @@ export default function Collection({ initialJson = null, availableModules = null
       .catch(err => {
         console.error('Failed to copy:', err)
       })
+  }
+
+  function sanitizeFilePart(str) {
+    if (!str || typeof str !== 'string') return 'MyCollection'
+    // Replace spaces with underscores, remove characters not allowed in filenames
+    // Allow letters, numbers, underscores, hyphens
+    const cleaned = str.trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '')
+    return cleaned || 'MyCollection'
+  }
+
+  function downloadJson() {
+    try {
+      const jsonText = prettyJson()
+      const blob = new Blob([jsonText], { type: 'application/json;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const base = sanitizeFilePart(name || generatedJson.class || 'MyCollection')
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${base}_weaviate_schema.json`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Failed to download JSON:', err)
+      alert('Could not download JSON file')
+    }
   }
 
   return (
@@ -241,6 +336,9 @@ export default function Collection({ initialJson = null, availableModules = null
           <pre className="json-block">{prettyJson()}</pre>
           <button className="copy-btn" onClick={copyToClipboard} title="Copy to clipboard">
             Copy
+          </button>
+          <button className="copy-btn" onClick={downloadJson} title="Download JSON" style={{ top: 44, right: 8 }}>
+            Download
           </button>
         </div>
       </div>
