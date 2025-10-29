@@ -48,6 +48,24 @@ export default function Collection({ initialJson = null, availableModules = null
         }
       }))
     }
+    // Preencher vectorConfigs a partir do vectorConfig do JSON importado
+    if (initialJson?.vectorConfig && typeof initialJson.vectorConfig === 'object') {
+      const configs = Object.entries(initialJson.vectorConfig).map(([name, config]) => {
+        // Extrai o nome, vectorizer, indexType, indexConfig, quantization
+        const vectorizerKey = config.vectorizer ? Object.keys(config.vectorizer)[0] : ''
+        const moduleConfig = vectorizerKey ? config.vectorizer[vectorizerKey] : {}
+        return {
+          name,
+          vectorizer: vectorizerKey,
+          moduleConfig,
+          indexType: config.vectorIndexType || 'hnsw',
+          indexConfig: config.vectorIndexConfig || {},
+          quantization: config.quantizer || {},
+          vectorizeClassName: moduleConfig?.vectorizeClassName || false
+        }
+      })
+      setVectorConfigs(configs)
+    }
   }, [initialJson])
 
   useEffect(() => {
