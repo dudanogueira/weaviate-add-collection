@@ -1,9 +1,36 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { tokenizationOptions, dataTypeOptions } from '../constants/options'
+import { validatePropertyName, sanitizePropertyName } from '../utils/propertyNameValidator'
 
 export default function PropertyItem({ value, onChange, onDelete, index }) {
+  const [nameValidation, setNameValidation] = useState({ valid: true, error: null, warning: null })
+  
+  useEffect(() => {
+    // Validate the name whenever it changes
+    if (value.name) {
+      const validation = validatePropertyName(value.name)
+      setNameValidation(validation)
+    } else {
+      setNameValidation({ valid: true, error: null, warning: null })
+    }
+  }, [value.name])
+  
   function update(key, val) {
     onChange({ ...value, [key]: val })
+  }
+  
+  function handleNameChange(newName) {
+    update('name', newName)
+  }
+  
+  function handleNameBlur() {
+    // Auto-sanitize on blur if invalid
+    if (value.name && !nameValidation.valid) {
+      const sanitized = sanitizePropertyName(value.name)
+      if (sanitized !== value.name) {
+        update('name', sanitized)
+      }
+    }
   }
 
   function updateDataType(val) {
@@ -44,7 +71,28 @@ export default function PropertyItem({ value, onChange, onDelete, index }) {
 
       <div className="field">
         <label>Name</label>
-        <input value={value.name || ''} onChange={(e) => update('name', e.target.value)} placeholder={`new_property${index + 1}`} />
+        <input 
+          value={value.name || ''} 
+          onChange={(e) => handleNameChange(e.target.value)} 
+          onBlur={handleNameBlur}
+          placeholder={`new_property${index + 1}`}
+          className={!nameValidation.valid ? 'input-error' : ''}
+        />
+        {nameValidation.error && (
+          <small className="error-text" style={{ color: '#dc2626', display: 'block', marginTop: '4px' }}>
+            ❌ {nameValidation.error}
+          </small>
+        )}
+        {nameValidation.warning && (
+          <small className="warning-text" style={{ color: '#f59e0b', display: 'block', marginTop: '4px' }}>
+            ⚠️ {nameValidation.warning}
+          </small>
+        )}
+        {nameValidation.valid && !nameValidation.warning && value.name && (
+          <small className="success-text" style={{ color: '#10b981', display: 'block', marginTop: '4px' }}>
+            ✓ Valid property name
+          </small>
+        )}
       </div>
       <div className="field">
         <label>Description</label>

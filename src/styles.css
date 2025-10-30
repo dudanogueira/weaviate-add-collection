@@ -18,6 +18,9 @@ body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Rob
 .array-label{display:flex;align-items:center;gap:8px;margin:0}
 .field label{font-weight:600;margin-bottom:6px}
 .field input, .field textarea{padding:8px 10px;border:1px solid #e6e9ef;border-radius:6px;font-size:14px}
+.field input.input-error{border-color:#dc2626;background:#fef2f2}
+.field input:focus{outline:2px solid rgba(37,99,235,0.3);border-color:var(--accent)}
+.field input.input-error:focus{outline:2px solid rgba(220,38,38,0.3);border-color:#dc2626}
 .field textarea{min-height:80px}
 .preview{margin-top:18px}
 .json-wrapper{position:relative}

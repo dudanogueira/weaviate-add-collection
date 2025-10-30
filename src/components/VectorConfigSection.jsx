@@ -10,7 +10,8 @@ const emptyVectorConfig = (index = 0) => ({
 export default function VectorConfigSection({ 
   vectorConfigs = [], 
   onChange,
-  availableModules = null 
+  availableModules = null,
+  properties = []
 }) {
   const configsList = vectorConfigs
 
@@ -53,6 +54,7 @@ export default function VectorConfigSection({
             onChange={(v) => updateAt(i, v)}
             onDelete={() => deleteAt(i)}
             availableModules={availableModules}
+            properties={properties}
           />
         ))}
       </div>

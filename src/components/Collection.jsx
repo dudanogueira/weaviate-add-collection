@@ -48,10 +48,10 @@ export default function Collection({ initialJson = null, availableModules = null
         }
       }))
     }
-    // Preencher vectorConfigs a partir do vectorConfig do JSON importado
+    // Fill vectorConfigs from the imported JSON's vectorConfig
     if (initialJson?.vectorConfig && typeof initialJson.vectorConfig === 'object') {
       const configs = Object.entries(initialJson.vectorConfig).map(([name, config]) => {
-        // Extrai o nome, vectorizer, indexType, indexConfig, quantization
+        // Extract name, vectorizer, indexType, indexConfig, quantization
         const vectorizerKey = config.vectorizer ? Object.keys(config.vectorizer)[0] : ''
         const moduleConfig = vectorizerKey ? config.vectorizer[vectorizerKey] : {}
         return {
@@ -160,48 +160,110 @@ export default function Collection({ initialJson = null, availableModules = null
         ? config.name 
         : `vector_config_${idx + 1}`
       
+      // If bringing own vectors, use 'none' as vectorizer
+      const vectorizerName = config.bringOwnVectors ? 'none' : (config.vectorizer || 'none')
+      
       // Build the vectorizer config only with non-empty values
       const moduleConfig = config.moduleConfig || {}
       const vectorizerConfig = {}
       
-      // Only add moduleConfig fields that have values
-      Object.keys(moduleConfig).forEach(key => {
-        const value = moduleConfig[key]
-        // Include the field if it has a meaningful value
-        if (value !== undefined && value !== null && value !== '' && 
-            !(Array.isArray(value) && value.length === 0)) {
-          vectorizerConfig[key] = value
+      // Only process moduleConfig if not bringing own vectors
+      if (!config.bringOwnVectors) {
+        // Only add moduleConfig fields that have values
+        Object.keys(moduleConfig).forEach(key => {
+          const value = moduleConfig[key]
+          // Include the field if it has a meaningful value
+          if (value !== undefined && value !== null && value !== '' && 
+              !(Array.isArray(value) && value.length === 0)) {
+            vectorizerConfig[key] = value
+          }
+        })
+        
+        // Add vectorizeClassName if it's explicitly set to true
+        if (config.vectorizeClassName === true) {
+          vectorizerConfig.vectorizeClassName = config.vectorizeClassName
         }
-      })
-      
-      // Add vectorizeClassName if it's explicitly set to true
-      if (config.vectorizeClassName === true) {
-        vectorizerConfig.vectorizeClassName = config.vectorizeClassName
       }
       
       const vectorConfigEntry = {
         vectorizer: {
-          [config.vectorizer || 'none']: Object.keys(vectorizerConfig).length > 0 ? vectorizerConfig : {}
+          [vectorizerName]: Object.keys(vectorizerConfig).length > 0 ? vectorizerConfig : {}
         },
         vectorIndexType: config.indexType || 'hnsw'
       }
       
-      // Build indexConfig only with non-default/non-empty values
+      // Build indexConfig based on index type
       if (config.indexConfig && Object.keys(config.indexConfig).length > 0) {
         const indexConfig = {}
-        Object.keys(config.indexConfig).forEach(key => {
-          const value = config.indexConfig[key]
-          // Only include non-default values
-          if (value !== undefined && value !== null && value !== '') {
-            // Skip default values
-            if (key === 'distance' && value === 'cosine') return
-            if (key === 'efConstruction' && value === 128) return
-            if (key === 'ef' && value === -1) return
-            if (key === 'maxConnections' && value === 64) return
-            if (key === 'threshold' && value === 10000) return
-            indexConfig[key] = value
+        
+        if (config.indexType === 'dynamic') {
+          // For dynamic index, include distanceMetric, threshold, hnsw, and flat
+          if (config.indexConfig.distanceMetric && config.indexConfig.distanceMetric !== 'cosine') {
+            indexConfig.distanceMetric = config.indexConfig.distanceMetric
           }
-        })
+          
+          if (config.indexConfig.threshold !== undefined && config.indexConfig.threshold !== 10000) {
+            indexConfig.threshold = config.indexConfig.threshold
+          }
+          
+          // Build HNSW config
+          if (config.indexConfig.hnsw && Object.keys(config.indexConfig.hnsw).length > 0) {
+            const hnswConfig = {}
+            Object.keys(config.indexConfig.hnsw).forEach(key => {
+              const value = config.indexConfig.hnsw[key]
+              if (value !== undefined && value !== null && value !== '') {
+                // Skip default values
+                if (key === 'distanceMetric' && value === 'cosine') return
+                if (key === 'efConstruction' && value === 128) return
+                if (key === 'ef' && value === -1) return
+                if (key === 'maxConnections' && value === 32) return
+                if (key === 'dynamicEfMin' && value === 100) return
+                if (key === 'dynamicEfMax' && value === 500) return
+                if (key === 'dynamicEfFactor' && value === 8) return
+                if (key === 'flatSearchCutoff' && value === 40000) return
+                if (key === 'cleanupIntervalSeconds' && value === 300) return
+                if (key === 'vectorCacheMaxObjects' && value === 1000000000000) return
+                if (key === 'filterStrategy' && value === 'sweeping') return
+                if (key === 'skip' && value === false) return
+                hnswConfig[key] = value
+              }
+            })
+            indexConfig.hnsw = hnswConfig
+          }
+          
+          // Build Flat config
+          if (config.indexConfig.flat && Object.keys(config.indexConfig.flat).length > 0) {
+            const flatConfig = {}
+            Object.keys(config.indexConfig.flat).forEach(key => {
+              const value = config.indexConfig.flat[key]
+              if (value !== undefined && value !== null && value !== '') {
+                // Skip default values
+                if (key === 'distanceMetric' && value === 'cosine') return
+                if (key === 'vectorCacheMaxObjects' && value === 1000000000000) return
+                flatConfig[key] = value
+              }
+            })
+            indexConfig.flat = flatConfig
+          }
+        } else {
+          // For non-dynamic index types, use the existing logic
+          Object.keys(config.indexConfig).forEach(key => {
+            const value = config.indexConfig[key]
+            // Only include non-default values
+            if (value !== undefined && value !== null && value !== '') {
+              // Skip default values
+              if (key === 'distance' && value === 'cosine') return
+              if (key === 'efConstruction' && value === 128) return
+              if (key === 'ef' && value === -1) return
+              if (key === 'maxConnections' && value === 32) return
+              if (key === 'threshold' && value === 10000) return
+              // Skip hnsw and flat keys for non-dynamic types
+              if (key === 'hnsw' || key === 'flat') return
+              indexConfig[key] = value
+            }
+          })
+        }
+        
         if (Object.keys(indexConfig).length > 0) {
           vectorConfigEntry.vectorIndexConfig = indexConfig
         }
@@ -343,6 +405,7 @@ export default function Collection({ initialJson = null, availableModules = null
               vectorConfigs={vectorConfigs} 
               onChange={setVectorConfigs}
               availableModules={availableModules}
+              properties={properties}
             />
           </div>
         )}

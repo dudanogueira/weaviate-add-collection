@@ -1,0 +1,26 @@
+{
+  "class": "TestCollection",
+  "description": "Test with properties",
+  "properties": [
+    {
+      "name": "title",
+      "dataType": ["text"]
+    },
+    {
+      "name": "content",
+      "dataType": ["text"]
+    }
+  ],
+  "vectorConfig": {
+    "default": {
+      "vectorizer": {
+        "text2vec-openai": {
+          "model": "text-embedding-3-small",
+          "vectorizeClassName": true,
+          "properties": ["title", "content"]
+        }
+      },
+      "vectorIndexType": "hnsw"
+    }
+  }
+}

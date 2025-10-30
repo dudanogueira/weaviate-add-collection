@@ -187,7 +187,7 @@ const VECTORIZER_CONFIG_FIELDS = {
   },
   'text2vec-openai': {
     fields: [
-      { name: 'model', type: 'string', description: 'The model to use (e.g., text-embedding-ada-002).' },
+      { name: 'model', type: 'string', description: 'The model to use (default: text-embedding-3-small).' },
       { name: 'modelVersion', type: 'string', description: 'The model version.' },
       { name: 'type', type: 'string', description: 'The type of embeddings (text, code).' },
       { name: 'baseURL', type: 'string', description: 'The base URL for OpenAI API.' },
