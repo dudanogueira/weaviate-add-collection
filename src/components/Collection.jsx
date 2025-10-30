@@ -108,21 +108,15 @@ export default function Collection({ initialJson = null, availableModules = null
         result.description = p.description
       }
 
-      // Only add indexFilterable if it's explicitly set to false (true is default)
-      if (p.indexFilterable === false) {
-        result.indexFilterable = false
-      }
+      // Always include indexFilterable (true or false)
+      result.indexFilterable = p.indexFilterable ?? true
 
       // Add indexSearchable only for text type
       if (finalBaseType === 'text') {
-        // Only add if it's explicitly set to false (true is default)
-        if (p.indexSearchable === false) {
-          result.indexSearchable = false
-        }
-        // Only add tokenization if it's not the default 'word'
-        if (p.tokenization && p.tokenization !== 'word') {
-          result.tokenization = p.tokenization
-        }
+        // English: Always include indexSearchable for text type
+        result.indexSearchable = p.indexSearchable ?? true
+        // Always include tokenization for text type
+        result.tokenization = p.tokenization || 'word'
       } else {
         // If not text type, set indexSearchable to false
         result.indexSearchable = false
@@ -130,9 +124,7 @@ export default function Collection({ initialJson = null, availableModules = null
 
       // Add indexRangeFilters only for int, number, date types and only if true
       if (finalBaseType === 'int' || finalBaseType === 'number' || finalBaseType === 'date') {
-        if (p.indexRangeFilters === true) {
-          result.indexRangeFilters = true
-        }
+        result.indexRangeFilters = p.indexRangeFilters ?? false
       } else {
         // If not a range-filterable type, set to false
         result.indexRangeFilters = false
