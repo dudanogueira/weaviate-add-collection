@@ -298,8 +298,9 @@ export default function VectorConfigItem({
             {activeTab === 'index' && (
               <div className="tab-panel">
                 <div className="field">
-                  <label>Index Type</label>
+                  <label htmlFor={`index-type-${index}`}>Index Type</label>
                   <select
+                    id={`index-type-${index}`}
                     value={value.indexType || 'hnsw'}
                     onChange={(e) => update('indexType', e.target.value)}
                   >
@@ -483,8 +484,9 @@ export default function VectorConfigItem({
 
                     {/* Flat Quantization - Only BQ available */}
                     <div className="field" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
-                      <label>Quantization Type</label>
+                      <label htmlFor={`flat-quantizer-${index}`}>Quantization Type</label>
                       <select
+                        id={`flat-quantizer-${index}`}
                         value={value.indexConfig?.bq ? 'bq' : 'none'}
                         onChange={(e) => {
                           const newType = e.target.value
@@ -808,8 +810,9 @@ export default function VectorConfigItem({
 
                             {/* HNSW Quantization */}
                             <div className="field" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
-                              <label>Quantization Type</label>
+                              <label htmlFor={`hnsw-quantizer-${index}`}>Quantization Type</label>
                               <select
+                                id={`hnsw-quantizer-${index}`}
                                 value={value.indexConfig?.hnsw?.quantizer || 'none'}
                                 onChange={(e) => {
                                   const newType = e.target.value
@@ -1128,8 +1131,9 @@ export default function VectorConfigItem({
 
                             {/* Flat Quantization - Only BQ available */}
                             <div className="field" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
-                              <label>Quantization Type</label>
+                              <label htmlFor={`dynamic-flat-quantizer-${index}`}>Quantization Type</label>
                               <select
+                                id={`dynamic-flat-quantizer-${index}`}
                                 value={value.indexConfig?.flat?.quantizer || 'none'}
                                 onChange={(e) => {
                                   const newType = e.target.value
@@ -1244,8 +1248,9 @@ export default function VectorConfigItem({
             {activeTab === 'compression' && (
               <div className="tab-panel">
                 <div className="field">
-                  <label>Quantization Type</label>
+                  <label htmlFor={`compression-quantizer-${index}`}>Quantization Type</label>
                   <select
+                    id={`compression-quantizer-${index}`}
                     value={
                       value.indexConfig?.pq ? 'pq' :
                       value.indexConfig?.bq ? 'bq' :

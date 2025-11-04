@@ -13,12 +13,12 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     await user.click(addVectorBtn)
     
     // Switch to Index Configuration tab
-    const indexTab = screen.getByRole('button', { name: /index configuration/i })
+  const indexTab = screen.getByRole('button', { name: 'Index Configuration' })
     await user.click(indexTab)
     
     // Select dynamic index type
-    const indexTypeSelect = screen.getByRole('combobox', { name: /index type/i })
-    await user.selectOptions(indexTypeSelect, 'dynamic')
+  const indexTypeSelect1 = screen.getByLabelText('Index Type')
+  await user.selectOptions(indexTypeSelect1, 'dynamic')
     
     // Compression/Quantization tab should not be visible
     await waitFor(() => {
@@ -45,7 +45,7 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     const { container } = render(<Collection />)
     
     // Set collection name
-    const nameInput = screen.getByPlaceholderText(/e\.g\., ArticleCollection/i)
+  const nameInput = screen.getByPlaceholderText('MyCollection')
     await user.clear(nameInput)
     await user.type(nameInput, 'TestCollection')
     
@@ -54,12 +54,12 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     await user.click(addVectorBtn)
     
     // Switch to Index Configuration tab
-    const indexTab = screen.getByRole('button', { name: /index configuration/i })
+  const indexTab = screen.getByRole('button', { name: 'Index Configuration' })
     await user.click(indexTab)
     
     // Select dynamic index type
-    const indexTypeSelect = screen.getByRole('combobox', { name: /index type/i })
-    await user.selectOptions(indexTypeSelect, 'dynamic')
+  const indexTypeSelect2 = screen.getByLabelText('Index Type')
+  await user.selectOptions(indexTypeSelect2, 'dynamic')
     
     // Navigate to HNSW Config sub-tab
     await waitFor(() => {
@@ -69,14 +69,11 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     const hnswTab = screen.getByRole('button', { name: /hnsw config/i })
     await user.click(hnswTab)
     
-    // Find and select PQ quantization
+    // Find and select PQ quantization (within HNSW panel)
     await waitFor(() => {
-      const quantizationSelects = screen.getAllByRole('combobox', { name: /quantization type/i })
-      expect(quantizationSelects.length).toBeGreaterThan(0)
+      expect(screen.getByText(/HNSW Parameters/i)).toBeInTheDocument()
     })
-    
-    const quantizationSelects = screen.getAllByRole('combobox', { name: /quantization type/i })
-    const hnswQuantizationSelect = quantizationSelects[0] // First one should be for HNSW
+    const hnswQuantizationSelect = screen.getByLabelText('Quantization Type')
     await user.selectOptions(hnswQuantizationSelect, 'pq')
     
     // Wait for PQ settings to appear
@@ -105,7 +102,7 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     const { container } = render(<Collection />)
     
     // Set collection name
-    const nameInput = screen.getByPlaceholderText(/e\.g\., ArticleCollection/i)
+  const nameInput = screen.getByPlaceholderText('MyCollection')
     await user.clear(nameInput)
     await user.type(nameInput, 'TestCollection')
     
@@ -114,12 +111,12 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     await user.click(addVectorBtn)
     
     // Switch to Index Configuration tab
-    const indexTab = screen.getByRole('button', { name: /index configuration/i })
+  const indexTab = screen.getByRole('button', { name: 'Index Configuration' })
     await user.click(indexTab)
     
     // Select dynamic index type
-    const indexTypeSelect = screen.getByRole('combobox', { name: /index type/i })
-    await user.selectOptions(indexTypeSelect, 'dynamic')
+  const indexTypeSelect3 = screen.getByLabelText('Index Type')
+  await user.selectOptions(indexTypeSelect3, 'dynamic')
     
     // Navigate to Flat Config sub-tab
     await waitFor(() => {
@@ -129,16 +126,12 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     const flatTab = screen.getByRole('button', { name: /flat config/i })
     await user.click(flatTab)
     
-    // Find and select BQ quantization for flat
+    // Find and select BQ quantization for flat (within Flat panel)
     await waitFor(() => {
-      const quantizationSelects = screen.getAllByRole('combobox', { name: /quantization type/i })
-      expect(quantizationSelects.length).toBeGreaterThan(0)
+      expect(screen.getByText(/Flat Parameters/i)).toBeInTheDocument()
     })
-    
-    const quantizationSelects = screen.getAllByRole('combobox', { name: /quantization type/i })
-    // When on Flat tab, this should be the flat quantization select
-    const flatQuantizationSelect = quantizationSelects[quantizationSelects.length - 1]
-    await user.selectOptions(flatQuantizationSelect, 'bq')
+    const flatQuantizationSelectForSelect = screen.getByLabelText('Quantization Type')
+    await user.selectOptions(flatQuantizationSelectForSelect, 'bq')
     
     // Wait for BQ settings to appear
     await waitFor(() => {
@@ -170,12 +163,12 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     await user.click(addVectorBtn)
     
     // Switch to Index Configuration tab
-    const indexTab = screen.getByRole('button', { name: /index configuration/i })
+  const indexTab = screen.getByRole('button', { name: 'Index Configuration' })
     await user.click(indexTab)
     
     // Select dynamic index type
-    const indexTypeSelect = screen.getByRole('combobox', { name: /index type/i })
-    await user.selectOptions(indexTypeSelect, 'dynamic')
+  const indexTypeSelect3b = screen.getByLabelText('Index Type')
+  await user.selectOptions(indexTypeSelect3b, 'dynamic')
     
     // Navigate to Flat Config sub-tab
     await waitFor(() => {
@@ -185,21 +178,18 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     const flatTab = screen.getByRole('button', { name: /flat config/i })
     await user.click(flatTab)
     
-    // Find flat quantization select
+    // Find flat quantization select and assert options (within Flat panel)
     await waitFor(() => {
-      const quantizationSelects = screen.getAllByRole('combobox', { name: /quantization type/i })
-      expect(quantizationSelects.length).toBeGreaterThan(0)
+      expect(screen.getByText(/Flat Parameters/i)).toBeInTheDocument()
     })
-    
-    const quantizationSelects = screen.getAllByRole('combobox', { name: /quantization type/i })
-    const flatQuantizationSelect = quantizationSelects[quantizationSelects.length - 1]
-    
-    // Check that only 'none' and 'bq' options are available
-    const options = Array.from(flatQuantizationSelect.options).map(opt => opt.value)
-    expect(options).toContain('none')
-    expect(options).toContain('bq')
-    expect(options).not.toContain('pq')
-    expect(options).not.toContain('sq')
+    {
+      const flatQuantizationSelect = screen.getByLabelText('Quantization Type')
+      const options = Array.from(flatQuantizationSelect.options).map(opt => opt.value)
+      expect(options).toContain('none')
+      expect(options).toContain('bq')
+      expect(options).not.toContain('pq')
+      expect(options).not.toContain('sq')
+    }
   })
   
   it('should import dynamic index with quantizers correctly', async () => {
@@ -249,31 +239,30 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     })
     
     // Switch to Index Configuration tab
-    const indexTab = screen.getByRole('button', { name: /index configuration/i })
+  const indexTab = screen.getByRole('button', { name: 'Index Configuration' })
     await user.click(indexTab)
     
     // Verify dynamic index is selected
-    const indexTypeSelect = screen.getByRole('combobox', { name: /index type/i })
-    expect(indexTypeSelect.value).toBe('dynamic')
+  const indexTypeSelect4 = screen.getByLabelText('Index Type')
+  expect(indexTypeSelect4.value).toBe('dynamic')
     
     // Navigate to HNSW Config sub-tab
     const hnswTab = screen.getByRole('button', { name: /hnsw config/i })
     await user.click(hnswTab)
     
-    // Verify PQ is selected
+    // Verify PQ is selected (within HNSW panel)
     await waitFor(() => {
-      const quantizationSelects = screen.getAllByRole('combobox', { name: /quantization type/i })
-      expect(quantizationSelects[0].value).toBe('pq')
+      const hnswSelect = screen.getByLabelText('Quantization Type')
+      expect(hnswSelect.value).toBe('pq')
     })
     
     // Navigate to Flat Config sub-tab
     const flatTab = screen.getByRole('button', { name: /flat config/i })
     await user.click(flatTab)
     
-    // Verify BQ is selected
+    // Verify BQ is selected (within Flat panel)
     await waitFor(() => {
-      const quantizationSelects = screen.getAllByRole('combobox', { name: /quantization type/i })
-      const flatSelect = quantizationSelects[quantizationSelects.length - 1]
+      const flatSelect = screen.getByLabelText('Quantization Type')
       expect(flatSelect.value).toBe('bq')
     })
     

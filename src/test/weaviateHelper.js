@@ -145,7 +145,7 @@ export async function exportCollectionSchema(client, collectionName) {
     schema.vectorConfig = {}
     config.vectorizers.forEach((vectorizer) => {
       const vecName = vectorizer.name || 'default'
-      const vecIndexType = vectorizer.indexType || 'hnsw'
+      let vecIndexType = vectorizer.indexType || 'hnsw'
       const vecConfig = vectorizer.vectorizer || {}
       
       // Extract vectorizer type and config
@@ -157,7 +157,18 @@ export async function exportCollectionSchema(client, collectionName) {
         vectorizerType = vecConfig.name || vecConfig.type || 'none'
         vectorizerConfig = vecConfig.config || {}
       }
+
+      // Normalize naming differences for export (UI supports both on import)
+      if (vectorizerConfig && vectorizerConfig.vectorizeClassName !== undefined && vectorizerConfig.vectorizeCollectionName === undefined) {
+        vectorizerConfig.vectorizeCollectionName = vectorizerConfig.vectorizeClassName
+      }
       
+      // Infer dynamic index type when indexConfig indicates dynamic behavior
+      const indexConfig = vectorizer.indexConfig || {}
+      if (vecIndexType !== 'dynamic' && (indexConfig?.threshold !== undefined || (indexConfig?.hnsw && indexConfig?.flat))) {
+        vecIndexType = 'dynamic'
+      }
+
       schema.vectorConfig[vecName] = {
         vectorizer: {
           [vectorizerType]: vectorizerConfig
@@ -165,8 +176,8 @@ export async function exportCollectionSchema(client, collectionName) {
         vectorIndexType: vecIndexType,
       }
       
-      if (vectorizer.indexConfig) {
-        schema.vectorConfig[vecName].vectorIndexConfig = vectorizer.indexConfig
+      if (indexConfig && Object.keys(indexConfig).length > 0) {
+        schema.vectorConfig[vecName].vectorIndexConfig = indexConfig
       }
       
       if (vectorizer.quantizer) {
@@ -178,17 +189,27 @@ export async function exportCollectionSchema(client, collectionName) {
     schema.vectorConfig = {}
     Object.entries(config.vectorConfig).forEach(([name, vectorConfig]) => {
       const vectorizerName = Object.keys(vectorConfig.vectorizer)[0]
-      const vectorizerConfig = vectorConfig.vectorizer[vectorizerName]
+      const vectorizerConfig = { ...(vectorConfig.vectorizer[vectorizerName] || {}) }
+      // Normalize naming differences for export
+      if (vectorizerConfig.vectorizeClassName !== undefined && vectorizerConfig.vectorizeCollectionName === undefined) {
+        vectorizerConfig.vectorizeCollectionName = vectorizerConfig.vectorizeClassName
+      }
+      // Infer dynamic
+      let vecIndexType = vectorConfig.vectorIndexType
+      const indexConfig = vectorConfig.vectorIndexConfig || {}
+      if (vecIndexType !== 'dynamic' && (indexConfig?.threshold !== undefined || (indexConfig?.hnsw && indexConfig?.flat))) {
+        vecIndexType = 'dynamic'
+      }
       
       schema.vectorConfig[name] = {
         vectorizer: {
           [vectorizerName]: vectorizerConfig
         },
-        vectorIndexType: vectorConfig.vectorIndexType,
+        vectorIndexType: vecIndexType,
       }
       
-      if (vectorConfig.vectorIndexConfig) {
-        schema.vectorConfig[name].vectorIndexConfig = vectorConfig.vectorIndexConfig
+      if (indexConfig && Object.keys(indexConfig).length > 0) {
+        schema.vectorConfig[name].vectorIndexConfig = indexConfig
       }
       
       if (vectorConfig.quantizer) {

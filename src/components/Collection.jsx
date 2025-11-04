@@ -165,7 +165,7 @@ export default function Collection({ initialJson = null, availableModules = null
       // Weaviate v4 export style: vectorizers is an array
       const configs = (initialJson.vectorizers || []).map((vz, idx) => {
         const name = vz.name || (idx === 0 ? 'default' : `vector_config_${idx + 1}`)
-        const indexType = vz.indexType || 'hnsw'
+        let indexType = vz.indexType || 'hnsw'
 
         // Extract vectorizer module name and its config flexibly
         let vectorizerKey = ''
@@ -641,8 +641,9 @@ export default function Collection({ initialJson = null, availableModules = null
         {openBasic && (
           <div className="collapsible-panel">
             <div className="field">
-              <label>Name</label>
+              <label htmlFor="collection-name">Name</label>
               <input
+                id="collection-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="MyCollection"
@@ -650,8 +651,9 @@ export default function Collection({ initialJson = null, availableModules = null
             </div>
 
             <div className="field">
-              <label>Description</label>
+              <label htmlFor="collection-description">Description</label>
               <textarea
+                id="collection-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="A Brand new collection"
