@@ -43,13 +43,15 @@ export default function VectorConfigItem({
   }
 
   function selectAllProperties() {
-    const allPropertyNames = properties
+    // Only select text properties
+    const textPropertyNames = properties
+      .filter(p => p.dataType === 'text')
       .map(p => p.name)
       .filter(name => name && name.trim() !== '')
     
     updateModuleConfig({
       ...value.moduleConfig,
-      properties: allPropertyNames
+      properties: textPropertyNames
     })
   }
 
@@ -151,46 +153,59 @@ export default function VectorConfigItem({
               overflowY: 'auto',
               backgroundColor: '#f9f9f9'
             }}>
-              {properties.map((property, idx) => {
-                const propertyName = property.name || `new_property${idx + 1}`
-                const isSelected = (value.moduleConfig?.properties || []).includes(propertyName)
-                
-                return (
-                  <div key={idx} style={{ marginBottom: '8px' }}>
-                    <label 
-                      style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        cursor: 'pointer',
-                        fontSize: '14px'
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handlePropertyToggle(propertyName)}
-                        style={{ width: 'auto', marginRight: '8px' }}
-                      />
-                      <span style={{ fontWeight: isSelected ? '600' : '400' }}>
-                        {propertyName}
-                      </span>
-                      {property.dataType && (
-                        <span style={{ 
-                          marginLeft: '8px', 
-                          color: '#666', 
-                          fontSize: '12px',
-                          fontStyle: 'italic'
-                        }}>
-                          ({property.dataType}{property.isArray ? '[]' : ''})
-                        </span>
-                      )}
-                    </label>
-                  </div>
-                )
-              })}
+              {properties.filter(p => p.dataType === 'text').length === 0 ? (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '20px', 
+                  color: '#666',
+                  fontSize: '14px'
+                }}>
+                  No text properties available. Only text fields can be vectorized.
+                </div>
+              ) : (
+                properties
+                  .filter(property => property.dataType === 'text')
+                  .map((property, idx) => {
+                    const propertyName = property.name || `new_property${idx + 1}`
+                    const isSelected = (value.moduleConfig?.properties || []).includes(propertyName)
+                    
+                    return (
+                      <div key={idx} style={{ marginBottom: '8px' }}>
+                        <label 
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            cursor: 'pointer',
+                            fontSize: '14px'
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handlePropertyToggle(propertyName)}
+                            style={{ width: 'auto', marginRight: '8px' }}
+                          />
+                          <span style={{ fontWeight: isSelected ? '600' : '400' }}>
+                            {propertyName}
+                          </span>
+                          {property.dataType && (
+                            <span style={{ 
+                              marginLeft: '8px', 
+                              color: '#666', 
+                              fontSize: '12px',
+                              fontStyle: 'italic'
+                            }}>
+                              ({property.dataType}{property.isArray ? '[]' : ''})
+                            </span>
+                          )}
+                        </label>
+                      </div>
+                    )
+                  })
+              )}
             </div>
             <small className="hint">
-              Select which properties should be vectorized to compose this vector
+              Only text properties can be vectorized. Select which text properties should be included in this vector
               {(value.moduleConfig?.properties || []).length > 0 && (
                 <span style={{ marginLeft: '8px', fontWeight: '600' }}>
                   ({(value.moduleConfig?.properties || []).length} selected)
