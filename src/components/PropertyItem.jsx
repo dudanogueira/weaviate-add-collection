@@ -117,17 +117,41 @@ export default function PropertyItem({ value, onChange, onDelete, index }) {
       </div>
 
       {value.dataType === 'text' && (
-        <div className="field">
-          <label>Tokenization</label>
-          <select value={value.tokenization || 'word'} onChange={(e) => update('tokenization', e.target.value)}>
-            {tokenizationOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-          <small className="help-text">
-            {tokenizationOptions.find(opt => opt.value === (value.tokenization || 'word'))?.description}
-          </small>
-        </div>
+        <>
+          <div className="field">
+            <label>Tokenization</label>
+            <select value={value.tokenization || 'word'} onChange={(e) => update('tokenization', e.target.value)}>
+              {tokenizationOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <small className="help-text">
+              {tokenizationOptions.find(opt => opt.value === (value.tokenization || 'word'))?.description}
+            </small>
+          </div>
+
+          <div className="field">
+            <h5 style={{ margin: '12px 0 8px 0', fontSize: '14px', fontWeight: 600 }}>Vectorization Settings (per-property)</h5>
+            <small className="hint" style={{ display: 'block', marginBottom: '12px' }}>
+              Configure how this property should be vectorized. These settings apply to all vectorizers unless overridden.
+            </small>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={value.vectorizePropertyName || false}
+                  onChange={(e) => update('vectorizePropertyName', e.target.checked)}
+                  style={{ width: 'auto', marginRight: '8px' }}
+                />
+                <span>Vectorize Property Name</span>
+              </label>
+              <small className="hint" style={{ marginLeft: '24px', marginTop: '-4px' }}>
+                Include the property name itself when creating embeddings
+              </small>
+            </div>
+          </div>
+        </>
       )}
 
 

@@ -35,7 +35,18 @@ export default function Collection({ initialJson = null, availableModules = null
         
         const isArrayType = dataTypeValue ? dataTypeValue.includes('[]') : false
         const baseDataType = dataTypeValue ? dataTypeValue.replace('[]', '') : 'text'
-        
+
+        // Derive per-property vectorization settings from imported moduleConfig (if any)
+        let vectorizePropertyName
+        if (baseDataType === 'text' && p.moduleConfig && typeof p.moduleConfig === 'object') {
+          try {
+            const anyTrue = Object.values(p.moduleConfig).some(cfg => cfg && typeof cfg === 'object' && cfg.vectorizePropertyName === true)
+            if (anyTrue) vectorizePropertyName = true
+          } catch (_) {
+            // ignore malformed moduleConfig
+          }
+        }
+
         return {
           name: p.name || '',
           dataType: baseDataType,
@@ -44,7 +55,8 @@ export default function Collection({ initialJson = null, availableModules = null
           indexRangeFilters: p.indexRangeFilters ?? false,
           indexSearchable: p.indexSearchable ?? true,
           isArray: isArrayType,
-          tokenization: p.tokenization || 'word'
+          tokenization: p.tokenization || 'word',
+          ...(vectorizePropertyName === true ? { vectorizePropertyName: true } : {})
         }
       }))
     }
@@ -130,11 +142,33 @@ export default function Collection({ initialJson = null, availableModules = null
         result.indexRangeFilters = false
       }
 
+      // Add moduleConfig for text properties with vectorization settings
+      if (finalBaseType === 'text' && (p.vectorizePropertyName !== undefined)) {
+        // Get the active vectorizers from vectorConfigs to create moduleConfig
+        const activeVectorizers = vectorConfigs
+          .filter(vc => vc.vectorizer && vc.vectorizer !== '')
+          .map(vc => vc.vectorizer)
+        
+        // If we have vectorizers, create moduleConfig for each one
+        if (activeVectorizers.length > 0) {
+          result.moduleConfig = {}
+          activeVectorizers.forEach(vectorizerName => {
+            const config = {}
+            if (p.vectorizePropertyName !== undefined) {
+              config.vectorizePropertyName = p.vectorizePropertyName
+            }
+            if (Object.keys(config).length > 0) {
+              result.moduleConfig[vectorizerName] = config
+            }
+          })
+        }
+      }
+
       return result
     })
 
     setGeneratedJson((prev) => ({ ...prev, properties: transformed }))
-  }, [properties])
+  }, [properties, vectorConfigs])
 
   // Transform vectorConfigs into vectorConfig object for JSON
   useEffect(() => {

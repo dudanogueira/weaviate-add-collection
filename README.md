@@ -49,6 +49,26 @@ The following fields are shown conditionally based on the selected data type:
 - **Default:** word
 - **Purpose:** Defines how text is tokenized for search indexing
 
+#### **Vectorization Settings (per-property)**
+- **Visible only for:** `text` data type
+- **Type:** Checkboxes
+- **Purpose:** Control how individual text properties are vectorized
+- **Options:**
+  - **Vectorize Property Name** - Include the property name itself when creating embeddings (default: false)
+- **Note:** These settings are applied to all active vectorizers in the vectorConfig and generate a `moduleConfig` object for each property
+- **Example Output:**
+  ```json
+  {
+    "name": "description",
+    "dataType": ["text"],
+    "moduleConfig": {
+      "text2vec-openai": {
+        "vectorizePropertyName": true
+      }
+    }
+  }
+  ```
+
 #### **indexSearchable**
 - **Visible only for:** `text` data type
 - **Type:** Checkbox
@@ -113,6 +133,17 @@ Each vector configuration has the following fields:
 - **Default:** false
 - **Purpose:** Whether to include the collection/class name in vectorization
 - **Note:** Common to all vectorizer modules
+
+#### **Properties to Vectorize**
+- **Type:** Multi-select checkboxes
+- **Constraint:** Only text properties are available for selection
+- **Purpose:** Select which text fields should be included when creating embeddings
+- **Features:**
+  - Select All / Deselect All buttons for quick management
+  - Only properties with `dataType: text` are shown
+  - Shows count of selected properties
+  - If no text properties exist, displays a helpful message
+- **Note:** Non-text properties (int, number, boolean, date, etc.) cannot be vectorized and won't appear in the list
 
 ### Tabbed Interface
 
