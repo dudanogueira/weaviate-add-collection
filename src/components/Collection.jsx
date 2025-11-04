@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import PropertySection from './PropertySection'
 import VectorConfigSection from './VectorConfigSection'
+import InvertedIndexConfigSection from './InvertedIndexConfigSection'
 
 // Contract:
 // Inputs: optional `initialJson` object with { name, description }
@@ -11,9 +12,21 @@ export default function Collection({ initialJson = null, availableModules = null
   const [name, setName] = useState(initialJson?.name || '')
   const [description, setDescription] = useState(initialJson?.description || '')
   const [generatedJson, setGeneratedJson] = useState({})
+  const [invertedIndexConfig, setInvertedIndexConfig] = useState({
+    bm25_b: 0.75,
+    bm25_k1: 1.2,
+    cleanup_interval_seconds: 60,
+    index_timestamps: false,
+    index_property_length: false,
+    index_null_state: false,
+    stopwords_preset: 'en',
+    stopwords_additions: [],
+    stopwords_removals: [],
+  })
   const [openBasic, setOpenBasic] = useState(true)
   const [openProperties, setOpenProperties] = useState(true)
   const [openVectorConfig, setOpenVectorConfig] = useState(true)
+  const [openInvertedIndexConfig, setOpenInvertedIndexConfig] = useState(true)
 
   useEffect(() => {
     // Handle both 'name' and 'class' fields for backwards compatibility
@@ -22,8 +35,7 @@ export default function Collection({ initialJson = null, availableModules = null
     // Also load properties from imported JSON
     if (initialJson?.properties && Array.isArray(initialJson.properties)) {
       setProperties(initialJson.properties.map(p => {
-        // Extract the base data type and check if it's an array
-        // Handle both array format ['text[]'] and string format 'text[]'
+        // ...existing code...
         let dataTypeValue
         if (Array.isArray(p.dataType)) {
           dataTypeValue = p.dataType[0]
@@ -32,21 +44,19 @@ export default function Collection({ initialJson = null, availableModules = null
         } else {
           dataTypeValue = 'text'
         }
-        
         const isArrayType = dataTypeValue ? dataTypeValue.includes('[]') : false
         const baseDataType = dataTypeValue ? dataTypeValue.replace('[]', '') : 'text'
-
-        // Derive per-property vectorization settings from imported moduleConfig (if any)
         let vectorizePropertyName
-        if (baseDataType === 'text' && p.moduleConfig && typeof p.moduleConfig === 'object') {
+        if (baseDataType === 'text' && ((p.moduleConfig && typeof p.moduleConfig === 'object') || (p.vectorizerConfig && typeof p.vectorizerConfig === 'object'))) {
           try {
-            const anyTrue = Object.values(p.moduleConfig).some(cfg => cfg && typeof cfg === 'object' && cfg.vectorizePropertyName === true)
+            const configs = {
+              ...(p.moduleConfig || {}),
+              ...(p.vectorizerConfig || {})
+            }
+            const anyTrue = Object.values(configs).some(cfg => cfg && typeof cfg === 'object' && cfg.vectorizePropertyName === true)
             if (anyTrue) vectorizePropertyName = true
-          } catch (_) {
-            // ignore malformed moduleConfig
-          }
+          } catch (_) {}
         }
-
         return {
           name: p.name || '',
           dataType: baseDataType,
@@ -60,16 +70,33 @@ export default function Collection({ initialJson = null, availableModules = null
         }
       }))
     }
-    // Fill vectorConfigs from the imported JSON's vectorConfig
+
+    // Load invertedIndexConfig from imported JSON if present
+    if (initialJson?.invertedIndexConfig && typeof initialJson.invertedIndexConfig === 'object') {
+      const cfg = initialJson.invertedIndexConfig
+      setInvertedIndexConfig({
+        bm25_b: cfg.bm25?.b ?? 0.75,
+        bm25_k1: cfg.bm25?.k1 ?? 1.2,
+        cleanup_interval_seconds: cfg.cleanupIntervalSeconds ?? 60,
+        index_null_state: cfg.indexNullState ?? false,
+        index_property_length: cfg.indexPropertyLength ?? false,
+        index_timestamps: cfg.indexTimestamps ?? false,
+        stopwords_preset: cfg.stopwords?.preset ?? 'en',
+        stopwords_additions: cfg.stopwords?.additions ?? [],
+        stopwords_removals: cfg.stopwords?.removals ?? [],
+      })
+    }
+    // Fill vectorConfigs from the imported JSON
+    // Support both legacy object map (vectorConfig) and Weaviate v4 array (vectorizers)
     if (initialJson?.vectorConfig && typeof initialJson.vectorConfig === 'object') {
       const configs = Object.entries(initialJson.vectorConfig).map(([name, config]) => {
         // Extract name, vectorizer, indexType, indexConfig
         const vectorizerKey = config.vectorizer ? Object.keys(config.vectorizer)[0] : ''
         const moduleConfig = vectorizerKey ? config.vectorizer[vectorizerKey] : {}
         
-        // Handle indexConfig - need to process quantizers correctly
-        let indexConfig = config.vectorIndexConfig || {}
-        const indexType = config.vectorIndexType || 'hnsw'
+  // Handle indexConfig - need to process quantizers correctly
+  let indexConfig = config.vectorIndexConfig || {}
+  let indexType = config.vectorIndexType || 'hnsw'
         
         // For dynamic index type, extract quantizers from hnsw and flat sub-configs
         if (indexType === 'dynamic') {
@@ -112,14 +139,102 @@ export default function Collection({ initialJson = null, availableModules = null
           // They're already in the correct format (pq, bq, sq as direct properties)
           // No processing needed - just keep them as-is
         }
+        // Heuristic: if both hnsw and flat configs exist or threshold is present, treat as dynamic
+        if (indexType !== 'dynamic' && (indexConfig?.threshold !== undefined || (indexConfig?.hnsw && indexConfig?.flat))) {
+          indexType = 'dynamic'
+        }
+        // Normalize moduleConfig naming differences
+        if (moduleConfig && moduleConfig.vectorizeCollectionName !== undefined && moduleConfig.vectorizeClassName === undefined) {
+          moduleConfig.vectorizeClassName = moduleConfig.vectorizeCollectionName
+        }
         
         return {
           name,
-          vectorizer: vectorizerKey,
+          // If vectorizer is 'none', treat as bring-your-own for UI purposes
+          vectorizer: vectorizerKey === 'none' ? '' : vectorizerKey,
+          bringOwnVectors: vectorizerKey === 'none',
           moduleConfig,
           indexType,
           indexConfig,
           // Note: No longer using separate quantization field
+          vectorizeClassName: moduleConfig?.vectorizeClassName || false
+        }
+      })
+      setVectorConfigs(configs)
+    } else if (Array.isArray(initialJson?.vectorizers)) {
+      // Weaviate v4 export style: vectorizers is an array
+      const configs = (initialJson.vectorizers || []).map((vz, idx) => {
+        const name = vz.name || (idx === 0 ? 'default' : `vector_config_${idx + 1}`)
+        const indexType = vz.indexType || 'hnsw'
+
+        // Extract vectorizer module name and its config flexibly
+        let vectorizerKey = ''
+        let moduleConfig = {}
+        const v = vz.vectorizer
+        if (v && typeof v === 'object') {
+          if ('name' in v || 'type' in v) {
+            vectorizerKey = v.name || v.type || ''
+            moduleConfig = v.config || {}
+          } else {
+            const keys = Object.keys(v)
+            if (keys.length > 0) {
+              vectorizerKey = keys[0]
+              moduleConfig = v[vectorizerKey] || {}
+            }
+          }
+        }
+
+        // Handle index config and dynamic quantizers
+  let indexConfig = vz.indexConfig || {}
+  if (indexType === 'dynamic') {
+          const processedIndexConfig = { ...indexConfig }
+
+          if (indexConfig.hnsw) {
+            const hnswConfig = { ...indexConfig.hnsw }
+            if (indexConfig.hnsw.pq) {
+              hnswConfig.quantizer = 'pq'
+              hnswConfig.pq = indexConfig.hnsw.pq
+            } else if (indexConfig.hnsw.bq) {
+              hnswConfig.quantizer = 'bq'
+              hnswConfig.bq = indexConfig.hnsw.bq
+            } else if (indexConfig.hnsw.sq) {
+              hnswConfig.quantizer = 'sq'
+              hnswConfig.sq = indexConfig.hnsw.sq
+            } else {
+              hnswConfig.quantizer = 'none'
+            }
+            processedIndexConfig.hnsw = hnswConfig
+          }
+
+          if (indexConfig.flat) {
+            const flatConfig = { ...indexConfig.flat }
+            if (indexConfig.flat.bq) {
+              flatConfig.quantizer = 'bq'
+              flatConfig.bq = indexConfig.flat.bq
+            } else {
+              flatConfig.quantizer = 'none'
+            }
+            processedIndexConfig.flat = flatConfig
+          }
+
+          indexConfig = processedIndexConfig
+        }
+        // Heuristic: infer dynamic if structure suggests so
+        if (indexType !== 'dynamic' && (indexConfig?.threshold !== undefined || (indexConfig?.hnsw && indexConfig?.flat))) {
+          indexType = 'dynamic'
+        }
+        // Normalize moduleConfig naming differences
+        if (moduleConfig && moduleConfig.vectorizeCollectionName !== undefined && moduleConfig.vectorizeClassName === undefined) {
+          moduleConfig.vectorizeClassName = moduleConfig.vectorizeCollectionName
+        }
+
+        return {
+          name,
+          vectorizer: vectorizerKey === 'none' ? '' : vectorizerKey,
+          bringOwnVectors: vectorizerKey === 'none',
+          moduleConfig,
+          indexType,
+          indexConfig,
           vectorizeClassName: moduleConfig?.vectorizeClassName || false
         }
       })
@@ -134,6 +249,47 @@ export default function Collection({ initialJson = null, availableModules = null
     }
     setGeneratedJson(j)
   }, [name, description])
+
+  // Update JSON with inverted index configuration, only including non-default values
+  useEffect(() => {
+    const defaults = {
+      bm25_b: 0.75,
+      bm25_k1: 1.2,
+      cleanup_interval_seconds: 60,
+      index_timestamps: false,
+      index_property_length: false,
+      index_null_state: false,
+      stopwords_preset: 'en',
+      stopwords_additions: [],
+      stopwords_removals: [],
+    };
+
+    const bm25 = {};
+    if (invertedIndexConfig.bm25_b !== defaults.bm25_b) bm25.b = invertedIndexConfig.bm25_b;
+    if (invertedIndexConfig.bm25_k1 !== defaults.bm25_k1) bm25.k1 = invertedIndexConfig.bm25_k1;
+
+    const stopwords = {};
+    if (invertedIndexConfig.stopwords_preset !== defaults.stopwords_preset) stopwords.preset = invertedIndexConfig.stopwords_preset;
+    if (invertedIndexConfig.stopwords_additions.length > 0) stopwords.additions = invertedIndexConfig.stopwords_additions;
+    if (invertedIndexConfig.stopwords_removals.length > 0) stopwords.removals = invertedIndexConfig.stopwords_removals;
+
+    const invertedIndexJson = {};
+    if (Object.keys(bm25).length > 0) invertedIndexJson.bm25 = bm25;
+    if (invertedIndexConfig.cleanup_interval_seconds !== defaults.cleanup_interval_seconds) invertedIndexJson.cleanupIntervalSeconds = invertedIndexConfig.cleanup_interval_seconds;
+    if (invertedIndexConfig.index_null_state !== defaults.index_null_state) invertedIndexJson.indexNullState = invertedIndexConfig.index_null_state;
+    if (invertedIndexConfig.index_property_length !== defaults.index_property_length) invertedIndexJson.indexPropertyLength = invertedIndexConfig.index_property_length;
+    if (invertedIndexConfig.index_timestamps !== defaults.index_timestamps) invertedIndexJson.indexTimestamps = invertedIndexConfig.index_timestamps;
+    if (Object.keys(stopwords).length > 0) invertedIndexJson.stopwords = stopwords;
+
+    setGeneratedJson((prev) => {
+      // Remove invertedIndexConfig if nothing is set
+      if (Object.keys(invertedIndexJson).length === 0) {
+        const { invertedIndexConfig, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, invertedIndexConfig: invertedIndexJson };
+    });
+  }, [invertedIndexConfig]);
 
   // properties state managed here and merged into generated JSON
   const [properties, setProperties] = useState([])
@@ -543,6 +699,24 @@ export default function Collection({ initialJson = null, availableModules = null
               availableModules={availableModules}
               properties={properties}
             />
+          </div>
+        )}
+      </div>
+
+      {/* Inverted Index Config collapsible section */}
+      <div className="collapsible" style={{ marginTop: 12 }}>
+        <button
+          className="collapsible-toggle"
+          aria-expanded={openInvertedIndexConfig}
+          onClick={() => setOpenInvertedIndexConfig((s) => !s)}
+        >
+          <span>Inverted Index Configuration</span>
+          <span className="chev">{openInvertedIndexConfig ? '\u25be' : '\u25b8'}</span>
+        </button>
+
+        {openInvertedIndexConfig && (
+          <div className="collapsible-panel">
+            <InvertedIndexConfigSection config={invertedIndexConfig} setConfig={setInvertedIndexConfig} />
           </div>
         )}
       </div>
