@@ -272,21 +272,29 @@ export default function Collection({ initialJson = null, availableModules = null
             indexConfig.flat = flatConfig
           }
         } else {
-          // For non-dynamic index types, use the existing logic
+          // For non-dynamic index types (e.g., hnsw, flat), include known keys and skip defaults
           Object.keys(config.indexConfig).forEach(key => {
             const value = config.indexConfig[key]
-            // Only include non-default values
-            if (value !== undefined && value !== null && value !== '') {
-              // Skip default values
-              if (key === 'distance' && value === 'cosine') return
-              if (key === 'efConstruction' && value === 128) return
-              if (key === 'ef' && value === -1) return
-              if (key === 'maxConnections' && value === 32) return
-              if (key === 'threshold' && value === 10000) return
-              // Skip hnsw and flat keys for non-dynamic types
-              if (key === 'hnsw' || key === 'flat') return
-              indexConfig[key] = value
-            }
+            if (value === undefined || value === null || value === '') return
+            // Map legacy 'distance' to 'distanceMetric'
+            const outKey = key === 'distance' ? 'distanceMetric' : key
+            // Skip hnsw/flat nested keys for non-dynamic types
+            if (outKey === 'hnsw' || outKey === 'flat') return
+            // Skip default values for HNSW
+            if (outKey === 'distanceMetric' && value === 'cosine') return
+            if (outKey === 'efConstruction' && value === 128) return
+            if (outKey === 'ef' && value === -1) return
+            if (outKey === 'maxConnections' && value === 32) return
+            if (outKey === 'dynamicEfMin' && value === 100) return
+            if (outKey === 'dynamicEfMax' && value === 500) return
+            if (outKey === 'dynamicEfFactor' && value === 8) return
+            if (outKey === 'flatSearchCutoff' && value === 40000) return
+            if (outKey === 'cleanupIntervalSeconds' && value === 300) return
+            if (outKey === 'vectorCacheMaxObjects' && value === 1000000000000) return
+            if (outKey === 'filterStrategy' && value === 'sweeping') return
+            if (outKey === 'skip' && value === false) return
+            if (outKey === 'threshold' && value === 10000) return
+            indexConfig[outKey] = value
           })
         }
         

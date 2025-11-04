@@ -319,8 +319,8 @@ export default function VectorConfigItem({
                     <div className="field">
                       <label>Distance Metric</label>
                       <select
-                        value={value.indexConfig?.distance || 'cosine'}
-                        onChange={(e) => update('indexConfig', { ...value.indexConfig, distance: e.target.value })}
+                        value={value.indexConfig?.distanceMetric || 'cosine'}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, distanceMetric: e.target.value })}
                       >
                         <option value="cosine">Cosine</option>
                         <option value="dot">Dot Product</option>
@@ -363,6 +363,98 @@ export default function VectorConfigItem({
                       />
                       <small className="hint">Number of connections per node (default: 32)</small>
                     </div>
+
+                    <div className="field">
+                      <label>Dynamic Ef Min</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.dynamicEfMin || 100}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, dynamicEfMin: parseInt(e.target.value) || 100 })}
+                        placeholder="100"
+                      />
+                      <small className="hint">Minimum value for dynamic ef (default: 100)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Dynamic Ef Max</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.dynamicEfMax || 500}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, dynamicEfMax: parseInt(e.target.value) || 500 })}
+                        placeholder="500"
+                      />
+                      <small className="hint">Maximum value for dynamic ef (default: 500)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Dynamic Ef Factor</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.dynamicEfFactor || 8}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, dynamicEfFactor: parseInt(e.target.value) || 8 })}
+                        placeholder="8"
+                      />
+                      <small className="hint">Factor for dynamic ef calculation (default: 8)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Flat Search Cutoff</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.flatSearchCutoff || 40000}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, flatSearchCutoff: parseInt(e.target.value) || 40000 })}
+                        placeholder="40000"
+                      />
+                      <small className="hint">When to use flat search instead (default: 40000)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Cleanup Interval Seconds</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.cleanupIntervalSeconds || 300}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, cleanupIntervalSeconds: parseInt(e.target.value) || 300 })}
+                        placeholder="300"
+                      />
+                      <small className="hint">Interval between cleanup operations (default: 300)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Vector Cache Max Objects</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.vectorCacheMaxObjects || 1000000000000}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, vectorCacheMaxObjects: parseInt(e.target.value) || 1000000000000 })}
+                        placeholder="1000000000000"
+                      />
+                      <small className="hint">Maximum objects in vector cache (default: 1000000000000)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Filter Strategy</label>
+                      <select
+                        value={value.indexConfig?.filterStrategy || 'sweeping'}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, filterStrategy: e.target.value })}
+                      >
+                        <option value="sweeping">Sweeping</option>
+                        <option value="acorn">Acorn</option>
+                      </select>
+                      <small className="hint">Strategy for filtering results (default: sweeping)</small>
+                    </div>
+
+                    <div className="field">
+                      <label htmlFor={`hnsw-skip-${index}`}>
+                        <input
+                          id={`hnsw-skip-${index}`}
+                          type="checkbox"
+                          checked={value.indexConfig?.skip || false}
+                          onChange={(e) => update('indexConfig', { ...value.indexConfig, skip: e.target.checked })}
+                          style={{ width: 'auto', marginRight: '8px' }}
+                        />
+                        Skip HNSW Index
+                      </label>
+                      <small className="hint">Skip building the HNSW index (default: false)</small>
+                    </div>
                   </div>
                 )}
 
@@ -374,8 +466,8 @@ export default function VectorConfigItem({
                     <div className="field">
                       <label>Distance Metric</label>
                       <select
-                        value={value.indexConfig?.distance || 'cosine'}
-                        onChange={(e) => update('indexConfig', { ...value.indexConfig, distance: e.target.value })}
+                        value={value.indexConfig?.distanceMetric || 'cosine'}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, distanceMetric: e.target.value })}
                       >
                         <option value="cosine">Cosine</option>
                         <option value="dot">Dot Product</option>
