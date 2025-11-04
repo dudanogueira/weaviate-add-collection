@@ -63,16 +63,63 @@ export default function Collection({ initialJson = null, availableModules = null
     // Fill vectorConfigs from the imported JSON's vectorConfig
     if (initialJson?.vectorConfig && typeof initialJson.vectorConfig === 'object') {
       const configs = Object.entries(initialJson.vectorConfig).map(([name, config]) => {
-        // Extract name, vectorizer, indexType, indexConfig, quantization
+        // Extract name, vectorizer, indexType, indexConfig
         const vectorizerKey = config.vectorizer ? Object.keys(config.vectorizer)[0] : ''
         const moduleConfig = vectorizerKey ? config.vectorizer[vectorizerKey] : {}
+        
+        // Handle indexConfig - need to process quantizers correctly
+        let indexConfig = config.vectorIndexConfig || {}
+        const indexType = config.vectorIndexType || 'hnsw'
+        
+        // For dynamic index type, extract quantizers from hnsw and flat sub-configs
+        if (indexType === 'dynamic') {
+          const processedIndexConfig = { ...indexConfig }
+          
+          // Process HNSW quantizer
+          if (indexConfig.hnsw) {
+            const hnswConfig = { ...indexConfig.hnsw }
+            // Check for PQ, BQ, or SQ configuration and extract quantizer
+            if (indexConfig.hnsw.pq) {
+              hnswConfig.quantizer = 'pq'
+              hnswConfig.pq = indexConfig.hnsw.pq
+            } else if (indexConfig.hnsw.bq) {
+              hnswConfig.quantizer = 'bq'
+              hnswConfig.bq = indexConfig.hnsw.bq
+            } else if (indexConfig.hnsw.sq) {
+              hnswConfig.quantizer = 'sq'
+              hnswConfig.sq = indexConfig.hnsw.sq
+            } else {
+              hnswConfig.quantizer = 'none'
+            }
+            processedIndexConfig.hnsw = hnswConfig
+          }
+          
+          // Process Flat quantizer (only BQ supported)
+          if (indexConfig.flat) {
+            const flatConfig = { ...indexConfig.flat }
+            if (indexConfig.flat.bq) {
+              flatConfig.quantizer = 'bq'
+              flatConfig.bq = indexConfig.flat.bq
+            } else {
+              flatConfig.quantizer = 'none'
+            }
+            processedIndexConfig.flat = flatConfig
+          }
+          
+          indexConfig = processedIndexConfig
+        } else {
+          // For non-dynamic types (HNSW, Flat), quantizers are directly in indexConfig
+          // They're already in the correct format (pq, bq, sq as direct properties)
+          // No processing needed - just keep them as-is
+        }
+        
         return {
           name,
           vectorizer: vectorizerKey,
           moduleConfig,
-          indexType: config.vectorIndexType || 'hnsw',
-          indexConfig: config.vectorIndexConfig || {},
-          quantization: config.quantizer || {},
+          indexType,
+          indexConfig,
+          // Note: No longer using separate quantization field
           vectorizeClassName: moduleConfig?.vectorizeClassName || false
         }
       })
@@ -251,10 +298,34 @@ export default function Collection({ initialJson = null, availableModules = null
                 if (key === 'vectorCacheMaxObjects' && value === 1000000000000) return
                 if (key === 'filterStrategy' && value === 'sweeping') return
                 if (key === 'skip' && value === false) return
+                // Skip quantizer field itself, we'll handle it separately
+                if (key === 'quantizer') return
                 hnswConfig[key] = value
               }
             })
-            indexConfig.hnsw = hnswConfig
+            
+            // Handle HNSW quantization
+            if (config.indexConfig.hnsw.quantizer && config.indexConfig.hnsw.quantizer !== 'none') {
+              const quantizerType = config.indexConfig.hnsw.quantizer
+              const quantizerConfig = config.indexConfig.hnsw[quantizerType]
+              
+              if (quantizerConfig && Object.keys(quantizerConfig).length > 0) {
+                const cleanedQuantizer = {}
+                Object.keys(quantizerConfig).forEach(qKey => {
+                  const qValue = quantizerConfig[qKey]
+                  if (qValue !== undefined && qValue !== null && qValue !== '') {
+                    cleanedQuantizer[qKey] = qValue
+                  }
+                })
+                if (Object.keys(cleanedQuantizer).length > 0) {
+                  hnswConfig[quantizerType] = cleanedQuantizer
+                }
+              }
+            }
+            
+            if (Object.keys(hnswConfig).length > 0) {
+              indexConfig.hnsw = hnswConfig
+            }
           }
           
           // Build Flat config
@@ -266,10 +337,34 @@ export default function Collection({ initialJson = null, availableModules = null
                 // Skip default values
                 if (key === 'distanceMetric' && value === 'cosine') return
                 if (key === 'vectorCacheMaxObjects' && value === 1000000000000) return
+                // Skip quantizer field itself, we'll handle it separately
+                if (key === 'quantizer') return
                 flatConfig[key] = value
               }
             })
-            indexConfig.flat = flatConfig
+            
+            // Handle Flat quantization (only BQ for flat)
+            if (config.indexConfig.flat.quantizer && config.indexConfig.flat.quantizer !== 'none') {
+              const quantizerType = config.indexConfig.flat.quantizer
+              const quantizerConfig = config.indexConfig.flat[quantizerType]
+              
+              if (quantizerConfig && Object.keys(quantizerConfig).length > 0) {
+                const cleanedQuantizer = {}
+                Object.keys(quantizerConfig).forEach(qKey => {
+                  const qValue = quantizerConfig[qKey]
+                  if (qValue !== undefined && qValue !== null && qValue !== '') {
+                    cleanedQuantizer[qKey] = qValue
+                  }
+                })
+                if (Object.keys(cleanedQuantizer).length > 0) {
+                  flatConfig[quantizerType] = cleanedQuantizer
+                }
+              }
+            }
+            
+            if (Object.keys(flatConfig).length > 0) {
+              indexConfig.flat = flatConfig
+            }
           }
         } else {
           // For non-dynamic index types (e.g., hnsw, flat), include known keys and skip defaults
@@ -280,6 +375,26 @@ export default function Collection({ initialJson = null, availableModules = null
             const outKey = key === 'distance' ? 'distanceMetric' : key
             // Skip hnsw/flat nested keys for non-dynamic types
             if (outKey === 'hnsw' || outKey === 'flat') return
+            // Skip quantizer field if present (it's just for UI state)
+            if (outKey === 'quantizer') return
+            
+            // Handle quantizer configs (pq, bq, sq) - include them as-is
+            if (outKey === 'pq' || outKey === 'bq' || outKey === 'sq') {
+              if (typeof value === 'object' && value !== null) {
+                const cleanedQuantizer = {}
+                Object.keys(value).forEach(qKey => {
+                  const qValue = value[qKey]
+                  if (qValue !== undefined && qValue !== null && qValue !== '') {
+                    cleanedQuantizer[qKey] = qValue
+                  }
+                })
+                if (Object.keys(cleanedQuantizer).length > 0) {
+                  indexConfig[outKey] = cleanedQuantizer
+                }
+              }
+              return
+            }
+            
             // Skip default values for HNSW
             if (outKey === 'distanceMetric' && value === 'cosine') return
             if (outKey === 'efConstruction' && value === 128) return
@@ -303,20 +418,7 @@ export default function Collection({ initialJson = null, availableModules = null
         }
       }
       
-      // Add quantization if it exists and type is not 'none'
-      if (config.quantization && config.quantization.type && config.quantization.type !== 'none') {
-        const quantization = { type: config.quantization.type }
-        // Only add other quantization fields if they have values
-        Object.keys(config.quantization).forEach(key => {
-          if (key !== 'type') {
-            const value = config.quantization[key]
-            if (value !== undefined && value !== null && value !== '' && value !== 0) {
-              quantization[key] = value
-            }
-          }
-        })
-        vectorConfigEntry.quantizer = quantization
-      }
+      // Note: No longer using separate quantizer field - quantizers are now in indexConfig directly
       
       vectorConfigObject[configName] = vectorConfigEntry
     })

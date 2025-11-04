@@ -187,6 +187,8 @@ Configure the vector index type and optimization parameters.
 #### Tab 3: Compression/Quantization
 Reduce memory usage by compressing vectors.
 
+**Note:** This tab is hidden when using Dynamic index type, as quantization is configured separately for each sub-index (HNSW and Flat).
+
 - **Quantization Types:**
   - **None** - Full precision (default)
   - **PQ** - Product Quantization (8x-32x compression)
@@ -198,6 +200,19 @@ Reduce memory usage by compressing vectors.
 
 - **BQ/SQ Parameters:**
   - Rescore Limit, Training Limit
+
+**Important:** For flat indexes, only binary quantization is available. This can speed up search performance significantly. See [Weaviate Compression Considerations](https://docs.weaviate.io/weaviate/starter-guides/managing-resources/compression#compression-considerations) for more details.
+
+### Dynamic Index Quantization
+
+When using the **Dynamic** index type, quantization is configured separately for each sub-index:
+
+- **HNSW Sub-index:** Supports all quantization types (PQ, BQ, SQ, None)
+- **Flat Sub-index:** Only supports Binary Quantization (BQ) or None
+
+This allows for optimal compression strategies based on the index type being used at different collection sizes.
+
+**Important Note:** For flat indexes, only binary quantization is available. This can speed up search performance significantly. See [Weaviate Compression Considerations](https://docs.weaviate.io/weaviate/starter-guides/managing-resources/compression#compression-considerations) for more details.
 
 See [TABS_DOCUMENTATION.md](TABS_DOCUMENTATION.md) for detailed information about each tab.
 
