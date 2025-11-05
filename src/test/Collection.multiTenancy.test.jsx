@@ -113,14 +113,14 @@ describe('Collection Component - Multi-Tenancy Configuration', () => {
     }, { timeout: 3000 })
   })
 
-  it('should include only enabled sub-options in JSON', async () => {
+  it('should include all sub-options in JSON when multi-tenancy is enabled', async () => {
     const importedJson = {
       class: 'PartialMT',
       description: 'Partial Multi-Tenancy Collection',
       multiTenancyConfig: {
         enabled: true,
         autoTenantCreation: true,
-        // autoTenantActivation is false/not set
+        autoTenantActivation: false,
       },
       properties: [],
       vectorConfig: {
@@ -141,12 +141,12 @@ describe('Collection Component - Multi-Tenancy Configuration', () => {
     const jsonBlock = container.querySelector('.json-block')
     const generatedJson = JSON.parse(jsonBlock.textContent)
 
-    // Verify multi-tenancy config structure
+    // Verify multi-tenancy config structure - all fields should be present when enabled
     expect(generatedJson.multiTenancyConfig).toBeDefined()
     expect(generatedJson.multiTenancyConfig.enabled).toBe(true)
     expect(generatedJson.multiTenancyConfig.autoTenantCreation).toBe(true)
-    // autoTenantActivation should not be in the JSON if it's false
-    expect(generatedJson.multiTenancyConfig.autoTenantActivation).toBeUndefined()
+    // autoTenantActivation should be present as false, not omitted
+    expect(generatedJson.multiTenancyConfig.autoTenantActivation).toBe(false)
   })
 
   it('should disable sub-options when multi-tenancy is disabled', async () => {

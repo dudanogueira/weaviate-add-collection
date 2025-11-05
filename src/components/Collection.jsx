@@ -10,8 +10,12 @@ import MultiTenancyConfigSection from './MultiTenancyConfigSection'
 // Outputs: none for now; component displays generated JSON and allows editing fields.
 
 export default function Collection({ initialJson = null, availableModules = null }) {
-  const [name, setName] = useState(initialJson?.name || '')
-  const [description, setDescription] = useState(initialJson?.description || '')
+  const [name, setName] = useState(
+    initialJson ? (initialJson.name ?? initialJson.class ?? '') : ''
+  )
+  const [description, setDescription] = useState(
+    initialJson ? (initialJson.description ?? '') : ''
+  )
   const [generatedJson, setGeneratedJson] = useState({})
   const [invertedIndexConfig, setInvertedIndexConfig] = useState({
     bm25_b: 0.75,
@@ -259,12 +263,16 @@ export default function Collection({ initialJson = null, availableModules = null
   }, [initialJson])
 
   useEffect(() => {
-    const j = {
-      class: name || 'MyCollection',
-      description: description || 'A Brand new collection'
-    }
-    setGeneratedJson(j)
-  }, [name, description])
+    // If name/description are empty strings and no initialJson, use defaults
+    const className = name === '' && !initialJson ? 'MyCollection' : name
+    const desc = description === '' && !initialJson ? 'A Brand new collection' : description
+    
+    setGeneratedJson((prev) => ({
+      ...prev,
+      class: className,
+      description: desc
+    }))
+  }, [name, description, initialJson])
 
   // Update JSON with inverted index configuration, only including non-default values
   useEffect(() => {
@@ -307,34 +315,22 @@ export default function Collection({ initialJson = null, availableModules = null
     });
   }, [invertedIndexConfig]);
 
-  // Update JSON with multi-tenancy configuration, only including non-default values
+  // Update JSON with multi-tenancy configuration
   useEffect(() => {
-    const defaults = {
-      enabled: false,
-      autoTenantCreation: false,
-      autoTenantActivation: false,
-    };
-
     const multiTenancyJson = {};
     
     // Only add to JSON if multi-tenancy is enabled
     if (multiTenancyConfig.enabled) {
       multiTenancyJson.enabled = true;
       
-      // Only add autoTenantCreation if it's true
-      if (multiTenancyConfig.autoTenantCreation) {
-        multiTenancyJson.autoTenantCreation = true;
-      }
-      
-      // Only add autoTenantActivation if it's true
-      if (multiTenancyConfig.autoTenantActivation) {
-        multiTenancyJson.autoTenantActivation = true;
-      }
+      // Always include autoTenantCreation and autoTenantActivation when enabled
+      multiTenancyJson.autoTenantCreation = multiTenancyConfig.autoTenantCreation;
+      multiTenancyJson.autoTenantActivation = multiTenancyConfig.autoTenantActivation;
     }
 
     setGeneratedJson((prev) => {
       // Remove multiTenancyConfig if multi-tenancy is not enabled
-      if (!multiTenancyConfig.enabled || Object.keys(multiTenancyJson).length === 0) {
+      if (!multiTenancyConfig.enabled) {
         const { multiTenancyConfig, ...rest } = prev;
         return rest;
       }
