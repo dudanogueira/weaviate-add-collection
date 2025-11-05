@@ -150,8 +150,7 @@ export default function VectorConfigItem({
               borderRadius: '4px', 
               padding: '12px',
               maxHeight: '200px',
-              overflowY: 'auto',
-              backgroundColor: '#f9f9f9'
+              overflowY: 'auto'
             }}>
               {properties.filter(p => p.dataType === 'text').length === 0 ? (
                 <div style={{ 
@@ -521,7 +520,7 @@ export default function VectorConfigItem({
 
                     {/* BQ Configuration for Flat */}
                     {value.indexConfig?.bq && (
-                      <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
+                      <div style={{ marginTop: '12px', padding: '12px', borderRadius: '4px' }} className="quantization-config">
                         <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 500 }}>BQ Settings</h6>
                         
                         <div className="field">
@@ -847,7 +846,7 @@ export default function VectorConfigItem({
 
                             {/* PQ Configuration for HNSW */}
                             {value.indexConfig?.hnsw?.quantizer === 'pq' && (
-                              <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
+                              <div style={{ marginTop: '12px', padding: '12px', borderRadius: '4px' }} className="quantization-config">
                                 <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 500 }}>PQ Settings</h6>
                                 
                                 <div className="field">
@@ -987,7 +986,7 @@ export default function VectorConfigItem({
 
                             {/* BQ Configuration for HNSW */}
                             {value.indexConfig?.hnsw?.quantizer === 'bq' && (
-                              <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
+                              <div style={{ marginTop: '12px', padding: '12px', borderRadius: '4px' }} className="quantization-config">
                                 <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 500 }}>BQ Settings</h6>
                                 
                                 <div className="field">
@@ -1051,7 +1050,7 @@ export default function VectorConfigItem({
 
                             {/* SQ Configuration for HNSW */}
                             {value.indexConfig?.hnsw?.quantizer === 'sq' && (
-                              <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
+                              <div style={{ marginTop: '12px', padding: '12px', borderRadius: '4px' }} className="quantization-config">
                                 <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 500 }}>SQ Settings</h6>
                                 
                                 <div className="field">
@@ -1174,7 +1173,7 @@ export default function VectorConfigItem({
 
                             {/* BQ Configuration for Flat */}
                             {value.indexConfig?.flat?.quantizer === 'bq' && (
-                              <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
+                              <div style={{ marginTop: '12px', padding: '12px', borderRadius: '4px' }} className="quantization-config">
                                 <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 500 }}>BQ Settings</h6>
                                 
                                 <div className="field">
