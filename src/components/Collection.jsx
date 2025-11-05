@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PropertySection from './PropertySection'
 import VectorConfigSection from './VectorConfigSection'
 import InvertedIndexConfigSection from './InvertedIndexConfigSection'
+import MultiTenancyConfigSection from './MultiTenancyConfigSection'
 
 // Contract:
 // Inputs: optional `initialJson` object with { name, description }
@@ -23,10 +24,16 @@ export default function Collection({ initialJson = null, availableModules = null
     stopwords_additions: [],
     stopwords_removals: [],
   })
+  const [multiTenancyConfig, setMultiTenancyConfig] = useState({
+    enabled: false,
+    autoTenantCreation: false,
+    autoTenantActivation: false,
+  })
   const [openBasic, setOpenBasic] = useState(true)
   const [openProperties, setOpenProperties] = useState(true)
   const [openVectorConfig, setOpenVectorConfig] = useState(true)
   const [openInvertedIndexConfig, setOpenInvertedIndexConfig] = useState(true)
+  const [openMultiTenancyConfig, setOpenMultiTenancyConfig] = useState(true)
 
   useEffect(() => {
     // Handle both 'name' and 'class' fields for backwards compatibility
@@ -84,6 +91,15 @@ export default function Collection({ initialJson = null, availableModules = null
         stopwords_preset: cfg.stopwords?.preset ?? 'en',
         stopwords_additions: cfg.stopwords?.additions ?? [],
         stopwords_removals: cfg.stopwords?.removals ?? [],
+      })
+    }
+    // Load multiTenancyConfig from imported JSON if present
+    if (initialJson?.multiTenancyConfig && typeof initialJson.multiTenancyConfig === 'object') {
+      const cfg = initialJson.multiTenancyConfig
+      setMultiTenancyConfig({
+        enabled: cfg.enabled ?? false,
+        autoTenantCreation: cfg.autoTenantCreation ?? false,
+        autoTenantActivation: cfg.autoTenantActivation ?? false,
       })
     }
     // Fill vectorConfigs from the imported JSON
@@ -290,6 +306,41 @@ export default function Collection({ initialJson = null, availableModules = null
       return { ...prev, invertedIndexConfig: invertedIndexJson };
     });
   }, [invertedIndexConfig]);
+
+  // Update JSON with multi-tenancy configuration, only including non-default values
+  useEffect(() => {
+    const defaults = {
+      enabled: false,
+      autoTenantCreation: false,
+      autoTenantActivation: false,
+    };
+
+    const multiTenancyJson = {};
+    
+    // Only add to JSON if multi-tenancy is enabled
+    if (multiTenancyConfig.enabled) {
+      multiTenancyJson.enabled = true;
+      
+      // Only add autoTenantCreation if it's true
+      if (multiTenancyConfig.autoTenantCreation) {
+        multiTenancyJson.autoTenantCreation = true;
+      }
+      
+      // Only add autoTenantActivation if it's true
+      if (multiTenancyConfig.autoTenantActivation) {
+        multiTenancyJson.autoTenantActivation = true;
+      }
+    }
+
+    setGeneratedJson((prev) => {
+      // Remove multiTenancyConfig if multi-tenancy is not enabled
+      if (!multiTenancyConfig.enabled || Object.keys(multiTenancyJson).length === 0) {
+        const { multiTenancyConfig, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, multiTenancyConfig: multiTenancyJson };
+    });
+  }, [multiTenancyConfig]);
 
   // properties state managed here and merged into generated JSON
   const [properties, setProperties] = useState([])
@@ -719,6 +770,24 @@ export default function Collection({ initialJson = null, availableModules = null
         {openInvertedIndexConfig && (
           <div className="collapsible-panel">
             <InvertedIndexConfigSection config={invertedIndexConfig} setConfig={setInvertedIndexConfig} />
+          </div>
+        )}
+      </div>
+
+      {/* Multi Tenancy Config collapsible section */}
+      <div className="collapsible" style={{ marginTop: 12 }}>
+        <button
+          className="collapsible-toggle"
+          aria-expanded={openMultiTenancyConfig}
+          onClick={() => setOpenMultiTenancyConfig((s) => !s)}
+        >
+          <span>Multi Tenancy Configuration</span>
+          <span className="chev">{openMultiTenancyConfig ? '\u25be' : '\u25b8'}</span>
+        </button>
+
+        {openMultiTenancyConfig && (
+          <div className="collapsible-panel">
+            <MultiTenancyConfigSection config={multiTenancyConfig} setConfig={setMultiTenancyConfig} />
           </div>
         )}
       </div>
