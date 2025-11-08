@@ -69,8 +69,12 @@ describe('Collection Component - Replication Configuration', () => {
     const jsonBlock = container.querySelector('.json-block')
     const generatedJson = JSON.parse(jsonBlock.textContent)
 
-    // Verify replication config is not present when all defaults
-    expect(generatedJson.replicationConfig).toBeUndefined()
+    // Verify replicationConfig is present with only factor (default value)
+    expect(generatedJson.replicationConfig).toBeDefined()
+    expect(generatedJson.replicationConfig.factor).toBe(1)
+    // asyncEnabled and deletionStrategy should not be included (they're defaults)
+    expect(generatedJson.replicationConfig.asyncEnabled).toBeUndefined()
+    expect(generatedJson.replicationConfig.deletionStrategy).toBeUndefined()
   })
 
   it('should handle all deletion strategy options', async () => {

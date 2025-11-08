@@ -365,23 +365,20 @@ export default function Collection({ initialJson = null, availableModules = null
 
     const replicationJson = {};
     
-    // Only include non-default values
-    if (replicationConfig.factor !== defaults.factor) {
-      replicationJson.factor = replicationConfig.factor;
-    }
+    // Always include factor
+    replicationJson.factor = replicationConfig.factor;
+    
+    // Only include asyncEnabled if non-default
     if (replicationConfig.asyncEnabled !== defaults.asyncEnabled) {
       replicationJson.asyncEnabled = replicationConfig.asyncEnabled;
     }
+    
+    // Only include deletionStrategy if non-default
     if (replicationConfig.deletionStrategy !== defaults.deletionStrategy) {
       replicationJson.deletionStrategy = replicationConfig.deletionStrategy;
     }
 
     setGeneratedJson((prev) => {
-      // Remove replicationConfig if all values are defaults
-      if (Object.keys(replicationJson).length === 0) {
-        const { replicationConfig, ...rest } = prev;
-        return rest;
-      }
       return { ...prev, replicationConfig: replicationJson };
     });
   }, [replicationConfig]);
