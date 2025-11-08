@@ -5,6 +5,8 @@ export default function App() {
   const [importedJson, setImportedJson] = useState(null)
   // Example: You can pass availableModules from your server
   // const [availableModules, setAvailableModules] = useState(null)
+  // Example: You can pass nodesNumber to limit the maximum replication factor
+  // const [nodesNumber, setNodesNumber] = useState(3)
 
   function handleFileImport(e) {
     const file = e.target.files?.[0]
@@ -34,6 +36,7 @@ export default function App() {
       <Collection 
         initialJson={importedJson} 
         // availableModules={availableModules} // Optional: pass server modules here
+        // nodesNumber={nodesNumber} // Optional: pass number of nodes to limit replication factor
       />
     </div>
   )

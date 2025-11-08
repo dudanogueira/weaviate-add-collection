@@ -3,13 +3,15 @@ import PropertySection from './PropertySection'
 import VectorConfigSection from './VectorConfigSection'
 import InvertedIndexConfigSection from './InvertedIndexConfigSection'
 import MultiTenancyConfigSection from './MultiTenancyConfigSection'
+import ReplicationConfigSection from './ReplicationConfigSection'
 
 // Contract:
 // Inputs: optional `initialJson` object with { name, description }
 //         optional `availableModules` object with available vectorizer modules
+//         optional `nodesNumber` number representing the number of nodes (used as max for replication factor)
 // Outputs: none for now; component displays generated JSON and allows editing fields.
 
-export default function Collection({ initialJson = null, availableModules = null }) {
+export default function Collection({ initialJson = null, availableModules = null, nodesNumber = null }) {
   const [name, setName] = useState(
     initialJson ? (initialJson.name ?? initialJson.class ?? '') : ''
   )
@@ -33,11 +35,17 @@ export default function Collection({ initialJson = null, availableModules = null
     autoTenantCreation: false,
     autoTenantActivation: false,
   })
+  const [replicationConfig, setReplicationConfig] = useState({
+    factor: 1,
+    asyncEnabled: false,
+    deletionStrategy: 'NoAutomatedResolution',
+  })
   const [openBasic, setOpenBasic] = useState(true)
   const [openProperties, setOpenProperties] = useState(true)
   const [openVectorConfig, setOpenVectorConfig] = useState(true)
   const [openInvertedIndexConfig, setOpenInvertedIndexConfig] = useState(true)
   const [openMultiTenancyConfig, setOpenMultiTenancyConfig] = useState(true)
+  const [openReplicationConfig, setOpenReplicationConfig] = useState(true)
 
   useEffect(() => {
     // Handle both 'name' and 'class' fields for backwards compatibility
@@ -104,6 +112,15 @@ export default function Collection({ initialJson = null, availableModules = null
         enabled: cfg.enabled ?? false,
         autoTenantCreation: cfg.autoTenantCreation ?? false,
         autoTenantActivation: cfg.autoTenantActivation ?? false,
+      })
+    }
+    // Load replicationConfig from imported JSON if present
+    if (initialJson?.replicationConfig && typeof initialJson.replicationConfig === 'object') {
+      const cfg = initialJson.replicationConfig
+      setReplicationConfig({
+        factor: cfg.factor ?? 1,
+        asyncEnabled: cfg.asyncEnabled ?? false,
+        deletionStrategy: cfg.deletionStrategy ?? 'NoAutomatedResolution',
       })
     }
     // Fill vectorConfigs from the imported JSON
@@ -337,6 +354,37 @@ export default function Collection({ initialJson = null, availableModules = null
       return { ...prev, multiTenancyConfig: multiTenancyJson };
     });
   }, [multiTenancyConfig]);
+
+  // Update JSON with replication configuration
+  useEffect(() => {
+    const defaults = {
+      factor: 1,
+      asyncEnabled: false,
+      deletionStrategy: 'NoAutomatedResolution',
+    };
+
+    const replicationJson = {};
+    
+    // Only include non-default values
+    if (replicationConfig.factor !== defaults.factor) {
+      replicationJson.factor = replicationConfig.factor;
+    }
+    if (replicationConfig.asyncEnabled !== defaults.asyncEnabled) {
+      replicationJson.asyncEnabled = replicationConfig.asyncEnabled;
+    }
+    if (replicationConfig.deletionStrategy !== defaults.deletionStrategy) {
+      replicationJson.deletionStrategy = replicationConfig.deletionStrategy;
+    }
+
+    setGeneratedJson((prev) => {
+      // Remove replicationConfig if all values are defaults
+      if (Object.keys(replicationJson).length === 0) {
+        const { replicationConfig, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, replicationConfig: replicationJson };
+    });
+  }, [replicationConfig]);
 
   // properties state managed here and merged into generated JSON
   const [properties, setProperties] = useState([])
@@ -784,6 +832,28 @@ export default function Collection({ initialJson = null, availableModules = null
         {openMultiTenancyConfig && (
           <div className="collapsible-panel">
             <MultiTenancyConfigSection config={multiTenancyConfig} setConfig={setMultiTenancyConfig} />
+          </div>
+        )}
+      </div>
+
+      {/* Replication Config collapsible section */}
+      <div className="collapsible" style={{ marginTop: 12 }}>
+        <button
+          className="collapsible-toggle"
+          aria-expanded={openReplicationConfig}
+          onClick={() => setOpenReplicationConfig((s) => !s)}
+        >
+          <span>Replication Configuration</span>
+          <span className="chev">{openReplicationConfig ? '\u25be' : '\u25b8'}</span>
+        </button>
+
+        {openReplicationConfig && (
+          <div className="collapsible-panel">
+            <ReplicationConfigSection 
+              config={replicationConfig} 
+              setConfig={setReplicationConfig}
+              nodesNumber={nodesNumber}
+            />
           </div>
         )}
       </div>
