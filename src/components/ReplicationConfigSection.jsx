@@ -38,19 +38,17 @@ const ReplicationConfigSection = ({ config, setConfig, nodesNumber = null }) => 
           onChange={e => update('asyncEnabled', e.target.checked)} 
         />
       </div>
-      {config.asyncEnabled && (
-        <div className="field">
-          <label>Deletion Strategy:</label>
-          <select 
-            value={config.deletionStrategy} 
-            onChange={e => update('deletionStrategy', e.target.value)}
-          >
-            <option value="NoAutomatedResolution">NoAutomatedResolution</option>
-            <option value="DeleteOnConflict">DeleteOnConflict</option>
-            <option value="TimeBasedResolution">TimeBasedResolution</option>
-          </select>
-        </div>
-      )}
+      <div className="field">
+        <label>Deletion Strategy:</label>
+        <select 
+          value={config.deletionStrategy} 
+          onChange={e => update('deletionStrategy', e.target.value)}
+        >
+          <option value="NoAutomatedResolution">NoAutomatedResolution</option>
+          <option value="DeleteOnConflict">DeleteOnConflict</option>
+          <option value="TimeBasedResolution">TimeBasedResolution</option>
+        </select>
+      </div>
     </div>
   );
 };

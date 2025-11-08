@@ -213,19 +213,7 @@ describe('Collection Component - Replication Configuration', () => {
       expect(jsonBlock).toBeTruthy()
     })
 
-    // First, enable async to make the deletion strategy field visible
-    const label = screen.getByText('Async Enabled:')
-    const asyncCheckbox = label.parentElement.querySelector('input[type="checkbox"]')
-    expect(asyncCheckbox).toBeTruthy()
-    await user.click(asyncCheckbox)
-
-    // Wait for the deletion strategy field to appear
-    await waitFor(() => {
-      const strategyLabel = screen.queryByText('Deletion Strategy:')
-      expect(strategyLabel).toBeTruthy()
-    })
-
-    // Find the deletion strategy select by label
+    // Find the deletion strategy select by label (now always visible)
     const strategyLabel = screen.getByText('Deletion Strategy:')
     const strategySelect = strategyLabel.parentElement.querySelector('select')
     expect(strategySelect).toBeTruthy()
@@ -240,7 +228,6 @@ describe('Collection Component - Replication Configuration', () => {
       const generatedJson = JSON.parse(jsonBlock.textContent)
       expect(generatedJson.replicationConfig).toBeDefined()
       expect(generatedJson.replicationConfig.deletionStrategy).toBe('DeleteOnConflict')
-      expect(generatedJson.replicationConfig.asyncEnabled).toBe(true)
     })
   })
 
