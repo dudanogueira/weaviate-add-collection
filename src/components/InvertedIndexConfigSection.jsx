@@ -61,7 +61,12 @@ function TagInput({ tags, setTags, label }) {
           type="text"
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' ? addTag() : null}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              addTag();
+            }
+          }}
           placeholder="Add tag"
           style={{ flex: 1, padding: '4px 8px', borderRadius: '8px', border: '1px solid #b6c2d6' }}
         />
