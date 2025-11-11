@@ -1,0 +1,28 @@
+{
+  "class": "TestFlatRQ",
+  "description": "Testing RQ with Flat index",
+  "vectorConfig": {
+    "default": {
+      "vectorizer": {
+        "text2vec-openai": {
+          "model": "text-embedding-ada-002"
+        }
+      },
+      "vectorIndexType": "flat",
+      "vectorIndexConfig": {
+        "rq": {
+          "bits": 8,
+          "rescoreLimit": 20,
+          "enabled": true
+        }
+      }
+    }
+  },
+  "properties": [
+    {
+      "name": "text",
+      "dataType": ["text"],
+      "description": "Text content"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "class": "TestRQ1Bit",
+  "description": "Testing Rotational Quantization with 1 bit",
+  "vectorConfig": {
+    "default": {
+      "vectorizer": {
+        "text2vec-openai": {
+          "model": "text-embedding-ada-002"
+        }
+      },
+      "vectorIndexType": "hnsw",
+      "vectorIndexConfig": {
+        "rq": {
+          "bits": 1,
+          "rescoreLimit": 20,
+          "enabled": true
+        }
+      }
+    }
+  },
+  "properties": [
+    {
+      "name": "text",
+      "dataType": ["text"],
+      "description": "Text content"
+    }
+  ]
+}

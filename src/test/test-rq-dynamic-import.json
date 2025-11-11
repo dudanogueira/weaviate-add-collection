@@ -1,0 +1,34 @@
+{
+  "class": "TestDynamicRQ",
+  "description": "Testing RQ with dynamic index",
+  "vectorConfig": {
+    "default": {
+      "vectorizer": {
+        "text2vec-openai": {}
+      },
+      "vectorIndexType": "dynamic",
+      "vectorIndexConfig": {
+        "threshold": 10000,
+        "hnsw": {
+          "efConstruction": 128,
+          "ef": -1,
+          "maxConnections": 32,
+          "rq": {
+            "bits": 8,
+            "rescoreLimit": 20,
+            "enabled": true
+          }
+        },
+        "flat": {
+          "distanceMetric": "cosine"
+        }
+      }
+    }
+  },
+  "properties": [
+    {
+      "name": "text",
+      "dataType": ["text"]
+    }
+  ]
+}

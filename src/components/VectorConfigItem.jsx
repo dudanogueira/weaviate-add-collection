@@ -481,22 +481,27 @@ export default function VectorConfigItem({
                       <small className="hint">Distance metric for vector comparison</small>
                     </div>
 
-                    {/* Flat Quantization - Only BQ available */}
+                    {/* Flat Quantization - BQ and RQ available */}
                     <div className="field" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
                       <label htmlFor={`flat-quantizer-${index}`}>Quantization Type</label>
                       <select
                         id={`flat-quantizer-${index}`}
-                        value={value.indexConfig?.bq ? 'bq' : 'none'}
+                        value={
+                          value.indexConfig?.bq ? 'bq' :
+                          value.indexConfig?.rq ? 'rq' :
+                          'none'
+                        }
                         onChange={(e) => {
                           const newType = e.target.value
                           const newIndexConfig = { ...value.indexConfig }
                           
-                          // Remove BQ config
+                          // Remove all quantizer configs
                           delete newIndexConfig.bq
+                          delete newIndexConfig.rq
                           
-                          // Add BQ config with enabled: true if selected
-                          if (newType === 'bq') {
-                            newIndexConfig.bq = { enabled: true }
+                          // Add quantizer config with enabled: true if not 'none'
+                          if (newType !== 'none') {
+                            newIndexConfig[newType] = { enabled: true }
                           }
                           
                           update('indexConfig', newIndexConfig)
@@ -504,17 +509,10 @@ export default function VectorConfigItem({
                       >
                         <option value="none">None</option>
                         <option value="bq">Binary Quantization (BQ)</option>
+                        <option value="rq">Rotational Quantization (RQ)</option>
                       </select>
                       <small className="hint">
-                        For flat indexes, only binary quantization is available. This can speed up search performance significantly.
-                        {' '}
-                        <a 
-                          href="https://docs.weaviate.io/weaviate/starter-guides/managing-resources/compression#compression-considerations" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                        >
-                          Learn more ↗
-                        </a>
+                        Compression method to reduce memory usage for Flat index
                       </small>
                     </div>
 
@@ -569,6 +567,59 @@ export default function VectorConfigItem({
                             Enabled
                           </label>
                           <small className="hint">Enable Binary Quantization (default: true)</small>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* RQ Configuration for Flat (regular, non-dynamic) */}
+                    {value.indexConfig?.rq && (
+                      <div style={{ marginTop: '12px', padding: '12px', borderRadius: '4px' }} className="quantization-config">
+                        <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 500 }}>RQ Settings</h6>
+                        
+                        <div className="field">
+                          <label>Bits</label>
+                          <select
+                            value={value.indexConfig?.rq?.bits || 8}
+                            onChange={(e) => update('indexConfig', { 
+                              ...value.indexConfig, 
+                              rq: { ...(value.indexConfig?.rq || {}), bits: parseInt(e.target.value) }
+                            })}
+                          >
+                            <option value="1">1</option>
+                            <option value="8">8</option>
+                          </select>
+                          <small className="hint">Number of bits for quantization (default: 8)</small>
+                        </div>
+
+                        <div className="field">
+                          <label>Rescore Limit</label>
+                          <input
+                            type="number"
+                            value={value.indexConfig?.rq?.rescoreLimit || 20}
+                            onChange={(e) => update('indexConfig', { 
+                              ...value.indexConfig, 
+                              rq: { ...(value.indexConfig?.rq || {}), rescoreLimit: parseInt(e.target.value) || 20 }
+                            })}
+                            placeholder="20"
+                          />
+                          <small className="hint">Number of candidates to rescore (default: 20)</small>
+                        </div>
+
+                        <div className="field">
+                          <label htmlFor={`flat-rq-enabled-regular-${index}`}>
+                            <input
+                              id={`flat-rq-enabled-regular-${index}`}
+                              type="checkbox"
+                              checked={value.indexConfig?.rq?.enabled !== false}
+                              onChange={(e) => update('indexConfig', { 
+                                ...value.indexConfig, 
+                                rq: { ...(value.indexConfig?.rq || {}), enabled: e.target.checked }
+                              })}
+                              style={{ width: 'auto', marginRight: '8px' }}
+                            />
+                            Enabled
+                          </label>
+                          <small className="hint">Enable Rotational Quantization (default: true)</small>
                         </div>
                       </div>
                     )}
@@ -821,6 +872,7 @@ export default function VectorConfigItem({
                                   delete newHnswConfig.pq
                                   delete newHnswConfig.bq
                                   delete newHnswConfig.sq
+                                  delete newHnswConfig.rq
                                   
                                   // Set quantizer type
                                   newHnswConfig.quantizer = newType
@@ -840,6 +892,7 @@ export default function VectorConfigItem({
                                 <option value="pq">Product Quantization (PQ)</option>
                                 <option value="bq">Binary Quantization (BQ)</option>
                                 <option value="sq">Scalar Quantization (SQ)</option>
+                                <option value="rq">Rotational Quantization (RQ)</option>
                               </select>
                               <small className="hint">Compression method to reduce memory usage for HNSW index</small>
                             </div>
@@ -1088,6 +1141,68 @@ export default function VectorConfigItem({
                                 </div>
                               </div>
                             )}
+
+                            {/* RQ Configuration for HNSW */}
+                            {value.indexConfig?.hnsw?.quantizer === 'rq' && (
+                              <div style={{ marginTop: '12px', padding: '12px', borderRadius: '4px' }} className="quantization-config">
+                                <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 500 }}>RQ Settings</h6>
+                                
+                                <div className="field">
+                                  <label>Bits</label>
+                                  <select
+                                    value={value.indexConfig?.hnsw?.rq?.bits || 8}
+                                    onChange={(e) => update('indexConfig', { 
+                                      ...value.indexConfig, 
+                                      hnsw: { 
+                                        ...(value.indexConfig?.hnsw || {}), 
+                                        rq: { ...(value.indexConfig?.hnsw?.rq || {}), bits: parseInt(e.target.value) }
+                                      }
+                                    })}
+                                  >
+                                    <option value="1">1</option>
+                                    <option value="8">8</option>
+                                  </select>
+                                  <small className="hint">Number of bits for quantization (default: 8)</small>
+                                </div>
+
+                                <div className="field">
+                                  <label>Rescore Limit</label>
+                                  <input
+                                    type="number"
+                                    value={value.indexConfig?.hnsw?.rq?.rescoreLimit || 20}
+                                    onChange={(e) => update('indexConfig', { 
+                                      ...value.indexConfig, 
+                                      hnsw: { 
+                                        ...(value.indexConfig?.hnsw || {}), 
+                                        rq: { ...(value.indexConfig?.hnsw?.rq || {}), rescoreLimit: parseInt(e.target.value) || 20 }
+                                      }
+                                    })}
+                                    placeholder="20"
+                                  />
+                                  <small className="hint">Number of candidates to rescore (default: 20)</small>
+                                </div>
+
+                                <div className="field">
+                                  <label htmlFor={`hnsw-rq-enabled-${index}`}>
+                                    <input
+                                      id={`hnsw-rq-enabled-${index}`}
+                                      type="checkbox"
+                                      checked={value.indexConfig?.hnsw?.rq?.enabled !== false}
+                                      onChange={(e) => update('indexConfig', { 
+                                        ...value.indexConfig, 
+                                        hnsw: { 
+                                          ...(value.indexConfig?.hnsw || {}), 
+                                          rq: { ...(value.indexConfig?.hnsw?.rq || {}), enabled: e.target.checked }
+                                        }
+                                      })}
+                                      style={{ width: 'auto', marginRight: '8px' }}
+                                    />
+                                    Enabled
+                                  </label>
+                                  <small className="hint">Enable Rotational Quantization (default: true)</small>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -1128,7 +1243,7 @@ export default function VectorConfigItem({
                               <small className="hint">Maximum objects in vector cache (default: 1000000000000)</small>
                             </div>
 
-                            {/* Flat Quantization - Only BQ available */}
+                            {/* Flat Quantization - BQ and RQ available */}
                             <div className="field" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
                               <label htmlFor={`dynamic-flat-quantizer-${index}`}>Quantization Type</label>
                               <select
@@ -1140,6 +1255,7 @@ export default function VectorConfigItem({
                                   
                                   // Remove all quantizer configs
                                   delete newFlatConfig.bq
+                                  delete newFlatConfig.rq
                                   
                                   // Set quantizer type
                                   newFlatConfig.quantizer = newType
@@ -1157,17 +1273,10 @@ export default function VectorConfigItem({
                               >
                                 <option value="none">None</option>
                                 <option value="bq">Binary Quantization (BQ)</option>
+                                <option value="rq">Rotational Quantization (RQ)</option>
                               </select>
                               <small className="hint">
-                                For flat indexes, only binary quantization is available. This can speed up search performance significantly.
-                                {' '}
-                                <a 
-                                  href="https://docs.weaviate.io/weaviate/starter-guides/managing-resources/compression#compression-considerations" 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                >
-                                  Learn more ↗
-                                </a>
+                                Compression method to reduce memory usage for Flat index
                               </small>
                             </div>
 
@@ -1234,6 +1343,68 @@ export default function VectorConfigItem({
                                 </div>
                               </div>
                             )}
+
+                            {/* RQ Configuration for Flat */}
+                            {value.indexConfig?.flat?.quantizer === 'rq' && (
+                              <div style={{ marginTop: '12px', padding: '12px', borderRadius: '4px' }} className="quantization-config">
+                                <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 500 }}>RQ Settings</h6>
+                                
+                                <div className="field">
+                                  <label>Bits</label>
+                                  <select
+                                    value={value.indexConfig?.flat?.rq?.bits || 8}
+                                    onChange={(e) => update('indexConfig', { 
+                                      ...value.indexConfig, 
+                                      flat: { 
+                                        ...(value.indexConfig?.flat || {}), 
+                                        rq: { ...(value.indexConfig?.flat?.rq || {}), bits: parseInt(e.target.value) }
+                                      }
+                                    })}
+                                  >
+                                    <option value="1">1</option>
+                                    <option value="8">8</option>
+                                  </select>
+                                  <small className="hint">Number of bits for quantization (default: 8)</small>
+                                </div>
+
+                                <div className="field">
+                                  <label>Rescore Limit</label>
+                                  <input
+                                    type="number"
+                                    value={value.indexConfig?.flat?.rq?.rescoreLimit || 20}
+                                    onChange={(e) => update('indexConfig', { 
+                                      ...value.indexConfig, 
+                                      flat: { 
+                                        ...(value.indexConfig?.flat || {}), 
+                                        rq: { ...(value.indexConfig?.flat?.rq || {}), rescoreLimit: parseInt(e.target.value) || 20 }
+                                      }
+                                    })}
+                                    placeholder="20"
+                                  />
+                                  <small className="hint">Number of candidates to rescore (default: 20)</small>
+                                </div>
+
+                                <div className="field">
+                                  <label htmlFor={`flat-rq-enabled-${index}`}>
+                                    <input
+                                      id={`flat-rq-enabled-${index}`}
+                                      type="checkbox"
+                                      checked={value.indexConfig?.flat?.rq?.enabled !== false}
+                                      onChange={(e) => update('indexConfig', { 
+                                        ...value.indexConfig, 
+                                        flat: { 
+                                          ...(value.indexConfig?.flat || {}), 
+                                          rq: { ...(value.indexConfig?.flat?.rq || {}), enabled: e.target.checked }
+                                        }
+                                      })}
+                                      style={{ width: 'auto', marginRight: '8px' }}
+                                    />
+                                    Enabled
+                                  </label>
+                                  <small className="hint">Enable Rotational Quantization (default: true)</small>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1254,6 +1425,7 @@ export default function VectorConfigItem({
                       value.indexConfig?.pq ? 'pq' :
                       value.indexConfig?.bq ? 'bq' :
                       value.indexConfig?.sq ? 'sq' :
+                      value.indexConfig?.rq ? 'rq' :
                       'none'
                     }
                     onChange={(e) => {
@@ -1264,6 +1436,7 @@ export default function VectorConfigItem({
                       delete newIndexConfig.pq
                       delete newIndexConfig.bq
                       delete newIndexConfig.sq
+                      delete newIndexConfig.rq
                       
                       // Add the new quantizer config if not 'none'
                       if (newType !== 'none') {
@@ -1277,6 +1450,7 @@ export default function VectorConfigItem({
                     <option value="pq">Product Quantization (PQ)</option>
                     <option value="bq">Binary Quantization (BQ)</option>
                     <option value="sq">Scalar Quantization (SQ)</option>
+                    <option value="rq">Rotational Quantization (RQ)</option>
                   </select>
                   <small className="hint">Compression method to reduce memory usage</small>
                 </div>
@@ -1509,7 +1683,85 @@ export default function VectorConfigItem({
                   </div>
                 )}
 
-                {!value.indexConfig?.pq && !value.indexConfig?.bq && !value.indexConfig?.sq && (
+                {/* Rotational Quantization Configuration */}
+                {value.indexConfig?.rq && (
+                  <div style={{ marginTop: '16px' }}>
+                    <h5 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 600 }}>Rotational Quantization Settings</h5>
+                    
+                    <div className="field">
+                      <label>Bits</label>
+                      <select
+                        value={value.indexConfig?.rq?.bits || 8}
+                        onChange={(e) => update('indexConfig', { 
+                          ...value.indexConfig, 
+                          rq: { ...(value.indexConfig?.rq || {}), bits: parseInt(e.target.value) }
+                        })}
+                      >
+                        <option value="1">1</option>
+                        <option value="8">8</option>
+                      </select>
+                      <small className="hint">Number of bits for quantization (default: 8)</small>
+                    </div>
+
+                    <div className="field">
+                      <label htmlFor={`rq-rescore-limit-${index}`}>
+                        <input
+                          id={`rq-rescore-limit-${index}`}
+                          type="checkbox"
+                          checked={value.indexConfig?.rq?.rescoreLimit !== undefined}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              update('indexConfig', { 
+                                ...value.indexConfig, 
+                                rq: { ...(value.indexConfig?.rq || {}), rescoreLimit: 20 }
+                              })
+                            } else {
+                              const { rescoreLimit, ...rest } = value.indexConfig?.rq || {}
+                              update('indexConfig', { 
+                                ...value.indexConfig, 
+                                rq: rest
+                              })
+                            }
+                          }}
+                          style={{ width: 'auto', marginRight: '8px' }}
+                        />
+                        Set Rescore Limit
+                      </label>
+                      {value.indexConfig?.rq?.rescoreLimit !== undefined && (
+                        <input
+                          type="number"
+                          value={value.indexConfig?.rq?.rescoreLimit || 20}
+                          onChange={(e) => update('indexConfig', { 
+                            ...value.indexConfig, 
+                            rq: { ...(value.indexConfig?.rq || {}), rescoreLimit: parseInt(e.target.value) || 20 }
+                          })}
+                          placeholder="20"
+                          style={{ marginTop: '8px' }}
+                        />
+                      )}
+                      <small className="hint">Number of candidates to rescore (default: 20)</small>
+                    </div>
+
+                    <div className="field">
+                      <label htmlFor={`rq-enabled-${index}`}>
+                        <input
+                          id={`rq-enabled-${index}`}
+                          type="checkbox"
+                          checked={value.indexConfig?.rq?.enabled !== false}
+                          onChange={(e) => update('indexConfig', { 
+                            ...value.indexConfig, 
+                            rq: { ...(value.indexConfig?.rq || {}), enabled: e.target.checked }
+                          })}
+                          style={{ width: 'auto', marginRight: '8px' }}
+                        />
+                        Enabled
+                      </label>
+                      <small className="hint">Enable Rotational Quantization (default: true)</small>
+                    </div>
+                  </div>
+                )}
+
+                {!value.indexConfig?.pq && !value.indexConfig?.bq && !value.indexConfig?.sq && !value.indexConfig?.rq && (
                   <div style={{ marginTop: '16px', padding: '16px', background: '#f9fafb', borderRadius: '6px' }}>
                     <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
                       No compression is applied. Vectors are stored in full precision.

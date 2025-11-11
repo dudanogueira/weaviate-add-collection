@@ -142,7 +142,7 @@ export default function Collection({ initialJson = null, availableModules = null
           // Process HNSW quantizer
           if (indexConfig.hnsw) {
             const hnswConfig = { ...indexConfig.hnsw }
-            // Check for PQ, BQ, or SQ configuration and extract quantizer
+            // Check for PQ, BQ, SQ, or RQ configuration and extract quantizer
             if (indexConfig.hnsw.pq) {
               hnswConfig.quantizer = 'pq'
               hnswConfig.pq = indexConfig.hnsw.pq
@@ -152,18 +152,24 @@ export default function Collection({ initialJson = null, availableModules = null
             } else if (indexConfig.hnsw.sq) {
               hnswConfig.quantizer = 'sq'
               hnswConfig.sq = indexConfig.hnsw.sq
+            } else if (indexConfig.hnsw.rq) {
+              hnswConfig.quantizer = 'rq'
+              hnswConfig.rq = indexConfig.hnsw.rq
             } else {
               hnswConfig.quantizer = 'none'
             }
             processedIndexConfig.hnsw = hnswConfig
           }
           
-          // Process Flat quantizer (only BQ supported)
+          // Process Flat quantizer (BQ and RQ supported)
           if (indexConfig.flat) {
             const flatConfig = { ...indexConfig.flat }
             if (indexConfig.flat.bq) {
               flatConfig.quantizer = 'bq'
               flatConfig.bq = indexConfig.flat.bq
+            } else if (indexConfig.flat.rq) {
+              flatConfig.quantizer = 'rq'
+              flatConfig.rq = indexConfig.flat.rq
             } else {
               flatConfig.quantizer = 'none'
             }
@@ -237,6 +243,9 @@ export default function Collection({ initialJson = null, availableModules = null
             } else if (indexConfig.hnsw.sq) {
               hnswConfig.quantizer = 'sq'
               hnswConfig.sq = indexConfig.hnsw.sq
+            } else if (indexConfig.hnsw.rq) {
+              hnswConfig.quantizer = 'rq'
+              hnswConfig.rq = indexConfig.hnsw.rq
             } else {
               hnswConfig.quantizer = 'none'
             }
@@ -248,6 +257,9 @@ export default function Collection({ initialJson = null, availableModules = null
             if (indexConfig.flat.bq) {
               flatConfig.quantizer = 'bq'
               flatConfig.bq = indexConfig.flat.bq
+            } else if (indexConfig.flat.rq) {
+              flatConfig.quantizer = 'rq'
+              flatConfig.rq = indexConfig.flat.rq
             } else {
               flatConfig.quantizer = 'none'
             }

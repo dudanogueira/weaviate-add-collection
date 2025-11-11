@@ -1,0 +1,33 @@
+{
+  "class": "TestRQCollection",
+  "description": "Testing Rotational Quantization (RQ) import",
+  "vectorConfig": {
+    "default": {
+      "vectorizer": {
+        "text2vec-openai": {
+          "model": "text-embedding-ada-002"
+        }
+      },
+      "vectorIndexType": "hnsw",
+      "vectorIndexConfig": {
+        "rq": {
+          "bits": 8,
+          "rescoreLimit": 20,
+          "enabled": true
+        }
+      }
+    }
+  },
+  "properties": [
+    {
+      "name": "title",
+      "dataType": ["text"],
+      "description": "Title of the document"
+    },
+    {
+      "name": "content",
+      "dataType": ["text"],
+      "description": "Content of the document"
+    }
+  ]
+}
