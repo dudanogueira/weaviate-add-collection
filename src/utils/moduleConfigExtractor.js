@@ -275,12 +275,109 @@ const VECTORIZER_CONFIG_FIELDS = {
 }
 
 /**
+ * Type definitions for generative modules
+ * These are used for RAG (Retrieval-Augmented Generation) capabilities
+ */
+const GENERATIVE_CONFIG_FIELDS = {
+  'generative-openai': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The OpenAI model to use (e.g., gpt-4, gpt-3.5-turbo).' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for OpenAI API.' },
+      { name: 'temperatureProperty', type: 'string', description: 'The property name for temperature parameter.' },
+      { name: 'maxTokensProperty', type: 'string', description: 'The property name for max tokens parameter.' },
+      { name: 'frequencyPenaltyProperty', type: 'string', description: 'The property name for frequency penalty parameter.' },
+      { name: 'presencePenaltyProperty', type: 'string', description: 'The property name for presence penalty parameter.' },
+      { name: 'topPProperty', type: 'string', description: 'The property name for top_p parameter.' }
+    ]
+  },
+  'generative-anthropic': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The Anthropic model to use (e.g., claude-3-opus, claude-3-sonnet).' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for Anthropic API.' },
+      { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' },
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation (0-1).' },
+      { name: 'topK', type: 'number', description: 'Top-k sampling parameter.' },
+      { name: 'topP', type: 'number', description: 'Top-p sampling parameter.' },
+      { name: 'stopSequences', type: 'string[]', description: 'Stop sequences for generation.' }
+    ]
+  },
+  'generative-cohere': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The Cohere model to use.' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for Cohere API.' },
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation (0-5).' },
+      { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' },
+      { name: 'k', type: 'number', description: 'Top-k sampling parameter.' },
+      { name: 'p', type: 'number', description: 'Top-p sampling parameter.' },
+      { name: 'frequencyPenalty', type: 'number', description: 'Frequency penalty parameter.' },
+      { name: 'presencePenalty', type: 'number', description: 'Presence penalty parameter.' }
+    ]
+  },
+  'generative-aws': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The AWS Bedrock model to use.' },
+      { name: 'region', type: 'string', description: 'The AWS region where the model runs.' },
+      { name: 'service', type: 'string', description: 'The AWS service to use (bedrock).' },
+      { name: 'endpoint', type: 'string', description: 'The endpoint URL for the service.' },
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation.' },
+      { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' }
+    ]
+  },
+  'generative-google': {
+    fields: [
+      { name: 'projectId', type: 'string', required: true, description: 'The GCP project ID.' },
+      { name: 'model', type: 'string', description: 'The Google model to use (e.g., gemini-pro).' },
+      { name: 'location', type: 'string', description: 'The location where the model runs.' },
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation (0-1).' },
+      { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' },
+      { name: 'topK', type: 'number', description: 'Top-k sampling parameter.' },
+      { name: 'topP', type: 'number', description: 'Top-p sampling parameter.' }
+    ]
+  },
+  'generative-mistral': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The Mistral model to use.' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for Mistral API.' },
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation (0-1).' },
+      { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' },
+      { name: 'topP', type: 'number', description: 'Top-p sampling parameter.' }
+    ]
+  },
+  'generative-ollama': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The Ollama model to use.' },
+      { name: 'apiEndpoint', type: 'string', description: 'The Ollama API endpoint.' },
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation.' }
+    ]
+  }
+}
+
+/**
  * Get configuration fields for a specific vectorizer module
  * @param {string} moduleName - The name of the vectorizer module
  * @returns {Array} Array of field definitions
  */
 export function getModuleConfigFields(moduleName) {
   return VECTORIZER_CONFIG_FIELDS[moduleName]?.fields || []
+}
+
+/**
+ * Get configuration fields for a specific generative module
+ * @param {string} moduleName - The name of the generative module
+ * @returns {Array} Array of field definitions
+ */
+export function getGenerativeConfigFields(moduleName) {
+  return GENERATIVE_CONFIG_FIELDS[moduleName]?.fields || []
+}
+
+/**
+ * Check if a generative module has configuration options
+ * @param {string} moduleName - The name of the generative module
+ * @returns {boolean} True if the module has config options
+ */
+export function hasGenerativeConfigOptions(moduleName) {
+  const fields = getGenerativeConfigFields(moduleName)
+  return fields && fields.length > 0
 }
 
 /**

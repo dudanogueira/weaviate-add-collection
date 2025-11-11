@@ -4,6 +4,7 @@ import VectorConfigSection from './VectorConfigSection'
 import InvertedIndexConfigSection from './InvertedIndexConfigSection'
 import MultiTenancyConfigSection from './MultiTenancyConfigSection'
 import ReplicationConfigSection from './ReplicationConfigSection'
+import GenerativeConfigSection from './GenerativeConfigSection'
 
 // Contract:
 // Inputs: optional `initialJson` object with { name, description }
@@ -40,12 +41,18 @@ export default function Collection({ initialJson = null, availableModules = null
     asyncEnabled: false,
     deletionStrategy: 'NoAutomatedResolution',
   })
+  const [generativeConfig, setGenerativeConfig] = useState({
+    enabled: false,
+    module: '',
+    moduleConfig: {},
+  })
   const [openBasic, setOpenBasic] = useState(true)
   const [openProperties, setOpenProperties] = useState(true)
   const [openVectorConfig, setOpenVectorConfig] = useState(true)
   const [openInvertedIndexConfig, setOpenInvertedIndexConfig] = useState(true)
   const [openMultiTenancyConfig, setOpenMultiTenancyConfig] = useState(true)
   const [openReplicationConfig, setOpenReplicationConfig] = useState(true)
+  const [openGenerativeConfig, setOpenGenerativeConfig] = useState(false)
 
   useEffect(() => {
     // Handle both 'name' and 'class' fields for backwards compatibility
@@ -122,6 +129,19 @@ export default function Collection({ initialJson = null, availableModules = null
         asyncEnabled: cfg.asyncEnabled ?? false,
         deletionStrategy: cfg.deletionStrategy ?? 'NoAutomatedResolution',
       })
+    }
+    // Load generativeConfig from imported JSON if present
+    if (initialJson?.generative && typeof initialJson.generative === 'object') {
+      const gen = initialJson.generative
+      // Extract the module name (first key in generative object, excluding 'generative' itself)
+      const moduleKey = Object.keys(gen).find(key => key.startsWith('generative-'))
+      if (moduleKey) {
+        setGenerativeConfig({
+          enabled: true,
+          module: moduleKey,
+          moduleConfig: gen[moduleKey] || {},
+        })
+      }
     }
     // Fill vectorConfigs from the imported JSON
     // Support both legacy object map (vectorConfig) and Weaviate v4 array (vectorizers)
@@ -394,6 +414,40 @@ export default function Collection({ initialJson = null, availableModules = null
       return { ...prev, replicationConfig: replicationJson };
     });
   }, [replicationConfig]);
+
+  // Update JSON with generative configuration
+  useEffect(() => {
+    if (!generativeConfig.enabled || !generativeConfig.module) {
+      // Remove generative config if disabled or no module selected
+      setGeneratedJson((prev) => {
+        const { generative, ...rest } = prev;
+        return rest;
+      });
+      return;
+    }
+
+    const generativeJson = {};
+    const moduleConfig = generativeConfig.moduleConfig || {};
+    
+    // Only include non-empty config values
+    const cleanConfig = {};
+    Object.keys(moduleConfig).forEach((key) => {
+      const value = moduleConfig[key];
+      if (value !== null && value !== '' && value !== undefined) {
+        // Don't include empty arrays
+        if (Array.isArray(value) && value.length === 0) {
+          return;
+        }
+        cleanConfig[key] = value;
+      }
+    });
+
+    generativeJson[generativeConfig.module] = Object.keys(cleanConfig).length > 0 ? cleanConfig : {};
+
+    setGeneratedJson((prev) => {
+      return { ...prev, generative: generativeJson };
+    });
+  }, [generativeConfig]);
 
   // properties state managed here and merged into generated JSON
   const [properties, setProperties] = useState([])
@@ -862,6 +916,27 @@ export default function Collection({ initialJson = null, availableModules = null
               config={replicationConfig} 
               setConfig={setReplicationConfig}
               nodesNumber={nodesNumber}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Generative Config collapsible section */}
+      <div className="collapsible" style={{ marginTop: 12 }}>
+        <button
+          className="collapsible-toggle"
+          aria-expanded={openGenerativeConfig}
+          onClick={() => setOpenGenerativeConfig((s) => !s)}
+        >
+          <span>Generative Configuration</span>
+          <span className="chev">{openGenerativeConfig ? '\u25be' : '\u25b8'}</span>
+        </button>
+
+        {openGenerativeConfig && (
+          <div className="collapsible-panel">
+            <GenerativeConfigSection 
+              config={generativeConfig} 
+              setConfig={setGenerativeConfig}
             />
           </div>
         )}
