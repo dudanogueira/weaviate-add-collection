@@ -10,9 +10,17 @@ import GenerativeConfigSection from './GenerativeConfigSection'
 // Inputs: optional `initialJson` object with { name, description }
 //         optional `availableModules` object with available vectorizer modules
 //         optional `nodesNumber` number representing the number of nodes (used as max for replication factor)
-// Outputs: none for now; component displays generated JSON and allows editing fields.
+//         optional `onChange` callback function called whenever the schema changes with the current JSON schema
+//         optional `onSubmit` callback function that can be called to submit the final schema
+// Outputs: Programmatic access to schema via onChange/onSubmit callbacks instead of DOM scraping.
 
-export default function Collection({ initialJson = null, availableModules = null, nodesNumber = null }) {
+export default function Collection({ 
+  initialJson = null, 
+  availableModules = null, 
+  nodesNumber = null,
+  onChange = null,
+  onSubmit = null 
+}) {
   const [name, setName] = useState(
     initialJson ? (initialJson.name ?? initialJson.class ?? '') : ''
   )
@@ -310,6 +318,14 @@ export default function Collection({ initialJson = null, availableModules = null
       setVectorConfigs(configs)
     }
   }, [initialJson])
+
+  // Call onChange callback whenever generatedJson changes
+  useEffect(() => {
+    if (onChange && typeof onChange === 'function') {
+      onChange(generatedJson)
+    }
+  }, [generatedJson, onChange])
+
 
   useEffect(() => {
     // If name/description are empty strings and no initialJson, use defaults
@@ -953,6 +969,24 @@ export default function Collection({ initialJson = null, availableModules = null
             Download
           </button>
         </div>
+        {onSubmit && typeof onSubmit === 'function' && (
+          <button 
+            className="submit-btn" 
+            onClick={() => onSubmit(generatedJson)}
+            style={{ 
+              marginTop: '16px', 
+              padding: '10px 20px', 
+              fontSize: '16px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Create Collection
+          </button>
+        )}
       </div>
     </div>
   )

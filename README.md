@@ -2,6 +2,8 @@
 
 A minimal React app (Vite) with a Collection component to compose a Weaviate collection JSON.
 
+**✨ New Feature**: Programmatic schema access via `onChange` and `onSubmit` callbacks - no more DOM scraping needed!
+
 ## Quick Start (macOS, zsh)
 
 ```bash
@@ -51,6 +53,54 @@ The `Collection` component accepts the following props:
 - **`initialJson`** (optional): JSON object to prepopulate the form with `name` and `description`
 - **`availableModules`** (optional): Object containing available vectorizer modules from the server. If not provided, all default modules are available.
 - **`nodesNumber`** (optional): Number representing the number of nodes (used as max for replication factor)
+- **`onChange`** (optional): Callback function `(schema: object) => void` called whenever the schema changes. Provides programmatic access to the current JSON schema without DOM scraping.
+- **`onSubmit`** (optional): Callback function `(schema: object) => void` called when the "Create Collection" button is clicked. If provided, a submit button will be displayed below the JSON preview.
+
+### Programmatic Schema Access
+
+Instead of scraping the DOM to get the generated schema, you can use the callback props:
+
+```jsx
+import React from 'react';
+import Collection from 'weaviate-add-collection';
+
+function App() {
+  const handleSchemaChange = (schema) => {
+    console.log('Schema updated:', schema);
+    // Do something with the schema as it changes
+  };
+
+  const handleSubmit = async (schema) => {
+    console.log('Creating collection with schema:', schema);
+    // Send the schema to your Weaviate instance
+    try {
+      const response = await fetch('http://localhost:8080/v1/schema', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(schema)
+      });
+      if (response.ok) {
+        alert('Collection created successfully!');
+      }
+    } catch (error) {
+      console.error('Failed to create collection:', error);
+    }
+  };
+
+  return (
+    <div>
+      <h1>My Weaviate Collection Builder</h1>
+      <Collection 
+        initialJson={{ name: 'MyCollection', description: 'A sample collection' }}
+        availableModules={serverModules}
+        nodesNumber={3}
+        onChange={handleSchemaChange}
+        onSubmit={handleSubmit}
+      />
+    </div>
+  );
+}
+```
 
 ## Testing
 
