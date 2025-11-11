@@ -2,6 +2,14 @@
   "name": "weaviate-add-collection",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.js"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

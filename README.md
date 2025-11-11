@@ -12,6 +12,46 @@ npm install
 npm run dev
 ```
 
+## Using as a Package
+
+You can import the `Collection` component into your own React application:
+
+```javascript
+// Default import
+import Collection from 'weaviate-add-collection';
+
+// Named import
+import { Collection } from 'weaviate-add-collection';
+```
+
+### Example Usage
+
+```jsx
+import React from 'react';
+import Collection from 'weaviate-add-collection';
+
+function App() {
+  return (
+    <div>
+      <h1>My Weaviate Collection Builder</h1>
+      <Collection 
+        initialJson={{ name: 'MyCollection', description: 'A sample collection' }}
+        availableModules={serverModules}
+        nodesNumber={3}
+      />
+    </div>
+  );
+}
+```
+
+### Props
+
+The `Collection` component accepts the following props:
+
+- **`initialJson`** (optional): JSON object to prepopulate the form with `name` and `description`
+- **`availableModules`** (optional): Object containing available vectorizer modules from the server. If not provided, all default modules are available.
+- **`nodesNumber`** (optional): Number representing the number of nodes (used as max for replication factor)
+
 ## Testing
 
 This project includes integration tests that work with a local Weaviate instance.
@@ -302,19 +342,6 @@ The vector configurations are output in the `vectorConfig` object with module-sp
     }
   }
 }
-```
-
-### Props
-
-The `Collection` component accepts the following props:
-
-- `initialJson` (optional): JSON object to prepopulate the form
-- `availableModules` (optional): Object containing available vectorizer modules from the server. If not provided, all default modules are available.
-
-Example usage with custom available modules:
-
-```jsx
-<Collection availableModules={serverModules} />
 ```
 
 ## Architecture
