@@ -4,6 +4,46 @@
  * 
  * It dynamically infers the available configuration fields for each
  * vectorizer module based on the TypeScript type definitions.
+ * 
+ * ## How to Discover Properties for Each Vectorizer Module
+ * 
+ * To find the available configuration properties for a vectorizer module,
+ * inspect the TypeScript definitions from the weaviate-client package:
+ * 
+ * ```bash
+ * # Navigate to the weaviate-client package
+ * cd node_modules/weaviate-client
+ * 
+ * # View the vectorizer type definitions
+ * cat dist/node/esm/collections/config/types/vectorizer.d.ts
+ * 
+ * # Or search for a specific vectorizer (e.g., text2vec-openai)
+ * grep -A 20 "text2vec-openai" dist/node/esm/collections/config/types/vectorizer.d.ts
+ * 
+ * # For property-level module configs, check:
+ * cat dist/node/esm/collections/config/types/property.d.ts
+ * ```
+ * 
+ * ### Example: Extracting text2vec-openai properties
+ * 
+ * ```bash
+ * # Use jq to parse and format the TypeScript definitions
+ * cat node_modules/weaviate-client/dist/node/esm/collections/config/types/vectorizer.d.ts | \
+ *   grep -A 30 "interface Text2VecOpenAIConfig"
+ * 
+ * # Output will show interface like:
+ * # interface Text2VecOpenAIConfig {
+ * #   model?: string;
+ * #   modelVersion?: string;
+ * #   type?: string;
+ * #   vectorizeClassName?: boolean;
+ * #   baseURL?: string;
+ * #   dimensions?: number;
+ * # }
+ * ```
+ * 
+ * The fields marked with `?` are optional, fields without `?` are required.
+ * Use these interface definitions to populate the VECTORIZER_CONFIG_FIELDS below.
  */
 
 // Import all vectorizer config types from weaviate-client
