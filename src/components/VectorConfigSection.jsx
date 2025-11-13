@@ -32,14 +32,6 @@ export default function VectorConfigSection({
 
   return (
     <div className="card property-section">
-      <div className="section-header">
-        <div>
-          <button type="button" className="btn btn-primary" onClick={addNew}>
-            Add Vector Config
-          </button>
-        </div>
-      </div>
-
       <div className="section-body">
         {configsList.length === 0 && (
           <p className="hint" style={{ textAlign: 'center', padding: '20px' }}>
@@ -57,6 +49,14 @@ export default function VectorConfigSection({
             properties={properties}
           />
         ))}
+      </div>
+      <div className="section-footer">
+        <div></div> {/* Empty div for flexbox spacing */}
+        <div>
+          <button type="button" className="btn btn-primary" onClick={addNew}>
+            Add Vector Config
+          </button>
+        </div>
       </div>
     </div>
   )
