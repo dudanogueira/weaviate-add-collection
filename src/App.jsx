@@ -61,12 +61,18 @@ export default function App() {
 
   return (
     <div className="container">
-      <h1>Weaviate — Add Collection</h1>
-
-      <div className="import-row">
-        <label className="file-label">Import JSON schema:</label>
-        <input type="file" accept="application/json" onChange={handleFileImport} />
-        <small className="hint">You can also pass JSON directly as a prop to the component.</small>
+      <div className="card-header">
+        <h1>Weaviate — Add Collection</h1>
+      </div>
+      
+      <div className="card-section">
+        <div className="import-row">
+          <div>
+            <label className="file-label">Import JSON schema:</label>
+            <small className="hint">You can also pass JSON directly as a prop to the component.</small>
+          </div>
+          <input type="file" accept="application/json" onChange={handleFileImport} />
+        </div>
       </div>
 
       <Collection 

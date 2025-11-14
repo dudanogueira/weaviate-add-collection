@@ -13,8 +13,8 @@ const emptyProperty = () => ({
 })
 
 export default function PropertySection({ properties = [], onChange }) {
-  // Do not synthesize a default empty property -- respect the provided array.
-  const propsList = properties
+  // Start with one empty property by default if no properties provided
+  const propsList = properties.length > 0 ? properties : [emptyProperty()]
 
   function updateAt(i, next) {
     const nextList = propsList.map((p, idx) => (idx === i ? next : p))
@@ -23,7 +23,12 @@ export default function PropertySection({ properties = [], onChange }) {
 
   function deleteAt(i) {
     const nextList = propsList.filter((_, idx) => idx !== i)
-    // Do NOT create a new empty property when the list becomes empty.
+    // If deleting the last property, ensure we keep at least one empty property
+    if (nextList.length === 0) {
+      const newList = [emptyProperty()]
+      onChange && onChange(newList)
+      return
+    }
     onChange && onChange(nextList)
   }
 
@@ -34,16 +39,16 @@ export default function PropertySection({ properties = [], onChange }) {
 
   return (
     <div className="card property-section">
-      <div className="section-header">
-        <div>
-          <button type="button" className="btn btn-primary" onClick={addNew}>Add property</button>
-        </div>
-      </div>
-
       <div className="section-body">
         {propsList.map((p, i) => (
           <PropertyItem key={i} index={i} value={p} onChange={(v) => updateAt(i, v)} onDelete={() => deleteAt(i)} />
         ))}
+      </div>
+      <div className="section-footer">
+        <div></div> {/* Empty div for flexbox spacing */}
+        <div>
+          <button type="button" className="btn btn-primary" onClick={addNew}>Add property</button>
+        </div>
       </div>
     </div>
   )

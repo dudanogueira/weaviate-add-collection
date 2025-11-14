@@ -56,10 +56,10 @@ export default function Collection({
   })
   const [openBasic, setOpenBasic] = useState(true)
   const [openProperties, setOpenProperties] = useState(true)
-  const [openVectorConfig, setOpenVectorConfig] = useState(true)
-  const [openInvertedIndexConfig, setOpenInvertedIndexConfig] = useState(true)
-  const [openMultiTenancyConfig, setOpenMultiTenancyConfig] = useState(true)
-  const [openReplicationConfig, setOpenReplicationConfig] = useState(true)
+  const [openVectorConfig, setOpenVectorConfig] = useState(false)
+  const [openInvertedIndexConfig, setOpenInvertedIndexConfig] = useState(false)
+  const [openMultiTenancyConfig, setOpenMultiTenancyConfig] = useState(false)
+  const [openReplicationConfig, setOpenReplicationConfig] = useState(false)
   const [openGenerativeConfig, setOpenGenerativeConfig] = useState(false)
 
   useEffect(() => {
@@ -800,7 +800,12 @@ export default function Collection({
 
   return (
     <div className="card">
-      <h2>Collection</h2>
+      <div className="card-section-header">
+        <h3>
+          Collection Configuration
+          <span>Define the structure and behavior of your Weaviate collection</span>
+        </h3>
+      </div>
 
       <div className="collapsible">
         <button
@@ -815,13 +820,17 @@ export default function Collection({
         {openBasic && (
           <div className="collapsible-panel">
             <div className="field">
-              <label htmlFor="collection-name">Name</label>
+              <label htmlFor="collection-name" className="required">Collection Name</label>
               <input
                 id="collection-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="MyCollection"
+                className={!name.trim() && name !== '' ? 'input-error' : ''}
               />
+              {!name.trim() && name !== '' && (
+                <div className="field-error">Collection name is required</div>
+              )}
             </div>
 
             <div className="field">
@@ -831,6 +840,7 @@ export default function Collection({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="A Brand new collection"
+                rows="3"
               />
             </div>
           </div>
@@ -839,14 +849,14 @@ export default function Collection({
       </div>
 
       {/* Properties collapsible section */}
-      <div className="collapsible" style={{ marginTop: 12 }}>
+      <div className="collapsible">
         <button
           className="collapsible-toggle"
           aria-expanded={openProperties}
           onClick={() => setOpenProperties((s) => !s)}
         >
           <span>Properties</span>
-          <span className="chev">{openProperties ? '\u25be' : '\u25b8'}</span>
+          <span className="chev">{openProperties ? '▾' : '▸'}</span>
         </button>
 
         {openProperties && (
@@ -857,14 +867,14 @@ export default function Collection({
       </div>
 
       {/* Vector Config collapsible section */}
-      <div className="collapsible" style={{ marginTop: 12 }}>
+      <div className="collapsible">
         <button
           className="collapsible-toggle"
           aria-expanded={openVectorConfig}
           onClick={() => setOpenVectorConfig((s) => !s)}
         >
           <span>Vectorizer Configuration</span>
-          <span className="chev">{openVectorConfig ? '\u25be' : '\u25b8'}</span>
+          <span className="chev">{openVectorConfig ? '▾' : '▸'}</span>
         </button>
 
         {openVectorConfig && (
@@ -880,14 +890,14 @@ export default function Collection({
       </div>
 
       {/* Inverted Index Config collapsible section */}
-      <div className="collapsible" style={{ marginTop: 12 }}>
+      <div className="collapsible">
         <button
           className="collapsible-toggle"
           aria-expanded={openInvertedIndexConfig}
           onClick={() => setOpenInvertedIndexConfig((s) => !s)}
         >
           <span>Inverted Index Configuration</span>
-          <span className="chev">{openInvertedIndexConfig ? '\u25be' : '\u25b8'}</span>
+          <span className="chev">{openInvertedIndexConfig ? '▾' : '▸'}</span>
         </button>
 
         {openInvertedIndexConfig && (
@@ -898,14 +908,14 @@ export default function Collection({
       </div>
 
       {/* Multi Tenancy Config collapsible section */}
-      <div className="collapsible" style={{ marginTop: 12 }}>
+      <div className="collapsible">
         <button
           className="collapsible-toggle"
           aria-expanded={openMultiTenancyConfig}
           onClick={() => setOpenMultiTenancyConfig((s) => !s)}
         >
           <span>Multi Tenancy Configuration</span>
-          <span className="chev">{openMultiTenancyConfig ? '\u25be' : '\u25b8'}</span>
+          <span className="chev">{openMultiTenancyConfig ? '▾' : '▸'}</span>
         </button>
 
         {openMultiTenancyConfig && (
@@ -916,14 +926,14 @@ export default function Collection({
       </div>
 
       {/* Replication Config collapsible section */}
-      <div className="collapsible" style={{ marginTop: 12 }}>
+      <div className="collapsible">
         <button
           className="collapsible-toggle"
           aria-expanded={openReplicationConfig}
           onClick={() => setOpenReplicationConfig((s) => !s)}
         >
           <span>Replication Configuration</span>
-          <span className="chev">{openReplicationConfig ? '\u25be' : '\u25b8'}</span>
+          <span className="chev">{openReplicationConfig ? '▾' : '▸'}</span>
         </button>
 
         {openReplicationConfig && (
@@ -938,14 +948,14 @@ export default function Collection({
       </div>
 
       {/* Generative Config collapsible section */}
-      <div className="collapsible" style={{ marginTop: 12 }}>
+      <div className="collapsible">
         <button
           className="collapsible-toggle"
           aria-expanded={openGenerativeConfig}
           onClick={() => setOpenGenerativeConfig((s) => !s)}
         >
           <span>Generative Configuration</span>
-          <span className="chev">{openGenerativeConfig ? '\u25be' : '\u25b8'}</span>
+          <span className="chev">{openGenerativeConfig ? '▾' : '▸'}</span>
         </button>
 
         {openGenerativeConfig && (
@@ -959,29 +969,32 @@ export default function Collection({
       </div>
 
       <div className="preview">
-        <h3>Generated JSON</h3>
+        <div className="preview-header">
+          <h3>Generated JSON Schema</h3>
+          <div className="preview-actions">
+            <button className="btn btn-primary" onClick={copyToClipboard}>
+              Copy JSON
+            </button>
+            <button className="btn btn-primary" onClick={downloadJson}>
+              Download JSON
+            </button>
+          </div>
+        </div>
+        
         <div className="json-wrapper">
           <pre className="json-block">{prettyJson()}</pre>
-          <button className="copy-btn" onClick={copyToClipboard} title="Copy to clipboard">
-            Copy
-          </button>
-          <button className="copy-btn" onClick={downloadJson} title="Download JSON" style={{ top: 44, right: 8 }}>
-            Download
-          </button>
         </div>
+        
         {onSubmit && typeof onSubmit === 'function' && (
           <button 
-            className="submit-btn" 
+            className="btn btn-primary submit-btn"
             onClick={() => onSubmit(generatedJson)}
             style={{ 
-              marginTop: '16px', 
-              padding: '10px 20px', 
+              marginTop: 'var(--spacing-lg)', 
+              width: '100%',
+              padding: 'var(--spacing-md)',
               fontSize: '16px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              fontWeight: 600
             }}
           >
             Create Collection
