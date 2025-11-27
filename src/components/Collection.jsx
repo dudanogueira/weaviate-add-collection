@@ -12,6 +12,7 @@ import GenerativeConfigSection from './GenerativeConfigSection'
 //         optional `nodesNumber` number representing the number of nodes (used as max for replication factor)
 //         optional `onChange` callback function called whenever the schema changes with the current JSON schema
 //         optional `onSubmit` callback function that can be called to submit the final schema
+//         optional `hideCreateButton` boolean to hide the "Create Collection" button (useful when using hooks)
 // Outputs: Programmatic access to schema via onChange/onSubmit callbacks instead of DOM scraping.
 
 export default function Collection({ 
@@ -19,7 +20,8 @@ export default function Collection({
   availableModules = null, 
   nodesNumber = null,
   onChange = null,
-  onSubmit = null 
+  onSubmit = null,
+  hideCreateButton = false
 }) {
   const [name, setName] = useState(
     initialJson ? (initialJson.name ?? initialJson.class ?? '') : ''
@@ -985,7 +987,7 @@ export default function Collection({
           <pre className="json-block">{prettyJson()}</pre>
         </div>
         
-        {onSubmit && typeof onSubmit === 'function' && (
+        {!hideCreateButton && onSubmit && typeof onSubmit === 'function' && (
           <button 
             className="btn btn-primary submit-btn"
             onClick={() => onSubmit(generatedJson)}
