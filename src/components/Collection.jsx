@@ -69,7 +69,6 @@ export default function Collection({
   const [openMultiTenancyConfig, setOpenMultiTenancyConfig] = useState(false)
   const [openReplicationConfig, setOpenReplicationConfig] = useState(false)
   const [openGenerativeConfig, setOpenGenerativeConfig] = useState(false)
-  const [openRerankerConfig, setOpenRerankerConfig] = useState(false)
 
   // Update replication factor when nodesNumber changes
   useEffect(() => {
@@ -173,13 +172,31 @@ export default function Collection({
     // Load rerankerConfig from imported JSON if present
     if (initialJson?.moduleConfig && typeof initialJson.moduleConfig === 'object') {
       const modCfg = initialJson.moduleConfig
-      // Extract the module name (first key in moduleConfig that starts with 'reranker-')
-      const rerankerKey = Object.keys(modCfg).find(key => key.startsWith('reranker-'))
+      
+      // Check for two possible structures:
+      // 1. Direct structure: { "reranker-cohere": { ... } }
+      // 2. Nested structure: { "name": "reranker-cohere", "config": { ... } }
+      
+      let rerankerKey = null
+      let rerankerModuleConfig = {}
+      
+      // First try to find a key that starts with 'reranker-'
+      rerankerKey = Object.keys(modCfg).find(key => key.startsWith('reranker-'))
+      
+      if (rerankerKey) {
+        // Direct structure
+        rerankerModuleConfig = modCfg[rerankerKey] || {}
+      } else if (modCfg.name && typeof modCfg.name === 'string' && modCfg.name.startsWith('reranker-')) {
+        // Nested structure with 'name' and 'config'
+        rerankerKey = modCfg.name
+        rerankerModuleConfig = modCfg.config || {}
+      }
+      
       if (rerankerKey) {
         setRerankerConfig({
           enabled: true,
           module: rerankerKey,
-          moduleConfig: modCfg[rerankerKey] || {},
+          moduleConfig: rerankerModuleConfig,
         })
       }
     }
@@ -1104,21 +1121,18 @@ export default function Collection({
       <div className="collapsible">
         <button
           className="collapsible-toggle"
-          aria-expanded={openRerankerConfig}
-          onClick={() => setOpenRerankerConfig((s) => !s)}
+          aria-expanded={true}
+          onClick={() => {}}
         >
           <span>Reranker Configuration</span>
-          <span className="chev">{openRerankerConfig ? '▾' : '▸'}</span>
         </button>
 
-        {openRerankerConfig && (
-          <div className="collapsible-panel">
-            <RerankerConfigSection 
-              config={rerankerConfig} 
-              setConfig={setRerankerConfig}
-            />
-          </div>
-        )}
+        <div className="collapsible-panel">
+          <RerankerConfigSection 
+            config={rerankerConfig} 
+            setConfig={setRerankerConfig}
+          />
+        </div>
       </div>
 
       {/* Inverted Index Config collapsible section */}
