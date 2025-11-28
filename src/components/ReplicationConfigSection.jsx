@@ -23,8 +23,12 @@ const ReplicationConfigSection = ({ config, setConfig, nodesNumber = null }) => 
           type="number" 
           min="1"
           max={maxFactor}
-          value={config.factor} 
-          onChange={e => update('factor', parseInt(e.target.value, 10) || 1)} 
+          value={config.factor === null ? '' : config.factor} 
+          onChange={e => {
+            const val = e.target.value;
+            update('factor', val === '' ? null : parseInt(val, 10) || null);
+          }}
+          placeholder="1"
         />
         {nodesNumber && nodesNumber > 0 ? (
           <small className="hint">Maximum: {maxFactor} (based on number of nodes)</small>
@@ -32,7 +36,7 @@ const ReplicationConfigSection = ({ config, setConfig, nodesNumber = null }) => 
           <small className="hint">Feature available for clusters with multiple nodes</small>
         )}
       </div>
-      {config.factor >= 2 && (
+      {config.factor !== null && config.factor >= 2 && (
         <>
           <div className="field">
             <label>Async Enabled:</label>

@@ -47,7 +47,7 @@ export default function Collection({
     autoTenantActivation: false,
   })
   const [replicationConfig, setReplicationConfig] = useState({
-    factor: 1,
+    factor: null,
     asyncEnabled: false,
     deletionStrategy: 'NoAutomatedResolution',
   })
@@ -434,9 +434,18 @@ export default function Collection({
       deletionStrategy: 'NoAutomatedResolution',
     };
 
+    // If factor is null, don't include replicationConfig at all
+    if (replicationConfig.factor === null) {
+      setGeneratedJson((prev) => {
+        const { replicationConfig, ...rest } = prev;
+        return rest;
+      });
+      return;
+    }
+
     const replicationJson = {};
     
-    // Always include factor
+    // Always include factor if not null
     replicationJson.factor = replicationConfig.factor;
     
     // Only include asyncEnabled if non-default and factor >= 2
