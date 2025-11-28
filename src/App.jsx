@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Collection from './components/Collection'
+import JsonSchemaImport from './components/JsonSchemaImport'
 
 export default function App() {
   const [importedJson, setImportedJson] = useState(null)
@@ -76,10 +77,12 @@ export default function App() {
         <h1>Weaviate — Add Collection</h1>
       </div>
       
+      <JsonSchemaImport onSchemaLoad={setImportedJson} />
+      
       <div className="card-section">
         <div className="import-row">
           <div>
-            <label className="file-label">Import JSON schema:</label>
+            <label className="file-label">Import JSON schema from file:</label>
             <small className="hint">You can also pass JSON directly as a prop to the component.</small>
           </div>
           <input type="file" accept="application/json" onChange={handleFileImport} />
