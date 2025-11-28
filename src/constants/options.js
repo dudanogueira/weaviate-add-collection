@@ -72,6 +72,10 @@ export const allAvailableModules = {
     documentationHref: 'https://txt.cohere.com/rerank/',
     name: 'Reranker - Cohere'
   },
+  'reranker-contextualai': {
+    documentationHref: 'https://contextual.ai/docs/reranking',
+    name: 'Reranker - Contextual AI'
+  },
   'reranker-jinaai': {
     documentationHref: 'https://jina.ai/reranker',
     name: 'Reranker - Jinaai'
@@ -79,6 +83,10 @@ export const allAvailableModules = {
   'reranker-voyageai': {
     documentationHref: 'https://docs.voyageai.com/reference/reranker-api',
     name: 'Reranker - VoyageAI'
+  },
+  'reranker-nvidia': {
+    documentationHref: 'https://docs.nvidia.com/nim/nemo-retriever/reranking/latest/index.html',
+    name: 'Reranker - NVIDIA'
   },
   'text2vec-aws': {
     documentationHref: 'https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html',

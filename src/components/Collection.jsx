@@ -5,6 +5,7 @@ import InvertedIndexConfigSection from './InvertedIndexConfigSection'
 import MultiTenancyConfigSection from './MultiTenancyConfigSection'
 import ReplicationConfigSection from './ReplicationConfigSection'
 import GenerativeConfigSection from './GenerativeConfigSection'
+import RerankerConfigSection from './RerankerConfigSection'
 
 // Contract:
 // Inputs: optional `initialJson` object with { name, description }
@@ -56,6 +57,11 @@ export default function Collection({
     module: '',
     moduleConfig: {},
   })
+  const [rerankerConfig, setRerankerConfig] = useState({
+    enabled: false,
+    module: '',
+    moduleConfig: {},
+  })
   const [openBasic, setOpenBasic] = useState(true)
   const [openProperties, setOpenProperties] = useState(true)
   const [openVectorConfig, setOpenVectorConfig] = useState(false)
@@ -63,6 +69,7 @@ export default function Collection({
   const [openMultiTenancyConfig, setOpenMultiTenancyConfig] = useState(false)
   const [openReplicationConfig, setOpenReplicationConfig] = useState(false)
   const [openGenerativeConfig, setOpenGenerativeConfig] = useState(false)
+  const [openRerankerConfig, setOpenRerankerConfig] = useState(false)
 
   // Update replication factor when nodesNumber changes
   useEffect(() => {
@@ -160,6 +167,19 @@ export default function Collection({
           enabled: true,
           module: moduleKey,
           moduleConfig: gen[moduleKey] || {},
+        })
+      }
+    }
+    // Load rerankerConfig from imported JSON if present
+    if (initialJson?.moduleConfig && typeof initialJson.moduleConfig === 'object') {
+      const modCfg = initialJson.moduleConfig
+      // Extract the module name (first key in moduleConfig that starts with 'reranker-')
+      const rerankerKey = Object.keys(modCfg).find(key => key.startsWith('reranker-'))
+      if (rerankerKey) {
+        setRerankerConfig({
+          enabled: true,
+          module: rerankerKey,
+          moduleConfig: modCfg[rerankerKey] || {},
         })
       }
     }
@@ -496,6 +516,62 @@ export default function Collection({
       return { ...prev, generative: generativeJson };
     });
   }, [generativeConfig]);
+
+  // Update JSON with reranker configuration
+  useEffect(() => {
+    if (!rerankerConfig.enabled || !rerankerConfig.module) {
+      // Remove reranker config if disabled or no module selected
+      setGeneratedJson((prev) => {
+        const { moduleConfig, ...rest } = prev;
+        if (moduleConfig) {
+          // Remove only reranker modules from moduleConfig
+          const cleanModuleConfig = { ...moduleConfig };
+          Object.keys(cleanModuleConfig).forEach(key => {
+            if (key.startsWith('reranker-')) {
+              delete cleanModuleConfig[key];
+            }
+          });
+          // If moduleConfig is now empty, remove it entirely
+          if (Object.keys(cleanModuleConfig).length === 0) {
+            return rest;
+          }
+          return { ...rest, moduleConfig: cleanModuleConfig };
+        }
+        return rest;
+      });
+      return;
+    }
+
+    const moduleConfig = rerankerConfig.moduleConfig || {};
+    
+    // Only include non-empty config values
+    const cleanConfig = {};
+    Object.keys(moduleConfig).forEach((key) => {
+      const value = moduleConfig[key];
+      if (value !== null && value !== '' && value !== undefined) {
+        // Don't include empty arrays
+        if (Array.isArray(value) && value.length === 0) {
+          return;
+        }
+        cleanConfig[key] = value;
+      }
+    });
+
+    const rerankerModuleConfig = {
+      [rerankerConfig.module]: Object.keys(cleanConfig).length > 0 ? cleanConfig : {}
+    };
+
+    setGeneratedJson((prev) => {
+      const existingModuleConfig = prev.moduleConfig || {};
+      return { 
+        ...prev, 
+        moduleConfig: {
+          ...existingModuleConfig,
+          ...rerankerModuleConfig
+        }
+      };
+    });
+  }, [rerankerConfig]);
 
   // properties state managed here and merged into generated JSON
   const [properties, setProperties] = useState([])
@@ -943,6 +1019,27 @@ export default function Collection({
             <GenerativeConfigSection 
               config={generativeConfig} 
               setConfig={setGenerativeConfig}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Reranker Config collapsible section */}
+      <div className="collapsible">
+        <button
+          className="collapsible-toggle"
+          aria-expanded={openRerankerConfig}
+          onClick={() => setOpenRerankerConfig((s) => !s)}
+        >
+          <span>Reranker Configuration</span>
+          <span className="chev">{openRerankerConfig ? '▾' : '▸'}</span>
+        </button>
+
+        {openRerankerConfig && (
+          <div className="collapsible-panel">
+            <RerankerConfigSection 
+              config={rerankerConfig} 
+              setConfig={setRerankerConfig}
             />
           </div>
         )}

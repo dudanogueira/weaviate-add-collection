@@ -1,14 +1,14 @@
 import React from 'react'
 import { allAvailableModules } from '../constants/options'
-import { getGenerativeConfigFields, hasGenerativeConfigOptions } from '../utils/moduleConfigExtractor'
+import { getRerankerConfigFields, hasRerankerConfigOptions } from '../utils/moduleConfigExtractor'
 import ModuleConfigField from './ModuleConfigField'
 
 /**
- * Component for configuring generative search capabilities (RAG)
+ * Component for configuring reranker capabilities
  */
-export default function GenerativeConfigSection({ config, setConfig }) {
-  const generativeModules = Object.entries(allAvailableModules)
-    .filter(([key]) => key.startsWith('generative-'))
+export default function RerankerConfigSection({ config, setConfig }) {
+  const rerankerModules = Object.entries(allAvailableModules)
+    .filter(([key]) => key.startsWith('reranker-'))
     .map(([key, value]) => ({
       value: key,
       label: value.name || key,
@@ -30,27 +30,27 @@ export default function GenerativeConfigSection({ config, setConfig }) {
   return (
     <div>
       <div className="field">
-        <label htmlFor="generative-enabled">
+        <label htmlFor="reranker-enabled">
           <input
-            id="generative-enabled"
+            id="reranker-enabled"
             type="checkbox"
             checked={config.enabled || false}
             onChange={(e) => update('enabled', e.target.checked)}
             style={{ width: 'auto', marginRight: '8px' }}
           />
-          Enable Generative Search
+          Enable Reranker
         </label>
         <small className="hint">
-          This allows you to use generative AI models to generate responses based on your data.
+          This allows you to rerank search results to improve relevance.
         </small>
       </div>
 
       {config.enabled && (
         <>
           <div className="field">
-            <label htmlFor="generative-module">Generative Module</label>
+            <label htmlFor="reranker-module">Reranker Module</label>
             <select
-              id="generative-module"
+              id="reranker-module"
               value={config.module || ''}
               onChange={(e) => {
                 // Update both module and reset module config at the same time
@@ -62,8 +62,8 @@ export default function GenerativeConfigSection({ config, setConfig }) {
               }}
               disabled={!config.enabled}
             >
-              <option value="">Select a generative module...</option>
-              {generativeModules.map((mod) => (
+              <option value="">Select a reranker module...</option>
+              {rerankerModules.map((mod) => (
                 <option key={mod.value} value={mod.value}>
                   {mod.label}
                 </option>
@@ -72,9 +72,9 @@ export default function GenerativeConfigSection({ config, setConfig }) {
             {config.module && (
               <>
                 <small className="hint">
-                  {generativeModules.find((m) => m.value === config.module)?.documentationHref && (
+                  {rerankerModules.find((m) => m.value === config.module)?.documentationHref && (
                     <a
-                      href={generativeModules.find((m) => m.value === config.module).documentationHref}
+                      href={rerankerModules.find((m) => m.value === config.module).documentationHref}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -86,12 +86,12 @@ export default function GenerativeConfigSection({ config, setConfig }) {
             )}
           </div>
 
-          {config.module && hasGenerativeConfigOptions(config.module) && (
+          {config.module && hasRerankerConfigOptions(config.module) && (
             <div style={{ marginTop: '16px' }}>
               <h5 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 600 }}>
                 Module Configuration for {config.module}
               </h5>
-              {getGenerativeConfigFields(config.module).map((field) => {
+              {getRerankerConfigFields(config.module).map((field) => {
                 const moduleConfig = config.moduleConfig || {}
                 const value = moduleConfig[field.name] || ''
                 return (
@@ -100,7 +100,7 @@ export default function GenerativeConfigSection({ config, setConfig }) {
                     field={field}
                     value={value}
                     onChange={updateModuleConfig}
-                    idPrefix="generative-config"
+                    idPrefix="reranker-config"
                   />
                 )
               })}

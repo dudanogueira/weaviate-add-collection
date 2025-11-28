@@ -353,6 +353,44 @@ const GENERATIVE_CONFIG_FIELDS = {
 }
 
 /**
+ * Configuration fields for reranker modules
+ * These are used for reranking search results
+ */
+const RERANKER_CONFIG_FIELDS = {
+  'reranker-cohere': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The Cohere reranker model to use (e.g., rerank-english-v2.0, rerank-multilingual-v2.0).' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for Cohere API.' }
+    ]
+  },
+  'reranker-contextualai': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The Contextual AI reranker model to use.' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for Contextual AI API.' }
+    ]
+  },
+  'reranker-jinaai': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The JinaAI reranker model to use (e.g., jina-reranker-v1-base-en).' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for JinaAI API.' }
+    ]
+  },
+  'reranker-voyageai': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The VoyageAI reranker model to use (e.g., rerank-lite-1, rerank-1).' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for VoyageAI API.' }
+    ]
+  },
+  'reranker-nvidia': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The NVIDIA reranker model to use (e.g., nv-rerank-qa-mistral-4b-v3).' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for NVIDIA NIM API.' },
+      { name: 'truncate', type: 'string', description: 'Truncation strategy: NONE, END (default).' }
+    ]
+  }
+}
+
+/**
  * Get configuration fields for a specific vectorizer module
  * @param {string} moduleName - The name of the vectorizer module
  * @returns {Array} Array of field definitions
@@ -377,6 +415,25 @@ export function getGenerativeConfigFields(moduleName) {
  */
 export function hasGenerativeConfigOptions(moduleName) {
   const fields = getGenerativeConfigFields(moduleName)
+  return fields && fields.length > 0
+}
+
+/**
+ * Get configuration fields for a specific reranker module
+ * @param {string} moduleName - The name of the reranker module
+ * @returns {Array} Array of field definitions
+ */
+export function getRerankerConfigFields(moduleName) {
+  return RERANKER_CONFIG_FIELDS[moduleName]?.fields || []
+}
+
+/**
+ * Check if a reranker module has configuration options
+ * @param {string} moduleName - The name of the reranker module
+ * @returns {boolean} True if the module has config options
+ */
+export function hasRerankerConfigOptions(moduleName) {
+  const fields = getRerankerConfigFields(moduleName)
   return fields && fields.length > 0
 }
 
