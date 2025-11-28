@@ -27,7 +27,8 @@ body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Rob
 .card-section:last-child{margin-bottom:0}
 .card-section-header{display:flex;align-items:center;gap:var(--spacing-sm);margin-bottom:var(--spacing-md);padding-bottom:var(--spacing-sm);border-bottom:2px solid var(--section-bg)}
 .card-section-header h3{margin:0;font-size:20px;font-weight:600;color:var(--text-primary)}
-.card-section-header h3 span{font-size:14px;font-weight:400;color:var(--text-secondary)}
+.card-section-header h3 span{display:block;font-size:14px;font-weight:400;color:var(--text-secondary);margin-top:var(--spacing-xs)}
+.card-section-header .hint{display:block;font-size:14px;font-weight:400;color:var(--text-secondary);margin-top:var(--spacing-xs)}
 .card-divider{height:1px;background:linear-gradient(to right,var(--border),rgba(230,233,239,0),var(--border));margin:var(--spacing-lg) 0}
 /* Form Controls Consistency */
 .field{display:flex;flex-direction:column;margin-bottom:var(--spacing-lg)}
