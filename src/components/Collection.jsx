@@ -64,6 +64,16 @@ export default function Collection({
   const [openReplicationConfig, setOpenReplicationConfig] = useState(false)
   const [openGenerativeConfig, setOpenGenerativeConfig] = useState(false)
 
+  // Update replication factor when nodesNumber changes
+  useEffect(() => {
+    if (nodesNumber && nodesNumber > 1 && !initialJson?.replicationConfig) {
+      setReplicationConfig(prev => ({
+        ...prev,
+        factor: nodesNumber
+      }))
+    }
+  }, [nodesNumber, initialJson])
+
   useEffect(() => {
     // Handle both 'name' and 'class' fields for backwards compatibility
     setName(initialJson?.name || initialJson?.class || '')
@@ -330,15 +340,26 @@ export default function Collection({
 
 
   useEffect(() => {
-    // If name/description are empty strings and no initialJson, use defaults
+    // If name is empty string and no initialJson, use default
     const className = name === '' && !initialJson ? 'MyCollection' : name
-    const desc = description === '' && !initialJson ? 'A Brand new collection' : description
     
-    setGeneratedJson((prev) => ({
-      ...prev,
-      class: className,
-      description: desc
-    }))
+    const update = {
+      class: className
+    }
+    
+    // Only add description if it's not empty
+    if (description && description.trim() !== '') {
+      update.description = description
+    }
+    
+    setGeneratedJson((prev) => {
+      const newJson = { ...prev, ...update }
+      // Remove description field if it's empty
+      if (!description || description.trim() === '') {
+        delete newJson.description
+      }
+      return newJson
+    })
   }, [name, description, initialJson])
 
   // Update JSON with inverted index configuration, only including non-default values
@@ -418,13 +439,13 @@ export default function Collection({
     // Always include factor
     replicationJson.factor = replicationConfig.factor;
     
-    // Only include asyncEnabled if non-default
-    if (replicationConfig.asyncEnabled !== defaults.asyncEnabled) {
+    // Only include asyncEnabled if non-default and factor >= 2
+    if (replicationConfig.factor >= 2 && replicationConfig.asyncEnabled !== defaults.asyncEnabled) {
       replicationJson.asyncEnabled = replicationConfig.asyncEnabled;
     }
     
-    // Only include deletionStrategy if non-default
-    if (replicationConfig.deletionStrategy !== defaults.deletionStrategy) {
+    // Only include deletionStrategy if asyncEnabled is true and factor >= 2
+    if (replicationConfig.factor >= 2 && replicationConfig.asyncEnabled && replicationConfig.deletionStrategy !== defaults.deletionStrategy) {
       replicationJson.deletionStrategy = replicationConfig.deletionStrategy;
     }
 
@@ -546,7 +567,13 @@ export default function Collection({
       return result
     })
 
-    setGeneratedJson((prev) => ({ ...prev, properties: transformed }))
+    setGeneratedJson((prev) => {
+      if (transformed.length === 0) {
+        const { properties, ...rest } = prev
+        return rest
+      }
+      return { ...prev, properties: transformed }
+    })
   }, [properties, vectorConfigs])
 
   // Transform vectorConfigs into vectorConfig object for JSON
@@ -933,18 +960,25 @@ export default function Collection({
           className="collapsible-toggle"
           aria-expanded={openReplicationConfig}
           onClick={() => setOpenReplicationConfig((s) => !s)}
+          disabled={nodesNumber === 1}
         >
           <span>Replication Configuration</span>
           <span className="chev">{openReplicationConfig ? '▾' : '▸'}</span>
         </button>
 
-        {openReplicationConfig && (
+        {openReplicationConfig && nodesNumber !== 1 && (
           <div className="collapsible-panel">
             <ReplicationConfigSection 
               config={replicationConfig} 
               setConfig={setReplicationConfig}
               nodesNumber={nodesNumber}
             />
+          </div>
+        )}
+        
+        {nodesNumber === 1 && (
+          <div className="collapsible-panel" style={{ padding: 'var(--spacing-md)', color: 'var(--color-text-secondary)' }}>
+            <p>Replication feature requires 2 or more nodes.</p>
           </div>
         )}
       </div>
