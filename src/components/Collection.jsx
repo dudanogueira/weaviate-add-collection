@@ -239,8 +239,30 @@ export default function Collection({
           indexConfig = processedIndexConfig
         } else {
           // For non-dynamic types (HNSW, Flat), quantizers are directly in indexConfig
-          // They're already in the correct format (pq, bq, sq as direct properties)
-          // No processing needed - just keep them as-is
+          // Need to detect and set the quantizer type
+          const processedIndexConfig = { ...indexConfig }
+          
+          if (indexType === 'hnsw') {
+            // Detect quantizer type from existing properties
+            if (indexConfig.pq) {
+              processedIndexConfig.quantizer = 'pq'
+            } else if (indexConfig.bq) {
+              processedIndexConfig.quantizer = 'bq'
+            } else if (indexConfig.sq) {
+              processedIndexConfig.quantizer = 'sq'
+            } else if (indexConfig.rq) {
+              processedIndexConfig.quantizer = 'rq'
+            }
+          } else if (indexType === 'flat') {
+            // Flat only supports BQ and RQ
+            if (indexConfig.bq) {
+              processedIndexConfig.quantizer = 'bq'
+            } else if (indexConfig.rq) {
+              processedIndexConfig.quantizer = 'rq'
+            }
+          }
+          
+          indexConfig = processedIndexConfig
         }
         // Heuristic: if both hnsw and flat configs exist or threshold is present, treat as dynamic
         if (indexType !== 'dynamic' && (indexConfig?.threshold !== undefined || (indexConfig?.hnsw && indexConfig?.flat))) {
@@ -326,6 +348,32 @@ export default function Collection({
             processedIndexConfig.flat = flatConfig
           }
 
+          indexConfig = processedIndexConfig
+        } else {
+          // For non-dynamic types (HNSW, Flat), quantizers are directly in indexConfig
+          // Need to detect and set the quantizer type
+          const processedIndexConfig = { ...indexConfig }
+          
+          if (indexType === 'hnsw') {
+            // Detect quantizer type from existing properties
+            if (indexConfig.pq) {
+              processedIndexConfig.quantizer = 'pq'
+            } else if (indexConfig.bq) {
+              processedIndexConfig.quantizer = 'bq'
+            } else if (indexConfig.sq) {
+              processedIndexConfig.quantizer = 'sq'
+            } else if (indexConfig.rq) {
+              processedIndexConfig.quantizer = 'rq'
+            }
+          } else if (indexType === 'flat') {
+            // Flat only supports BQ and RQ
+            if (indexConfig.bq) {
+              processedIndexConfig.quantizer = 'bq'
+            } else if (indexConfig.rq) {
+              processedIndexConfig.quantizer = 'rq'
+            }
+          }
+          
           indexConfig = processedIndexConfig
         }
         // Heuristic: infer dynamic if structure suggests so
@@ -822,8 +870,8 @@ export default function Collection({
             // Skip quantizer field if present (it's just for UI state)
             if (outKey === 'quantizer') return
             
-            // Handle quantizer configs (pq, bq, sq) - include them as-is
-            if (outKey === 'pq' || outKey === 'bq' || outKey === 'sq') {
+            // Handle quantizer configs (pq, bq, sq, rq) - include them as-is
+            if (outKey === 'pq' || outKey === 'bq' || outKey === 'sq' || outKey === 'rq') {
               if (typeof value === 'object' && value !== null) {
                 const cleanedQuantizer = {}
                 Object.keys(value).forEach(qKey => {
