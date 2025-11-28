@@ -122,7 +122,7 @@ body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Rob
 .property-section-header .header-actions .btn{font-size:14px;padding:var(--spacing-md) var(--spacing-lg)}
 .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--spacing-lg)}
 .section-body{display:flex;flex-direction:column;gap:var(--spacing-lg)}
-.section-footer{display:flex;justify-content:space-between;align-items:center;margin-top:var(--spacing-lg);padding-top:var(--spacing-lg);border-top:1px solid var(--section-bg)}
+.section-footer{display:flex;justify-content:space-between;align-items:center;padding:var(--spacing-xl);border-top:1px solid var(--section-bg)}
 .property-item{padding:var(--spacing-xl);margin-bottom:var(--spacing-lg);border:1px solid var(--border);border-radius:var(--border-radius);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.04);transition:all 0.2s ease}
 .property-item:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08);border-color:var(--accent)}
 .property-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--spacing-lg);padding-bottom:var(--spacing-md);border-bottom:1px solid var(--section-bg)}
