@@ -21,24 +21,26 @@ const MultiTenancyConfigSection = ({ config, setConfig }) => {
           onChange={e => update('enabled', e.target.checked)} 
         />
       </div>
-      <div className="field">
-        <label>Auto Tenant Creation:</label>
-        <input 
-          type="checkbox" 
-          checked={config.autoTenantCreation} 
-          onChange={e => update('autoTenantCreation', e.target.checked)} 
-          disabled={!config.enabled}
-        />
-      </div>
-      <div className="field">
-        <label>Auto Tenant Activation:</label>
-        <input 
-          type="checkbox" 
-          checked={config.autoTenantActivation} 
-          onChange={e => update('autoTenantActivation', e.target.checked)} 
-          disabled={!config.enabled}
-        />
-      </div>
+      {config.enabled && (
+        <>
+          <div className="field">
+            <label>Auto Tenant Creation:</label>
+            <input 
+              type="checkbox" 
+              checked={config.autoTenantCreation} 
+              onChange={e => update('autoTenantCreation', e.target.checked)} 
+            />
+          </div>
+          <div className="field">
+            <label>Auto Tenant Activation:</label>
+            <input 
+              type="checkbox" 
+              checked={config.autoTenantActivation} 
+              onChange={e => update('autoTenantActivation', e.target.checked)} 
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };
