@@ -927,6 +927,27 @@ export default function Collection({
         )}
       </div>
 
+      {/* Generative Config collapsible section */}
+      <div className="collapsible">
+        <button
+          className="collapsible-toggle"
+          aria-expanded={openGenerativeConfig}
+          onClick={() => setOpenGenerativeConfig((s) => !s)}
+        >
+          <span>Generative Configuration</span>
+          <span className="chev">{openGenerativeConfig ? '▾' : '▸'}</span>
+        </button>
+
+        {openGenerativeConfig && (
+          <div className="collapsible-panel">
+            <GenerativeConfigSection 
+              config={generativeConfig} 
+              setConfig={setGenerativeConfig}
+            />
+          </div>
+        )}
+      </div>
+
       {/* Inverted Index Config collapsible section */}
       <div className="collapsible">
         <button
@@ -988,27 +1009,6 @@ export default function Collection({
         {nodesNumber === 1 && (
           <div className="collapsible-panel" style={{ padding: 'var(--spacing-md)', color: 'var(--color-text-secondary)' }}>
             <p>Replication feature requires 2 or more nodes.</p>
-          </div>
-        )}
-      </div>
-
-      {/* Generative Config collapsible section */}
-      <div className="collapsible">
-        <button
-          className="collapsible-toggle"
-          aria-expanded={openGenerativeConfig}
-          onClick={() => setOpenGenerativeConfig((s) => !s)}
-        >
-          <span>Generative Configuration</span>
-          <span className="chev">{openGenerativeConfig ? '▾' : '▸'}</span>
-        </button>
-
-        {openGenerativeConfig && (
-          <div className="collapsible-panel">
-            <GenerativeConfigSection 
-              config={generativeConfig} 
-              setConfig={setGenerativeConfig}
-            />
           </div>
         )}
       </div>
