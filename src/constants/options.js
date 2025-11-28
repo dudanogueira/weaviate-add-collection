@@ -33,13 +33,29 @@ export const allAvailableModules = {
     documentationHref: 'https://docs.anthropic.com/en/api/getting-started',
     name: 'Generative Search - Anthropic'
   },
+  'generative-anyscale': {
+    documentationHref: 'https://docs.anyscale.com/endpoints/text-generation/',
+    name: 'Generative Search - Anyscale'
+  },
   'generative-aws': {
     documentationHref: 'https://docs.aws.amazon.com/bedrock/latest/APIReference/welcome.html',
     name: 'Generative Search - AWS'
   },
+  'generative-azure-openai': {
+    documentationHref: 'https://learn.microsoft.com/en-us/azure/ai-services/openai/',
+    name: 'Generative Search - Azure OpenAI'
+  },
   'generative-cohere': {
     documentationHref: 'https://docs.cohere.com/reference/chat',
     name: 'Generative Search - Cohere'
+  },
+  'generative-databricks': {
+    documentationHref: 'https://docs.databricks.com/en/generative-ai/generative-ai.html',
+    name: 'Generative Search - Databricks'
+  },
+  'generative-friendliai': {
+    documentationHref: 'https://docs.friendli.ai/',
+    name: 'Generative Search - FriendliAI'
   },
   'generative-google': {
     documentationHref: 'https://cloud.google.com/vertex-ai/docs/generative-ai/chat/test-chat-prompts',
@@ -49,6 +65,10 @@ export const allAvailableModules = {
     documentationHref: 'https://docs.mistral.ai/api/',
     name: 'Generative Search - Mistral'
   },
+  'generative-nvidia': {
+    documentationHref: 'https://docs.nvidia.com/nim/',
+    name: 'Generative Search - NVIDIA'
+  },
   'generative-ollama': {
     documentationHref: 'https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-completion',
     name: 'Generative Search - Ollama'
@@ -56,6 +76,10 @@ export const allAvailableModules = {
   'generative-openai': {
     documentationHref: 'https://platform.openai.com/docs/api-reference/completions',
     name: 'Generative Search - OpenAI'
+  },
+  'generative-xai': {
+    documentationHref: 'https://docs.x.ai/api',
+    name: 'Generative Search - xAI'
   },
   'multi2vec-google': {
     documentationHref: 'https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-multimodal-embeddings',
@@ -72,21 +96,21 @@ export const allAvailableModules = {
     documentationHref: 'https://txt.cohere.com/rerank/',
     name: 'Reranker - Cohere'
   },
-  'reranker-contextualai': {
-    documentationHref: 'https://contextual.ai/docs/reranking',
-    name: 'Reranker - Contextual AI'
-  },
   'reranker-jinaai': {
     documentationHref: 'https://jina.ai/reranker',
     name: 'Reranker - Jinaai'
   },
-  'reranker-voyageai': {
-    documentationHref: 'https://docs.voyageai.com/reference/reranker-api',
-    name: 'Reranker - VoyageAI'
-  },
   'reranker-nvidia': {
     documentationHref: 'https://docs.nvidia.com/nim/nemo-retriever/reranking/latest/index.html',
     name: 'Reranker - NVIDIA'
+  },
+  'reranker-transformers': {
+    documentationHref: 'https://weaviate.io/developers/weaviate/model-providers/transformers/reranker',
+    name: 'Reranker - Transformers'
+  },
+  'reranker-voyageai': {
+    documentationHref: 'https://docs.voyageai.com/reference/reranker-api',
+    name: 'Reranker - VoyageAI'
   },
   'text2vec-aws': {
     documentationHref: 'https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html',

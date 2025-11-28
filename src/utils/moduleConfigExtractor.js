@@ -52,7 +52,8 @@
 
 /**
  * Type definitions mapping for each vectorizer module.
- * This is extracted from weaviate-client/dist/node/esm/collections/config/types/vectorizer.d.ts
+ * Based on weaviate-client TypeScript definitions in:
+ * node_modules/weaviate-client/dist/node/esm/collections/config/types/vectorizer.d.ts
  */
 const VECTORIZER_CONFIG_FIELDS = {
   'img2vec-neural': {
@@ -130,146 +131,190 @@ const VECTORIZER_CONFIG_FIELDS = {
   },
   'multi2vec-jinaai': {
     fields: [
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
+      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector once embedded.' },
       { name: 'imageFields', type: 'string[]', description: 'The image fields used when vectorizing.' },
-      { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL where API requests should go.' }
+      { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether the collection name is vectorized (deprecated).' },
+      { name: 'weights', type: 'object', description: 'The weights of the fields used for vectorization.' }
     ]
   },
   'multi2vec-voyageai': {
     fields: [
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
       { name: 'imageFields', type: 'string[]', description: 'The image fields used when vectorizing.' },
-      { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL where API requests should go.' }
+      { name: 'outputEncoding', type: 'string', description: 'How the output from the model should be encoded on return.' },
+      { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' },
+      { name: 'truncate', type: 'boolean', description: 'Whether the input should be truncated to fit in the context window.' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether the collection name is vectorized.' },
+      { name: 'weights', type: 'object', description: 'The weights of the fields used for vectorization.' }
     ]
   },
   'ref2vec-centroid': {
     fields: [
-      { name: 'referenceProperties', type: 'string[]', required: true, description: 'The reference properties to use for centroid calculation.' },
-      { name: 'method', type: 'string', description: 'The method to use for centroid calculation (mean).' }
+      { name: 'referenceProperties', type: 'string[]', required: true, description: 'The properties used as reference points for vectorization.' },
+      { name: 'method', type: 'string', description: 'The method used to calculate the centroid (mean).' }
     ]
   },
   'text2vec-aws': {
     fields: [
-      { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'region', type: 'string', description: 'The AWS region where the model runs.' },
-      { name: 'service', type: 'string', description: 'The AWS service to use (bedrock, sagemaker).' },
-      { name: 'endpoint', type: 'string', description: 'The endpoint URL for SageMaker.' },
-      { name: 'targetModel', type: 'string', description: 'The target model for Bedrock.' }
+      { name: 'region', type: 'string', required: true, description: 'The AWS region where the model runs.' },
+      { name: 'service', type: 'string', required: true, description: 'The AWS service to use (bedrock, sagemaker).' },
+      { name: 'endpoint', type: 'string', description: 'The endpoint URL. REQUIRED for service sagemaker.' },
+      { name: 'model', type: 'string', description: 'The model to use. REQUIRED for service bedrock.' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether the collection name is vectorized.' }
     ]
   },
   'text2vec-azure-openai': {
     fields: [
       { name: 'resourceName', type: 'string', required: true, description: 'The Azure resource name.' },
       { name: 'deploymentId', type: 'string', required: true, description: 'The deployment ID.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Azure OpenAI.' }
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-cohere': {
     fields: [
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'truncate', type: 'string', description: 'The truncation strategy (NONE, START, END).' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Cohere API.' }
+      { name: 'truncate', type: 'boolean', description: 'Whether to truncate the input texts to fit within the context length.' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-contextionary': {
-    fields: []
+    fields: [
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
+    ]
   },
   'text2vec-databricks': {
     fields: [
-      { name: 'endpoint', type: 'string', required: true, description: 'The Databricks endpoint URL.' }
+      { name: 'endpoint', type: 'string', required: true, description: 'The Databricks endpoint URL.' },
+      { name: 'instruction', type: 'string', description: 'Instruction for the embedding model.' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-gpt4all': {
-    fields: []
+    fields: [
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
+    ]
   },
   'text2vec-huggingface': {
     fields: [
+      { name: 'endpointURL', type: 'string', description: 'The endpoint URL to use.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'passageModel', type: 'string', description: 'The passage model to use.' },
-      { name: 'queryModel', type: 'string', description: 'The query model to use.' },
-      { name: 'endpointURL', type: 'string', description: 'The endpoint URL for the model.' },
-      { name: 'waitForModel', type: 'boolean', description: 'Whether to wait for the model to be ready.' },
-      { name: 'useGPU', type: 'boolean', description: 'Whether to use GPU.' },
-      { name: 'useCache', type: 'boolean', description: 'Whether to use cache.' }
+      { name: 'passageModel', type: 'string', description: 'The model to use for passage vectorization.' },
+      { name: 'queryModel', type: 'string', description: 'The model to use for query vectorization.' },
+      { name: 'useCache', type: 'boolean', description: 'Whether to use the cache.' },
+      { name: 'useGPU', type: 'boolean', description: 'Whether to use the GPU.' },
+      { name: 'waitForModel', type: 'boolean', description: 'Whether to wait for the model.' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-jinaai': {
     fields: [
-      { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Jina AI API.' }
+      { name: 'model', type: 'string', description: 'The model to use (e.g., jina-embeddings-v2-base-en).' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-nvidia': {
     fields: [
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for NVIDIA API.' },
-      { name: 'truncation', type: 'boolean', description: 'Whether to apply truncation.' }
+      { name: 'truncate', type: 'boolean', description: 'Whether to truncate when vectorising.' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-mistral': {
     fields: [
-      { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Mistral API.' }
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
+      { name: 'model', type: 'string', description: 'The model to use (e.g., mistral-embed).' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-model2vec': {
     fields: [
-      { name: 'inferenceUrl', type: 'string', description: 'The URL where inference requests are sent.' }
+      { name: 'inferenceURL', type: 'string', description: 'The URL to use where API requests should go.' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-ollama': {
     fields: [
+      { name: 'apiEndpoint', type: 'string', description: 'The base URL to use where API requests should go.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'apiEndpoint', type: 'string', description: 'The Ollama API endpoint.' }
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-openai': {
     fields: [
-      { name: 'model', type: 'string', description: 'The model to use (default: text-embedding-3-small).' },
-      { name: 'modelVersion', type: 'string', description: 'The model version.' },
-      { name: 'type', type: 'string', description: 'The type of embeddings (text, code).' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for OpenAI API.' },
-      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector.' }
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
+      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector once embedded.' },
+      { name: 'model', type: 'string', description: 'The model to use (e.g., text-embedding-3-small).' },
+      { name: 'modelVersion', type: 'string', description: 'The model version to use.' },
+      { name: 'type', type: 'string', description: 'The type of model to use (text, code).' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-google': {
     fields: [
-      { name: 'projectId', type: 'string', required: true, description: 'The project ID of the model in GCP.' },
-      { name: 'location', type: 'string', description: 'The location where the model runs.' },
-      { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector.' }
+      { name: 'apiEndpoint', type: 'string', description: 'The API endpoint to use without a leading scheme.' },
+      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector once embedded.' },
+      { name: 'model', type: 'string', description: 'The model ID to use.' },
+      { name: 'modelId', type: 'string', description: 'The model ID to use (deprecated - use model instead).' },
+      { name: 'projectId', type: 'string', description: 'The project ID to use.' },
+      { name: 'titleProperty', type: 'string', description: 'The Weaviate property name to use as the title.' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-google-ai-studio': {
     fields: [
-      { name: 'model', type: 'string', description: 'The model to use.' }
+      { name: 'model', type: 'string', description: 'The model ID to use.' },
+      { name: 'titleProperty', type: 'string', description: 'The Weaviate property name to use as the title.' }
     ]
   },
   'text2vec-transformers': {
     fields: [
-      { name: 'poolingStrategy', type: 'string', description: 'The pooling strategy (masked_mean, cls).' },
-      { name: 'inferenceUrl', type: 'string', description: 'The URL where inference requests are sent.' }
+      { name: 'dimensions', type: 'number', description: 'The number of dimensions for the generated embeddings.' },
+      { name: 'inferenceUrl', type: 'string', description: 'The inference url to use where API requests should go.' },
+      { name: 'passageInferenceUrl', type: 'string', description: 'The inference url to use where passage API requests should go.' },
+      { name: 'queryInferenceUrl', type: 'string', description: 'The inference url to use where query API requests should go.' },
+      { name: 'poolingStrategy', type: 'string', description: 'The pooling strategy to use (masked_mean, cls).' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-voyageai': {
     fields: [
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Voyage AI API.' },
-      { name: 'truncate', type: 'boolean', description: 'Whether to truncate input.' }
+      { name: 'truncate', type: 'boolean', description: 'Whether to truncate the input texts to fit within the context length.' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-weaviate': {
     fields: [
-      { name: 'model', type: 'string', description: 'The model to use.' }
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
+      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector once embedded.' },
+      { name: 'model', type: 'string', description: 'The model to use (e.g., Snowflake/snowflake-arctic-embed-l-v2.0).' },
+      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2multivec-jinaai': {
     fields: [
-      { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Jina AI API.' },
-      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector.' }
+      { name: 'dimensions', type: 'number', description: 'The dimensionality of the multi-vector.' },
+      { name: 'model', type: 'string', description: 'The model to use.' }
+    ]
+  },
+  'multi2multivec-jinaai': {
+    fields: [
+      { name: 'imageFields', type: 'string[]', description: 'The image fields used when vectorizing.' },
+      { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' }
+    ]
+  },
+  'text2vec-morph': {
+    fields: [
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
+      { name: 'model', type: 'string', description: 'The model to use.' }
     ]
   }
 }
@@ -277,17 +322,19 @@ const VECTORIZER_CONFIG_FIELDS = {
 /**
  * Type definitions for generative modules
  * These are used for RAG (Retrieval-Augmented Generation) capabilities
+ * Based on weaviate-client TypeScript definitions in:
+ * node_modules/weaviate-client/dist/node/esm/collections/config/types/generative.d.ts
  */
 const GENERATIVE_CONFIG_FIELDS = {
   'generative-openai': {
     fields: [
       { name: 'model', type: 'string', description: 'The OpenAI model to use (e.g., gpt-4, gpt-3.5-turbo).' },
       { name: 'baseURL', type: 'string', description: 'The base URL for OpenAI API.' },
-      { name: 'temperatureProperty', type: 'string', description: 'The property name for temperature parameter.' },
-      { name: 'maxTokensProperty', type: 'string', description: 'The property name for max tokens parameter.' },
-      { name: 'frequencyPenaltyProperty', type: 'string', description: 'The property name for frequency penalty parameter.' },
-      { name: 'presencePenaltyProperty', type: 'string', description: 'The property name for presence penalty parameter.' },
-      { name: 'topPProperty', type: 'string', description: 'The property name for top_p parameter.' }
+      { name: 'frequencyPenaltyProperty', type: 'number', description: 'Frequency penalty parameter (property-level).' },
+      { name: 'maxTokensProperty', type: 'number', description: 'Maximum number of tokens to generate (property-level).' },
+      { name: 'presencePenaltyProperty', type: 'number', description: 'Presence penalty parameter (property-level).' },
+      { name: 'temperatureProperty', type: 'number', description: 'Temperature for response generation (property-level).' },
+      { name: 'topPProperty', type: 'number', description: 'Top-p sampling parameter (property-level).' }
     ]
   },
   'generative-anthropic': {
@@ -301,35 +348,69 @@ const GENERATIVE_CONFIG_FIELDS = {
       { name: 'stopSequences', type: 'string[]', description: 'Stop sequences for generation.' }
     ]
   },
-  'generative-cohere': {
+  'generative-anyscale': {
     fields: [
-      { name: 'model', type: 'string', description: 'The Cohere model to use.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Cohere API.' },
-      { name: 'temperature', type: 'number', description: 'Temperature for response generation (0-5).' },
-      { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' },
-      { name: 'k', type: 'number', description: 'Top-k sampling parameter.' },
-      { name: 'p', type: 'number', description: 'Top-p sampling parameter.' },
-      { name: 'frequencyPenalty', type: 'number', description: 'Frequency penalty parameter.' },
-      { name: 'presencePenalty', type: 'number', description: 'Presence penalty parameter.' }
+      { name: 'model', type: 'string', description: 'The Anyscale model to use.' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for Anyscale API.' },
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation.' }
     ]
   },
   'generative-aws': {
     fields: [
+      { name: 'region', type: 'string', required: true, description: 'The AWS region where the model runs.' },
+      { name: 'service', type: 'string', required: true, description: 'The AWS service to use (bedrock).' },
       { name: 'model', type: 'string', description: 'The AWS Bedrock model to use.' },
-      { name: 'region', type: 'string', description: 'The AWS region where the model runs.' },
-      { name: 'service', type: 'string', description: 'The AWS service to use (bedrock).' },
       { name: 'endpoint', type: 'string', description: 'The endpoint URL for the service.' },
-      { name: 'temperature', type: 'number', description: 'Temperature for response generation.' },
       { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' }
+    ]
+  },
+  'generative-azure-openai': {
+    fields: [
+      { name: 'resourceName', type: 'string', required: true, description: 'The Azure resource name.' },
+      { name: 'deploymentId', type: 'string', required: true, description: 'The deployment ID.' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for Azure OpenAI.' },
+      { name: 'frequencyPenaltyProperty', type: 'number', description: 'Frequency penalty parameter (property-level).' },
+      { name: 'maxTokensProperty', type: 'number', description: 'Maximum number of tokens to generate (property-level).' },
+      { name: 'presencePenaltyProperty', type: 'number', description: 'Presence penalty parameter (property-level).' },
+      { name: 'temperatureProperty', type: 'number', description: 'Temperature for response generation (property-level).' },
+      { name: 'topPProperty', type: 'number', description: 'Top-p sampling parameter (property-level).' }
+    ]
+  },
+  'generative-cohere': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The Cohere model to use.' },
+      { name: 'kProperty', type: 'number', description: 'Top-k sampling parameter (property-level).' },
+      { name: 'maxTokensProperty', type: 'number', description: 'Maximum number of tokens to generate (property-level).' },
+      { name: 'returnLikelihoodsProperty', type: 'string', description: 'Return likelihoods setting (property-level).' },
+      { name: 'stopSequencesProperty', type: 'string[]', description: 'Stop sequences for generation (property-level).' },
+      { name: 'temperatureProperty', type: 'number', description: 'Temperature for response generation (property-level).' }
+    ]
+  },
+  'generative-databricks': {
+    fields: [
+      { name: 'endpoint', type: 'string', required: true, description: 'The Databricks endpoint URL.' },
+      { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' },
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation.' },
+      { name: 'topK', type: 'number', description: 'Top-k sampling parameter.' },
+      { name: 'topP', type: 'number', description: 'Top-p sampling parameter.' }
+    ]
+  },
+  'generative-friendliai': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The FriendliAI model to use.' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for FriendliAI API.' },
+      { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' },
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation.' }
     ]
   },
   'generative-google': {
     fields: [
-      { name: 'projectId', type: 'string', required: true, description: 'The GCP project ID.' },
+      { name: 'projectId', type: 'string', description: 'The GCP project ID.' },
       { name: 'model', type: 'string', description: 'The Google model to use (e.g., gemini-pro).' },
-      { name: 'location', type: 'string', description: 'The location where the model runs.' },
+      { name: 'modelId', type: 'string', description: 'The model ID (deprecated - use model instead).' },
+      { name: 'apiEndpoint', type: 'string', description: 'The API endpoint URL.' },
+      { name: 'maxOutputTokens', type: 'number', description: 'Maximum number of output tokens to generate.' },
       { name: 'temperature', type: 'number', description: 'Temperature for response generation (0-1).' },
-      { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' },
       { name: 'topK', type: 'number', description: 'Top-k sampling parameter.' },
       { name: 'topP', type: 'number', description: 'Top-p sampling parameter.' }
     ]
@@ -338,16 +419,31 @@ const GENERATIVE_CONFIG_FIELDS = {
     fields: [
       { name: 'model', type: 'string', description: 'The Mistral model to use.' },
       { name: 'baseURL', type: 'string', description: 'The base URL for Mistral API.' },
-      { name: 'temperature', type: 'number', description: 'Temperature for response generation (0-1).' },
       { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' },
-      { name: 'topP', type: 'number', description: 'Top-p sampling parameter.' }
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation.' }
+    ]
+  },
+  'generative-nvidia': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The NVIDIA model to use (e.g., meta/llama-3.1-8b-instruct).' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for NVIDIA NIM API.' },
+      { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' },
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation.' }
     ]
   },
   'generative-ollama': {
     fields: [
       { name: 'model', type: 'string', description: 'The Ollama model to use.' },
-      { name: 'apiEndpoint', type: 'string', description: 'The Ollama API endpoint.' },
-      { name: 'temperature', type: 'number', description: 'Temperature for response generation.' }
+      { name: 'apiEndpoint', type: 'string', description: 'The Ollama API endpoint.' }
+    ]
+  },
+  'generative-xai': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The xAI model to use (e.g., grok-beta).' },
+      { name: 'baseURL', type: 'string', description: 'The base URL for xAI API.' },
+      { name: 'maxTokens', type: 'number', description: 'Maximum number of tokens to generate.' },
+      { name: 'temperature', type: 'number', description: 'Temperature for response generation.' },
+      { name: 'topP', type: 'number', description: 'Top-p sampling parameter.' }
     ]
   }
 }
@@ -355,37 +451,33 @@ const GENERATIVE_CONFIG_FIELDS = {
 /**
  * Configuration fields for reranker modules
  * These are used for reranking search results
+ * Based on weaviate-client TypeScript definitions in:
+ * node_modules/weaviate-client/dist/node/esm/collections/config/types/reranker.d.ts
  */
 const RERANKER_CONFIG_FIELDS = {
   'reranker-cohere': {
     fields: [
-      { name: 'model', type: 'string', description: 'The Cohere reranker model to use (e.g., rerank-english-v2.0, rerank-multilingual-v2.0).' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Cohere API.' }
-    ]
-  },
-  'reranker-contextualai': {
-    fields: [
-      { name: 'model', type: 'string', description: 'The Contextual AI reranker model to use.' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for Contextual AI API.' }
+      { name: 'model', type: 'string', description: 'The Cohere reranker model to use (e.g., rerank-english-v2.0, rerank-multilingual-v2.0).' }
     ]
   },
   'reranker-jinaai': {
     fields: [
-      { name: 'model', type: 'string', description: 'The JinaAI reranker model to use (e.g., jina-reranker-v1-base-en).' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for JinaAI API.' }
-    ]
-  },
-  'reranker-voyageai': {
-    fields: [
-      { name: 'model', type: 'string', description: 'The VoyageAI reranker model to use (e.g., rerank-lite-1, rerank-1).' },
-      { name: 'baseURL', type: 'string', description: 'The base URL for VoyageAI API.' }
+      { name: 'model', type: 'string', description: 'The JinaAI reranker model to use (e.g., jina-reranker-v2-base-multilingual, jina-reranker-v1-base-en).' }
     ]
   },
   'reranker-nvidia': {
     fields: [
-      { name: 'model', type: 'string', description: 'The NVIDIA reranker model to use (e.g., nv-rerank-qa-mistral-4b-v3).' },
       { name: 'baseURL', type: 'string', description: 'The base URL for NVIDIA NIM API.' },
-      { name: 'truncate', type: 'string', description: 'Truncation strategy: NONE, END (default).' }
+      { name: 'model', type: 'string', description: 'The NVIDIA reranker model to use (e.g., nvidia/rerank-qa-mistral-4b).' }
+    ]
+  },
+  'reranker-transformers': {
+    fields: []
+  },
+  'reranker-voyageai': {
+    fields: [
+      { name: 'baseURL', type: 'string', description: 'The base URL for VoyageAI API.' },
+      { name: 'model', type: 'string', description: 'The VoyageAI reranker model to use (e.g., rerank-lite-1).' }
     ]
   }
 }
