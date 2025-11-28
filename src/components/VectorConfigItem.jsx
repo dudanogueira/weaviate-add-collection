@@ -104,7 +104,7 @@ export default function VectorConfigItem({
           <small className="hint">Check this if you will provide pre-computed vectors instead of using a vectorizer</small>
         </div>
 
-        {/* Vectorize Class Name - common to all modules - hidden when bringing own vectors */}
+        {/* Vectorize Collection Name - common to all modules - hidden when bringing own vectors */}
         {!value.bringOwnVectors && (
           <div className="field">
             <label htmlFor={`vectorize-class-name-${index}`}>
@@ -115,9 +115,9 @@ export default function VectorConfigItem({
                 onChange={(e) => update('vectorizeClassName', e.target.checked)}
                 style={{ width: 'auto', marginRight: '8px' }}
               />
-              Vectorize Class Name
+              Vectorize Collection Name
             </label>
-            <small className="hint">Whether to vectorize the collection/class name</small>
+            <small className="hint">Whether to vectorize the collection name</small>
           </div>
         )}
 

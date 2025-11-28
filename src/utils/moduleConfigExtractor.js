@@ -87,7 +87,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'imageFields', type: 'string[]', description: 'The image fields used when vectorizing.' },
       { name: 'inferenceUrl', type: 'string', description: 'The URL where inference requests are sent.' },
       { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether the collection name is vectorized.' },
       { name: 'weights', type: 'object', description: 'The weights of the fields used for vectorization.' }
     ]
   },
@@ -98,7 +97,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'model', type: 'string', description: 'The specific model to use.' },
       { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' },
       { name: 'truncate', type: 'string', description: 'The truncation strategy to use.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether the collection name is vectorized.' },
       { name: 'weights', type: 'object', description: 'The weights of the fields used for vectorization.' }
     ]
   },
@@ -111,7 +109,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' },
       { name: 'thermalFields', type: 'string[]', description: 'The thermal fields used when vectorizing.' },
       { name: 'videoFields', type: 'string[]', description: 'The video fields used when vectorizing.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether the collection name is vectorized.' },
       { name: 'weights', type: 'object', description: 'The weights of the fields used for vectorization.' }
     ]
   },
@@ -125,7 +122,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'videoIntervalSeconds', type: 'number', description: 'Length of a video interval in seconds.' },
       { name: 'model', type: 'string', description: 'The model ID in use.' },
       { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector once embedded.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether the collection name is vectorized.' },
       { name: 'weights', type: 'object', description: 'The weights of the fields used for vectorization.' }
     ]
   },
@@ -136,7 +132,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'imageFields', type: 'string[]', description: 'The image fields used when vectorizing.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
       { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether the collection name is vectorized (deprecated).' },
       { name: 'weights', type: 'object', description: 'The weights of the fields used for vectorization.' }
     ]
   },
@@ -148,7 +143,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'outputEncoding', type: 'string', description: 'How the output from the model should be encoded on return.' },
       { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' },
       { name: 'truncate', type: 'boolean', description: 'Whether the input should be truncated to fit in the context window.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether the collection name is vectorized.' },
       { name: 'weights', type: 'object', description: 'The weights of the fields used for vectorization.' }
     ]
   },
@@ -164,7 +158,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'service', type: 'string', required: true, description: 'The AWS service to use (bedrock, sagemaker).' },
       { name: 'endpoint', type: 'string', description: 'The endpoint URL. REQUIRED for service sagemaker.' },
       { name: 'model', type: 'string', description: 'The model to use. REQUIRED for service bedrock.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether the collection name is vectorized.' }
     ]
   },
   'text2vec-azure-openai': {
@@ -172,7 +165,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'resourceName', type: 'string', required: true, description: 'The Azure resource name.' },
       { name: 'deploymentId', type: 'string', required: true, description: 'The deployment ID.' },
       { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-cohere': {
@@ -180,24 +172,20 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
       { name: 'truncate', type: 'boolean', description: 'Whether to truncate the input texts to fit within the context length.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-contextionary': {
     fields: [
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-databricks': {
     fields: [
       { name: 'endpoint', type: 'string', required: true, description: 'The Databricks endpoint URL.' },
       { name: 'instruction', type: 'string', description: 'Instruction for the embedding model.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-gpt4all': {
     fields: [
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-huggingface': {
@@ -209,13 +197,11 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'useCache', type: 'boolean', description: 'Whether to use the cache.' },
       { name: 'useGPU', type: 'boolean', description: 'Whether to use the GPU.' },
       { name: 'waitForModel', type: 'boolean', description: 'Whether to wait for the model.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-jinaai': {
     fields: [
       { name: 'model', type: 'string', description: 'The model to use (e.g., jina-embeddings-v2-base-en).' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-nvidia': {
@@ -223,27 +209,23 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
       { name: 'truncate', type: 'boolean', description: 'Whether to truncate when vectorising.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-mistral': {
     fields: [
       { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
       { name: 'model', type: 'string', description: 'The model to use (e.g., mistral-embed).' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-model2vec': {
     fields: [
       { name: 'inferenceURL', type: 'string', description: 'The URL to use where API requests should go.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-ollama': {
     fields: [
       { name: 'apiEndpoint', type: 'string', description: 'The base URL to use where API requests should go.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-openai': {
@@ -253,7 +235,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'model', type: 'string', description: 'The model to use (e.g., text-embedding-3-small).' },
       { name: 'modelVersion', type: 'string', description: 'The model version to use.' },
       { name: 'type', type: 'string', description: 'The type of model to use (text, code).' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-google': {
@@ -264,7 +245,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'modelId', type: 'string', description: 'The model ID to use (deprecated - use model instead).' },
       { name: 'projectId', type: 'string', description: 'The project ID to use.' },
       { name: 'titleProperty', type: 'string', description: 'The Weaviate property name to use as the title.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-google-ai-studio': {
@@ -280,7 +260,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'passageInferenceUrl', type: 'string', description: 'The inference url to use where passage API requests should go.' },
       { name: 'queryInferenceUrl', type: 'string', description: 'The inference url to use where query API requests should go.' },
       { name: 'poolingStrategy', type: 'string', description: 'The pooling strategy to use (masked_mean, cls).' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-voyageai': {
@@ -288,7 +267,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
       { name: 'model', type: 'string', description: 'The model to use.' },
       { name: 'truncate', type: 'boolean', description: 'Whether to truncate the input texts to fit within the context length.' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2vec-weaviate': {
@@ -296,7 +274,6 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
       { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector once embedded.' },
       { name: 'model', type: 'string', description: 'The model to use (e.g., Snowflake/snowflake-arctic-embed-l-v2.0).' },
-      { name: 'vectorizeCollectionName', type: 'boolean', description: 'Whether to vectorize the collection name.' }
     ]
   },
   'text2multivec-jinaai': {
