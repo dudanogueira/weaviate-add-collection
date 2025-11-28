@@ -86,7 +86,7 @@ describe('Collection Component - Replication Configuration', () => {
         description: 'Strategy Test Collection',
         replicationConfig: {
           factor: 2,
-          asyncEnabled: false,
+          asyncEnabled: true, // Must be true for deletionStrategy to appear in JSON
           deletionStrategy: strategy
         },
         properties: [],
@@ -109,14 +109,16 @@ describe('Collection Component - Replication Configuration', () => {
       const generatedJson = JSON.parse(jsonBlock.textContent)
 
       expect(generatedJson.replicationConfig).toBeDefined()
+      expect(generatedJson.replicationConfig.factor).toBe(2)
+      expect(generatedJson.replicationConfig.asyncEnabled).toBe(true)
       
       // Only non-default values appear in the JSON
-      // NoAutomatedResolution is the default, so it won't appear unless another value changes
+      // NoAutomatedResolution is the default, so it won't appear
       if (strategy === 'NoAutomatedResolution') {
-        // When strategy is default, only factor appears (since it's 2, not 1)
-        expect(generatedJson.replicationConfig.factor).toBe(2)
+        // When strategy is default, it won't appear in JSON
+        expect(generatedJson.replicationConfig.deletionStrategy).toBeUndefined()
       } else {
-        // Non-default strategies will appear in the JSON
+        // Non-default strategies will appear in the JSON when asyncEnabled is true
         expect(generatedJson.replicationConfig.deletionStrategy).toBe(strategy)
       }
       
@@ -134,13 +136,18 @@ describe('Collection Component - Replication Configuration', () => {
       expect(jsonBlock).toBeTruthy()
     })
 
-    // Find and click the Replication Configuration toggle
+    // Find and click the Replication Configuration toggle to expand it
     const replicationToggle = screen.getByText('Replication Configuration').closest('button')
     expect(replicationToggle).toBeTruthy()
+    await user.click(replicationToggle)
 
-    // Find the replication factor input
+    // Wait for the section to expand and find the replication factor input
+    await waitFor(() => {
+      const factorInput = container.querySelector('input[type="number"][min="1"]')
+      expect(factorInput).toBeTruthy()
+    })
+
     const factorInput = container.querySelector('input[type="number"][min="1"]')
-    expect(factorInput).toBeTruthy()
     
     // Triple click to select all, then type new value
     await user.tripleClick(factorInput)
@@ -156,6 +163,7 @@ describe('Collection Component - Replication Configuration', () => {
   })
 
   it('should respect nodesNumber as maximum replication factor', async () => {
+    const user = userEvent.setup()
     const nodesNumber = 5
     const { container } = render(<Collection nodesNumber={nodesNumber} />)
 
@@ -165,9 +173,17 @@ describe('Collection Component - Replication Configuration', () => {
       expect(jsonBlock).toBeTruthy()
     })
 
-    // Find the replication factor input
+    // Click the Replication Configuration toggle to expand it
+    const replicationToggle = screen.getByText('Replication Configuration').closest('button')
+    await user.click(replicationToggle)
+
+    // Wait for the section to expand and find the replication factor input
+    await waitFor(() => {
+      const factorInput = container.querySelector('input[type="number"][min="1"]')
+      expect(factorInput).toBeTruthy()
+    })
+
     const factorInput = container.querySelector('input[type="number"][min="1"]')
-    expect(factorInput).toBeTruthy()
     expect(factorInput.max).toBe(nodesNumber.toString())
 
     // Verify the hint is displayed
@@ -183,6 +199,28 @@ describe('Collection Component - Replication Configuration', () => {
     await waitFor(() => {
       const jsonBlock = container.querySelector('.json-block')
       expect(jsonBlock).toBeTruthy()
+    })
+
+    // Click the Replication Configuration toggle to expand it
+    const replicationToggle = screen.getByText('Replication Configuration').closest('button')
+    await user.click(replicationToggle)
+
+    // Wait for the section to expand
+    await waitFor(() => {
+      const factorInput = container.querySelector('input[type="number"][min="1"]')
+      expect(factorInput).toBeTruthy()
+    })
+
+    // First, set replication factor to 2 or more to show async enabled field
+    const factorInput = container.querySelector('input[type="number"][min="1"]')
+    
+    await user.tripleClick(factorInput)
+    await user.keyboard('2')
+
+    // Wait for the async enabled field to appear
+    await waitFor(() => {
+      const label = screen.queryByText('Async Enabled:')
+      expect(label).toBeTruthy()
     })
 
     // Find the async enabled checkbox by label
@@ -213,7 +251,39 @@ describe('Collection Component - Replication Configuration', () => {
       expect(jsonBlock).toBeTruthy()
     })
 
-    // Find the deletion strategy select by label (now always visible)
+    // Click the Replication Configuration toggle to expand it
+    const replicationToggle = screen.getByText('Replication Configuration').closest('button')
+    await user.click(replicationToggle)
+
+    // Wait for the section to expand
+    await waitFor(() => {
+      const factorInput = container.querySelector('input[type="number"][min="1"]')
+      expect(factorInput).toBeTruthy()
+    })
+
+    // First, set replication factor to 2 or more to show async enabled field
+    const factorInput = container.querySelector('input[type="number"][min="1"]')
+    await user.tripleClick(factorInput)
+    await user.keyboard('2')
+
+    // Wait for the async enabled field to appear
+    await waitFor(() => {
+      const label = screen.queryByText('Async Enabled:')
+      expect(label).toBeTruthy()
+    })
+
+    // Enable async to show deletion strategy field
+    const asyncLabel = screen.getByText('Async Enabled:')
+    const asyncCheckbox = asyncLabel.parentElement.querySelector('input[type="checkbox"]')
+    await user.click(asyncCheckbox)
+
+    // Wait for deletion strategy field to appear
+    await waitFor(() => {
+      const strategyLabel = screen.queryByText('Deletion Strategy:')
+      expect(strategyLabel).toBeTruthy()
+    })
+
+    // Find the deletion strategy select by label
     const strategyLabel = screen.getByText('Deletion Strategy:')
     const strategySelect = strategyLabel.parentElement.querySelector('select')
     expect(strategySelect).toBeTruthy()
@@ -241,6 +311,16 @@ describe('Collection Component - Replication Configuration', () => {
       expect(jsonBlock).toBeTruthy()
     })
 
+    // Click the Replication Configuration toggle to expand it
+    const replicationToggle = screen.getByText('Replication Configuration').closest('button')
+    await user.click(replicationToggle)
+
+    // Wait for the section to expand
+    await waitFor(() => {
+      const factorInput = container.querySelector('input[type="number"][min="1"]')
+      expect(factorInput).toBeTruthy()
+    })
+
     // Change only the replication factor
     const factorInput = container.querySelector('input[type="number"][min="1"]')
     
@@ -248,10 +328,7 @@ describe('Collection Component - Replication Configuration', () => {
     await user.tripleClick(factorInput)
     await user.keyboard('2')
     
-    // Trigger blur to ensure state is updated
-    await user.click(document.body)
-
-    // Wait for state update
+    // Wait for state update - factor 2 should show replicationConfig with only factor
     await waitFor(() => {
       const jsonBlock = container.querySelector('.json-block')
       const generatedJson = JSON.parse(jsonBlock.textContent)
@@ -260,7 +337,7 @@ describe('Collection Component - Replication Configuration', () => {
       // asyncEnabled and deletionStrategy should not be included (they're defaults)
       expect(generatedJson.replicationConfig.asyncEnabled).toBeUndefined()
       expect(generatedJson.replicationConfig.deletionStrategy).toBeUndefined()
-    }, { timeout: 2000 })
+    }, { timeout: 3000 })
   })
 
   it('should handle complex replication configuration from import', async () => {

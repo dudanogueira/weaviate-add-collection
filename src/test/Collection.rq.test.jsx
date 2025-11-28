@@ -219,4 +219,62 @@ describe('Collection RQ (Rotational Quantization) Handling', () => {
     expect(generatedJson.vectorConfig.default.vectorIndexConfig).toHaveProperty('rq')
     expect(generatedJson.vectorConfig.default.vectorIndexConfig.rq.bits).toBe(1)
   })
+
+  it('should correctly import a collection with RQ nested inside HNSW config', async () => {
+    const jsonWithNestedRQ = {
+      class: 'Compression',
+      description: 'Test with RQ nested in HNSW',
+      vectorConfig: {
+        default: {
+          vectorizer: {
+            none: {}
+          },
+          vectorIndexType: 'hnsw',
+          vectorIndexConfig: {
+            distanceMetric: 'cosine',
+            skip: false,
+            hnsw: {
+              cleanupIntervalSeconds: 300,
+              dynamicEfMin: 100,
+              dynamicEfMax: 500,
+              dynamicEfFactor: 8,
+              ef: -1,
+              efConstruction: 128,
+              filterStrategy: 'sweeping',
+              flatSearchCutoff: 40000,
+              maxConnections: 32,
+              skip: false,
+              vectorCacheMaxObjects: 1000000000000,
+              distanceMetric: 'cosine',
+              rq: {
+                enabled: true,
+                bits: 8,
+                rescoreLimit: 20
+              }
+            }
+          }
+        }
+      },
+      properties: []
+    }
+
+    render(<Collection initialJson={jsonWithNestedRQ} />)
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Compression')).toBeInTheDocument()
+    })
+
+    // Check that nested RQ config was imported correctly
+    const jsonBlock = screen.getByText(/"class"/, { selector: 'pre' })
+    const generatedJsonText = jsonBlock.textContent
+    const generatedJson = JSON.parse(generatedJsonText)
+
+    // The quantizer should be detected and the config should be accessible
+    expect(generatedJson.vectorConfig.default.vectorIndexConfig).toHaveProperty('rq')
+    expect(generatedJson.vectorConfig.default.vectorIndexConfig.rq).toMatchObject({
+      bits: 8,
+      rescoreLimit: 20,
+      enabled: true
+    })
+  })
 })

@@ -8,6 +8,15 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     const user = userEvent.setup()
     render(<Collection />)
     
+    // Expand Vectorizer Configuration section
+    const vectorizerToggle = screen.getByText('Vectorizer Configuration').closest('button')
+    await user.click(vectorizerToggle)
+    
+    // Wait for section to expand
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /add vector config/i })).toBeInTheDocument()
+    })
+    
     // Add a vector config
     const addVectorBtn = screen.getByRole('button', { name: /add vector config/i })
     await user.click(addVectorBtn)
@@ -31,6 +40,15 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     const user = userEvent.setup()
     render(<Collection />)
     
+    // Expand Vectorizer Configuration section
+    const vectorizerToggle = screen.getByText('Vectorizer Configuration').closest('button')
+    await user.click(vectorizerToggle)
+    
+    // Wait for section to expand
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /add vector config/i })).toBeInTheDocument()
+    })
+    
     // Add a vector config
     const addVectorBtn = screen.getByRole('button', { name: /add vector config/i })
     await user.click(addVectorBtn)
@@ -48,6 +66,15 @@ describe('Collection - Dynamic Index with Quantizers', () => {
   const nameInput = screen.getByPlaceholderText('MyCollection')
     await user.clear(nameInput)
     await user.type(nameInput, 'TestCollection')
+    
+    // Expand Vectorizer Configuration section
+    const vectorizerToggle = screen.getByText('Vectorizer Configuration').closest('button')
+    await user.click(vectorizerToggle)
+    
+    // Wait for section to expand
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /add vector config/i })).toBeInTheDocument()
+    })
     
     // Add a vector config
     const addVectorBtn = screen.getByRole('button', { name: /add vector config/i })
@@ -106,6 +133,15 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     await user.clear(nameInput)
     await user.type(nameInput, 'TestCollection')
     
+    // Expand Vectorizer Configuration section
+    const vectorizerToggle = screen.getByText('Vectorizer Configuration').closest('button')
+    await user.click(vectorizerToggle)
+    
+    // Wait for section to expand
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /add vector config/i })).toBeInTheDocument()
+    })
+    
     // Add a vector config
     const addVectorBtn = screen.getByRole('button', { name: /add vector config/i })
     await user.click(addVectorBtn)
@@ -157,6 +193,15 @@ describe('Collection - Dynamic Index with Quantizers', () => {
   it('should only show BQ option for flat index quantization', async () => {
     const user = userEvent.setup()
     render(<Collection />)
+    
+    // Expand Vectorizer Configuration section
+    const vectorizerToggle = screen.getByText('Vectorizer Configuration').closest('button')
+    await user.click(vectorizerToggle)
+    
+    // Wait for section to expand
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /add vector config/i })).toBeInTheDocument()
+    })
     
     // Add a vector config
     const addVectorBtn = screen.getByRole('button', { name: /add vector config/i })
@@ -231,6 +276,10 @@ describe('Collection - Dynamic Index with Quantizers', () => {
     
     const user = userEvent.setup()
     const { container } = render(<Collection initialJson={initialJson} />)
+    
+    // Expand Vectorizer Configuration section
+    const vectorizerToggle = screen.getByText('Vectorizer Configuration').closest('button')
+    await user.click(vectorizerToggle)
     
     // Open vector configs section
     await waitFor(() => {

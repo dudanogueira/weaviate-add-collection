@@ -175,18 +175,29 @@ describe('Collection Component - Multi-Tenancy Configuration', () => {
       })
     }
 
-    // Wait for section to expand and content to be visible
+    // When multi-tenancy is disabled, sub-options should not be visible at all
+    // (they are hidden, not just disabled)
+    expect(screen.queryByText(/^Auto Tenant Creation:$/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^Auto Tenant Activation:$/)).not.toBeInTheDocument()
+
+    // Now enable multi-tenancy to show sub-options
+    const enabledLabel = screen.getByText(/^Enabled:$/)
+    const enabledCheckbox = enabledLabel.parentElement.querySelector('input[type="checkbox"]')
+    await user.click(enabledCheckbox)
+
+    // Wait for sub-options to appear
     await waitFor(() => {
       expect(screen.getByText(/^Auto Tenant Creation:$/)).toBeInTheDocument()
+      expect(screen.getByText(/^Auto Tenant Activation:$/)).toBeInTheDocument()
     })
 
-    // Check that sub-options are disabled when main option is disabled
+    // Verify sub-options are now visible and enabled
     const autoCreationLabel = screen.getByText(/^Auto Tenant Creation:$/)
     const autoCreationCheckbox = autoCreationLabel.parentElement.querySelector('input[type="checkbox"]')
-    expect(autoCreationCheckbox.disabled).toBe(true)
+    expect(autoCreationCheckbox.disabled).toBe(false)
 
     const autoActivationLabel = screen.getByText(/^Auto Tenant Activation:$/)
     const autoActivationCheckbox = autoActivationLabel.parentElement.querySelector('input[type="checkbox"]')
-    expect(autoActivationCheckbox.disabled).toBe(true)
+    expect(autoActivationCheckbox.disabled).toBe(false)
   })
 })

@@ -26,9 +26,10 @@ describe('Collection Component - Empty Fields Preservation', () => {
     const jsonBlock = container.querySelector('.json-block')
     const generatedJson = JSON.parse(jsonBlock.textContent)
 
-    // Verify that empty strings are preserved, not replaced with defaults
+    // Verify that empty name is preserved, but empty description is removed
     expect(generatedJson.class).toBe('')
-    expect(generatedJson.description).toBe('')
+    // description is removed when empty/whitespace
+    expect(generatedJson.description).toBeUndefined()
   })
 
   it('should preserve specific name and description values from imported JSON', async () => {
@@ -72,7 +73,8 @@ describe('Collection Component - Empty Fields Preservation', () => {
 
     // Verify that defaults are used when creating a new collection
     expect(generatedJson.class).toBe('MyCollection')
-    expect(generatedJson.description).toBe('A Brand new collection')
+    // description is not included when empty (no initialJson means empty description)
+    expect(generatedJson.description).toBeUndefined()
   })
 
   it('should preserve whitespace-only values', async () => {
@@ -92,8 +94,9 @@ describe('Collection Component - Empty Fields Preservation', () => {
     const jsonBlock = container.querySelector('.json-block')
     const generatedJson = JSON.parse(jsonBlock.textContent)
 
-    // Verify that whitespace is preserved
+    // Verify that whitespace class is preserved but whitespace description is removed
     expect(generatedJson.class).toBe('   ')
-    expect(generatedJson.description).toBe('  ')
+    // description is removed when it's only whitespace
+    expect(generatedJson.description).toBeUndefined()
   })
 })

@@ -244,14 +244,28 @@ export default function Collection({
           
           if (indexType === 'hnsw') {
             // Detect quantizer type from existing properties
-            if (indexConfig.pq) {
+            // Check both root level and hnsw nested level
+            const hnswConfig = indexConfig.hnsw || {}
+            if (indexConfig.pq || hnswConfig.pq) {
               processedIndexConfig.quantizer = 'pq'
-            } else if (indexConfig.bq) {
+              if (hnswConfig.pq && !processedIndexConfig.pq) {
+                processedIndexConfig.pq = hnswConfig.pq
+              }
+            } else if (indexConfig.bq || hnswConfig.bq) {
               processedIndexConfig.quantizer = 'bq'
-            } else if (indexConfig.sq) {
+              if (hnswConfig.bq && !processedIndexConfig.bq) {
+                processedIndexConfig.bq = hnswConfig.bq
+              }
+            } else if (indexConfig.sq || hnswConfig.sq) {
               processedIndexConfig.quantizer = 'sq'
-            } else if (indexConfig.rq) {
+              if (hnswConfig.sq && !processedIndexConfig.sq) {
+                processedIndexConfig.sq = hnswConfig.sq
+              }
+            } else if (indexConfig.rq || hnswConfig.rq) {
               processedIndexConfig.quantizer = 'rq'
+              if (hnswConfig.rq && !processedIndexConfig.rq) {
+                processedIndexConfig.rq = hnswConfig.rq
+              }
             }
           } else if (indexType === 'flat') {
             // Flat only supports BQ and RQ
@@ -356,14 +370,28 @@ export default function Collection({
           
           if (indexType === 'hnsw') {
             // Detect quantizer type from existing properties
-            if (indexConfig.pq) {
+            // Check both root level and hnsw nested level
+            const hnswConfig = indexConfig.hnsw || {}
+            if (indexConfig.pq || hnswConfig.pq) {
               processedIndexConfig.quantizer = 'pq'
-            } else if (indexConfig.bq) {
+              if (hnswConfig.pq && !processedIndexConfig.pq) {
+                processedIndexConfig.pq = hnswConfig.pq
+              }
+            } else if (indexConfig.bq || hnswConfig.bq) {
               processedIndexConfig.quantizer = 'bq'
-            } else if (indexConfig.sq) {
+              if (hnswConfig.bq && !processedIndexConfig.bq) {
+                processedIndexConfig.bq = hnswConfig.bq
+              }
+            } else if (indexConfig.sq || hnswConfig.sq) {
               processedIndexConfig.quantizer = 'sq'
-            } else if (indexConfig.rq) {
+              if (hnswConfig.sq && !processedIndexConfig.sq) {
+                processedIndexConfig.sq = hnswConfig.sq
+              }
+            } else if (indexConfig.rq || hnswConfig.rq) {
               processedIndexConfig.quantizer = 'rq'
+              if (hnswConfig.rq && !processedIndexConfig.rq) {
+                processedIndexConfig.rq = hnswConfig.rq
+              }
             }
           } else if (indexType === 'flat') {
             // Flat only supports BQ and RQ

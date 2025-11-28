@@ -44,22 +44,18 @@ describe('Collection Component - Create Collection Test', () => {
     await user.clear(descriptionInput)
     await user.type(descriptionInput, 'This is a test collection created from the form')
 
-    // Add a property
     // First, make sure Properties section is open
     const propertiesButton = screen.getByRole('button', { name: /properties/i })
     if (propertiesButton.getAttribute('aria-expanded') === 'false') {
       await user.click(propertiesButton)
     }
 
-    // Click "Add Property" button
-    const addPropertyButton = screen.getByRole('button', { name: /add property/i })
-    await user.click(addPropertyButton)
-
-    // Fill in property details (find the first property name input)
-    const propertyInputs = container.querySelectorAll('input[placeholder*="property"]')
-    if (propertyInputs.length > 0) {
-      await user.clear(propertyInputs[0])
-      await user.type(propertyInputs[0], 'title')
+    // Fill in the default property that already exists
+    // Find the first property name input using placeholder
+    const propertyNameInputs = container.querySelectorAll('input[placeholder^="new_property"]')
+    if (propertyNameInputs.length > 0) {
+      await user.clear(propertyNameInputs[0])
+      await user.type(propertyNameInputs[0], 'title')
     }
 
     // Wait for JSON to be generated
