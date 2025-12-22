@@ -6,6 +6,7 @@ import MultiTenancyConfigSection from './MultiTenancyConfigSection'
 import ReplicationConfigSection from './ReplicationConfigSection'
 import GenerativeConfigSection from './GenerativeConfigSection'
 import RerankerConfigSection from './RerankerConfigSection'
+import { validateCollectionName, sanitizeCollectionName } from '../utils/collectionNameValidator'
 
 // Contract:
 // Inputs: optional `initialJson` object with { name, description }
@@ -30,6 +31,7 @@ export default function Collection({
   const [description, setDescription] = useState(
     initialJson ? (initialJson.description ?? '') : ''
   )
+  const [nameValidation, setNameValidation] = useState({ valid: true, error: null, warning: null })
   const [generatedJson, setGeneratedJson] = useState({})
   const [invertedIndexConfig, setInvertedIndexConfig] = useState({
     bm25_b: 0.75,
@@ -69,6 +71,16 @@ export default function Collection({
   const [openMultiTenancyConfig, setOpenMultiTenancyConfig] = useState(false)
   const [openReplicationConfig, setOpenReplicationConfig] = useState(false)
   const [openGenerativeConfig, setOpenGenerativeConfig] = useState(false)
+
+  // Validate collection name whenever it changes
+  useEffect(() => {
+    if (name) {
+      const validation = validateCollectionName(name)
+      setNameValidation(validation)
+    } else {
+      setNameValidation({ valid: true, error: null, warning: null })
+    }
+  }, [name])
 
   // Update replication factor when nodesNumber changes
   useEffect(() => {
@@ -1032,11 +1044,32 @@ export default function Collection({
                 id="collection-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onBlur={() => {
+                  // Auto-sanitize on blur if invalid
+                  if (name && !nameValidation.valid) {
+                    const sanitized = sanitizeCollectionName(name)
+                    if (sanitized !== name) {
+                      setName(sanitized)
+                    }
+                  }
+                }}
                 placeholder="MyCollection"
-                className={!name.trim() && name !== '' ? 'input-error' : ''}
+                className={!nameValidation.valid ? 'input-error' : ''}
               />
-              {!name.trim() && name !== '' && (
-                <div className="field-error">Collection name is required</div>
+              {nameValidation.error && (
+                <small className="error-text" style={{ color: '#dc2626', display: 'block', marginTop: '4px' }}>
+                  ❌ {nameValidation.error}
+                </small>
+              )}
+              {nameValidation.warning && (
+                <small className="warning-text" style={{ color: '#f59e0b', display: 'block', marginTop: '4px' }}>
+                  ⚠️ {nameValidation.warning}
+                </small>
+              )}
+              {nameValidation.valid && !nameValidation.warning && name && (
+                <small className="success-text" style={{ color: '#10b981', display: 'block', marginTop: '4px' }}>
+                  ✓ Valid collection name
+                </small>
               )}
             </div>
 
