@@ -96,43 +96,55 @@ export default function Collection({
     // Handle both 'name' and 'class' fields for backwards compatibility
     setName(initialJson?.name || initialJson?.class || '')
     setDescription(initialJson?.description || '')
+    
+    // Helper function to recursively process properties and their nested properties
+    const processProperty = (p) => {
+      // ...existing code...
+      let dataTypeValue
+      if (Array.isArray(p.dataType)) {
+        dataTypeValue = p.dataType[0]
+      } else if (typeof p.dataType === 'string') {
+        dataTypeValue = p.dataType
+      } else {
+        dataTypeValue = 'text'
+      }
+      const isArrayType = dataTypeValue ? dataTypeValue.includes('[]') : false
+      const baseDataType = dataTypeValue ? dataTypeValue.replace('[]', '') : 'text'
+      let vectorizePropertyName
+      if (baseDataType === 'text' && ((p.moduleConfig && typeof p.moduleConfig === 'object') || (p.vectorizerConfig && typeof p.vectorizerConfig === 'object'))) {
+        try {
+          const configs = {
+            ...(p.moduleConfig || {}),
+            ...(p.vectorizerConfig || {})
+          }
+          const anyTrue = Object.values(configs).some(cfg => cfg && typeof cfg === 'object' && cfg.vectorizePropertyName === true)
+          if (anyTrue) vectorizePropertyName = true
+        } catch (_) {}
+      }
+      
+      const result = {
+        name: p.name || '',
+        dataType: baseDataType,
+        description: p.description || '',
+        indexFilterable: p.indexFilterable ?? true,
+        indexRangeFilters: p.indexRangeFilters ?? false,
+        indexSearchable: p.indexSearchable ?? true,
+        isArray: isArrayType,
+        tokenization: p.tokenization || 'word',
+        ...(vectorizePropertyName === true ? { vectorizePropertyName: true } : {})
+      }
+      
+      // Process nested properties recursively for object type
+      if (baseDataType === 'object' && p.nestedProperties && Array.isArray(p.nestedProperties)) {
+        result.nestedProperties = p.nestedProperties.map(processProperty)
+      }
+      
+      return result
+    }
+    
     // Also load properties from imported JSON
     if (initialJson?.properties && Array.isArray(initialJson.properties)) {
-      setProperties(initialJson.properties.map(p => {
-        // ...existing code...
-        let dataTypeValue
-        if (Array.isArray(p.dataType)) {
-          dataTypeValue = p.dataType[0]
-        } else if (typeof p.dataType === 'string') {
-          dataTypeValue = p.dataType
-        } else {
-          dataTypeValue = 'text'
-        }
-        const isArrayType = dataTypeValue ? dataTypeValue.includes('[]') : false
-        const baseDataType = dataTypeValue ? dataTypeValue.replace('[]', '') : 'text'
-        let vectorizePropertyName
-        if (baseDataType === 'text' && ((p.moduleConfig && typeof p.moduleConfig === 'object') || (p.vectorizerConfig && typeof p.vectorizerConfig === 'object'))) {
-          try {
-            const configs = {
-              ...(p.moduleConfig || {}),
-              ...(p.vectorizerConfig || {})
-            }
-            const anyTrue = Object.values(configs).some(cfg => cfg && typeof cfg === 'object' && cfg.vectorizePropertyName === true)
-            if (anyTrue) vectorizePropertyName = true
-          } catch (_) {}
-        }
-        return {
-          name: p.name || '',
-          dataType: baseDataType,
-          description: p.description || '',
-          indexFilterable: p.indexFilterable ?? true,
-          indexRangeFilters: p.indexRangeFilters ?? false,
-          indexSearchable: p.indexSearchable ?? true,
-          isArray: isArrayType,
-          tokenization: p.tokenization || 'word',
-          ...(vectorizePropertyName === true ? { vectorizePropertyName: true } : {})
-        }
-      }))
+      setProperties(initialJson.properties.map(processProperty))
     }
 
     // Load invertedIndexConfig from imported JSON if present
@@ -685,16 +697,16 @@ export default function Collection({
   const [vectorConfigs, setVectorConfigs] = useState([])
 
   useEffect(() => {
-    // Transform properties into final JSON shape:
-    const transformed = (properties || []).map((p, idx) => {
+    // Helper function to recursively transform properties including nested properties
+    const transformProperty = (p, idx) => {
       // Extract base type and ensure it doesn't contain []
       let rawBaseType = typeof p.dataType === 'string' ? p.dataType : (Array.isArray(p.dataType) ? p.dataType[0] : 'text')
       const baseType = rawBaseType ? rawBaseType.replace('[]', '') : 'text'
       const typeValue = p.isArray ? `${baseType}[]` : baseType
       // placeholders when not provided
-  // placeholder name per-property: new_property1, new_property2, ...
-  const placeholderName = `new_property${idx + 1}`
-  const placeholderDescription = `Description for ${placeholderName}`
+      // placeholder name per-property: new_property1, new_property2, ...
+      const placeholderName = `new_property${idx + 1}`
+      const placeholderDescription = `Description for ${placeholderName}`
       const placeholderDataType = 'text'
       const placeholderTokenization = 'word'
 
@@ -754,8 +766,16 @@ export default function Collection({
         }
       }
 
+      // Recursively process nested properties for object type
+      if (finalBaseType === 'object' && p.nestedProperties && Array.isArray(p.nestedProperties) && p.nestedProperties.length > 0) {
+        result.nestedProperties = p.nestedProperties.map(transformProperty)
+      }
+
       return result
-    })
+    }
+    
+    // Transform properties into final JSON shape:
+    const transformed = (properties || []).map(transformProperty)
 
     setGeneratedJson((prev) => {
       if (transformed.length === 0) {

@@ -1,0 +1,141 @@
+{
+  "class": "TestNestedObject",
+  "description": "Example collection with nested object properties",
+  "properties": [
+    {
+      "name": "nested",
+      "dataType": ["object"],
+      "description": "A nested object property",
+      "indexFilterable": true,
+      "indexSearchable": false,
+      "nestedProperties": [
+        {
+          "name": "text",
+          "dataType": ["text"],
+          "description": "A text field inside nested object",
+          "indexFilterable": true,
+          "indexSearchable": true,
+          "tokenization": "word"
+        },
+        {
+          "name": "child",
+          "dataType": ["object"],
+          "description": "A nested object inside nested object",
+          "indexFilterable": true,
+          "indexSearchable": false,
+          "nestedProperties": [
+            {
+              "name": "number",
+              "dataType": ["number"],
+              "description": "A number field inside child object",
+              "indexFilterable": true,
+              "indexSearchable": false
+            },
+            {
+              "name": "deepChild",
+              "dataType": ["object"],
+              "description": "A deeply nested object",
+              "indexFilterable": true,
+              "indexSearchable": false,
+              "nestedProperties": [
+                {
+                  "name": "boolean",
+                  "dataType": ["boolean"],
+                  "description": "A boolean field in deep nested object",
+                  "indexFilterable": true,
+                  "indexSearchable": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "date",
+          "dataType": ["date"],
+          "description": "A date field inside nested object",
+          "indexFilterable": true,
+          "indexSearchable": false,
+          "indexRangeFilters": true
+        }
+      ]
+    },
+    {
+      "name": "simpleText",
+      "dataType": ["text"],
+      "description": "A regular text property for comparison",
+      "indexFilterable": true,
+      "indexSearchable": true,
+      "tokenization": "word"
+    },
+    {
+      "name": "arrayOfObjects",
+      "dataType": ["object[]"],
+      "description": "An array of nested objects",
+      "indexFilterable": true,
+      "indexSearchable": false,
+      "nestedProperties": [
+        {
+          "name": "id",
+          "dataType": ["int"],
+          "description": "ID field in array item",
+          "indexFilterable": true,
+          "indexSearchable": false
+        },
+        {
+          "name": "value",
+          "dataType": ["text"],
+          "description": "Value field in array item",
+          "indexFilterable": true,
+          "indexSearchable": true,
+          "tokenization": "word"
+        }
+      ]
+    }
+  ],
+  "invertedIndexConfig": {
+    "bm25": {
+      "b": 0.75,
+      "k1": 1.2
+    },
+    "cleanupIntervalSeconds": 60,
+    "indexNullState": false,
+    "indexPropertyLength": false,
+    "indexTimestamps": false,
+    "stopwords": {
+      "preset": "en"
+    }
+  },
+  "multiTenancyConfig": {
+    "enabled": false,
+    "autoTenantCreation": false,
+    "autoTenantActivation": false
+  },
+  "replicationConfig": {
+    "factor": 1,
+    "asyncEnabled": false,
+    "deletionStrategy": "NoAutomatedResolution"
+  },
+  "vectorConfig": {
+    "default": {
+      "vectorizer": {
+        "none": {}
+      },
+      "vectorIndexType": "hnsw",
+      "vectorIndexConfig": {
+        "cleanupIntervalSeconds": 300,
+        "distanceMetric": "cosine",
+        "dynamicEfMin": 100,
+        "dynamicEfMax": 500,
+        "dynamicEfFactor": 8,
+        "ef": -1,
+        "efConstruction": 128,
+        "filterStrategy": "acorn",
+        "flatSearchCutoff": 40000,
+        "maxConnections": 32,
+        "skip": false,
+        "vectorCacheMaxObjects": 1000000000000
+      }
+    }
+  },
+  "moduleConfig": {}
+}

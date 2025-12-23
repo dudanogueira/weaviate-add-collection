@@ -18,7 +18,8 @@ export const dataTypeOptions = [
   { value: 'geoCoordinates', label: 'geoCoordinates' },
   { value: 'phoneNumber', label: 'phoneNumber' },
   { value: 'uuid', label: 'uuid' },
-  { value: 'blob', label: 'blob' }
+  { value: 'blob', label: 'blob' },
+  { value: 'object', label: 'object' }
 ]
 
 export const indexTypeOptions = [

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { tokenizationOptions, dataTypeOptions } from '../constants/options'
 import { validatePropertyName, sanitizePropertyName } from '../utils/propertyNameValidator'
+import NestedPropertySection from './NestedPropertySection'
 
-export default function PropertyItem({ value, onChange, onDelete, index }) {
+export default function PropertyItem({ value, onChange, onDelete, index, isNested = false, depth = 0 }) {
   const [nameValidation, setNameValidation] = useState({ valid: true, error: null, warning: null })
   
   useEffect(() => {
@@ -49,9 +50,17 @@ export default function PropertyItem({ value, onChange, onDelete, index }) {
       newValue.indexSearchable = true
     } else if (val === 'int' || val === 'number' || val === 'date') {
       newValue.indexRangeFilters = false
+    } else if (val === 'object') {
+      // Initialize empty nestedProperties array for object type
+      newValue.nestedProperties = []
+      newValue.indexSearchable = false
     }
     
     onChange(newValue)
+  }
+
+  function updateNestedProperties(nestedProps) {
+    update('nestedProperties', nestedProps)
   }
 
   return (
@@ -166,6 +175,13 @@ export default function PropertyItem({ value, onChange, onDelete, index }) {
         )}
       </div>
 
+      {value.dataType === 'object' && (
+        <NestedPropertySection 
+          nestedProperties={value.nestedProperties || []} 
+          onChange={updateNestedProperties}
+          depth={depth + 1}
+        />
+      )}
 
     </div>
   )
