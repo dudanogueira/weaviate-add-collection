@@ -24,3 +24,39 @@
 
 export { default as Collection } from './src/components/Collection';
 export { default } from './src/components/Collection';
+
+// Collection name validation and sanitization utilities
+export {
+  validateCollectionName,
+  sanitizeCollectionName,
+  autoCorrectCollectionName
+} from './src/utils/collectionNameValidator';
+
+// Property name validation and sanitization utilities
+export {
+  validatePropertyName,
+  sanitizePropertyName,
+  autoCorrectPropertyName
+} from './src/utils/propertyNameValidator';
+
+// Module configuration utilities
+export {
+  getModuleConfigFields,
+  getGenerativeConfigFields,
+  hasGenerativeConfigOptions,
+  getRerankerConfigFields,
+  hasRerankerConfigOptions,
+  getAllModuleConfigs,
+  hasConfigOptions,
+  getRequiredFields,
+  validateModuleConfig
+} from './src/utils/moduleConfigExtractor';
+
+// Constants and options
+export {
+  tokenizationOptions,
+  dataTypeOptions,
+  indexTypeOptions,
+  allAvailableModules,
+  getVectorizerModuleOptions
+} from './src/constants/options';
