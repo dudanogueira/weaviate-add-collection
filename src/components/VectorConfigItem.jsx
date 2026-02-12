@@ -508,8 +508,8 @@ export default function VectorConfigItem({
                         }}
                       >
                         <option value="none">None</option>
+                        <option value="rq">Rotational Quantization (RQ) - Recommended</option>
                         <option value="bq">Binary Quantization (BQ)</option>
-                        <option value="rq">Rotational Quantization (RQ)</option>
                       </select>
                       <small className="hint">
                         Compression method to reduce memory usage for Flat index
@@ -889,10 +889,10 @@ export default function VectorConfigItem({
                                 }}
                               >
                                 <option value="none">None</option>
+                                <option value="rq">Rotational Quantization (RQ) - Recommended</option>
                                 <option value="pq">Product Quantization (PQ)</option>
                                 <option value="bq">Binary Quantization (BQ)</option>
                                 <option value="sq">Scalar Quantization (SQ)</option>
-                                <option value="rq">Rotational Quantization (RQ)</option>
                               </select>
                               <small className="hint">Compression method to reduce memory usage for HNSW index</small>
                             </div>
@@ -1272,8 +1272,8 @@ export default function VectorConfigItem({
                                 }}
                               >
                                 <option value="none">None</option>
+                                <option value="rq">Rotational Quantization (RQ) - Recommended</option>
                                 <option value="bq">Binary Quantization (BQ)</option>
-                                <option value="rq">Rotational Quantization (RQ)</option>
                               </select>
                               <small className="hint">
                                 Compression method to reduce memory usage for Flat index
@@ -1447,10 +1447,10 @@ export default function VectorConfigItem({
                     }}
                   >
                     <option value="none">None</option>
+                    <option value="rq">Rotational Quantization (RQ) - Recommended</option>
                     <option value="pq">Product Quantization (PQ)</option>
                     <option value="bq">Binary Quantization (BQ)</option>
                     <option value="sq">Scalar Quantization (SQ)</option>
-                    <option value="rq">Rotational Quantization (RQ)</option>
                   </select>
                   <small className="hint">Compression method to reduce memory usage</small>
                 </div>
