@@ -89,11 +89,12 @@ export default function App() {
         </div>
       </div>
 
-      <Collection 
-        initialJson={importedJson} 
+      <Collection
+        initialJson={importedJson}
         onChange={handleSchemaChange}
         onSubmit={handleSubmit}
         nodesNumber={nodesNumber}
+        hideCreateButton={true}
         // availableModules={availableModules} // Optional: pass server modules here
       />
     </div>

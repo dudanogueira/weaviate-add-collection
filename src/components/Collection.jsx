@@ -71,6 +71,7 @@ export default function Collection({
   const [openMultiTenancyConfig, setOpenMultiTenancyConfig] = useState(false)
   const [openReplicationConfig, setOpenReplicationConfig] = useState(false)
   const [openGenerativeConfig, setOpenGenerativeConfig] = useState(false)
+  const [openRerankerConfig, setOpenRerankerConfig] = useState(false)
 
   // Validate collection name whenever it changes
   useEffect(() => {
@@ -1174,18 +1175,21 @@ export default function Collection({
       <div className="collapsible">
         <button
           className="collapsible-toggle"
-          aria-expanded={true}
-          onClick={() => {}}
+          aria-expanded={openRerankerConfig}
+          onClick={() => setOpenRerankerConfig((s) => !s)}
         >
           <span>Reranker Configuration</span>
+          <span className="chev">{openRerankerConfig ? '▾' : '▸'}</span>
         </button>
 
-        <div className="collapsible-panel">
-          <RerankerConfigSection 
-            config={rerankerConfig} 
-            setConfig={setRerankerConfig}
-          />
-        </div>
+        {openRerankerConfig && (
+          <div className="collapsible-panel">
+            <RerankerConfigSection
+              config={rerankerConfig}
+              setConfig={setRerankerConfig}
+            />
+          </div>
+        )}
       </div>
 
       {/* Inverted Index Config collapsible section */}

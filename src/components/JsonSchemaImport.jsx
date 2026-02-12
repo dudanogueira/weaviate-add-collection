@@ -1,15 +1,34 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 export default function JsonSchemaImport({ onSchemaLoad }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [jsonInput, setJsonInput] = useState('')
   const [error, setError] = useState(null)
+  const [isValidJson, setIsValidJson] = useState(false)
+
+  useEffect(() => {
+    if (!jsonInput.trim()) {
+      setIsValidJson(false)
+      setError(null)
+      return
+    }
+
+    try {
+      JSON.parse(jsonInput)
+      setIsValidJson(true)
+      setError(null)
+    } catch (err) {
+      setIsValidJson(false)
+      setError(`Invalid JSON: ${err.message}`)
+    }
+  }, [jsonInput])
 
   const handleLoadSchema = () => {
     try {
       const parsed = JSON.parse(jsonInput)
       setError(null)
       onSchemaLoad(parsed)
+      setIsExpanded(false)
     } catch (err) {
       setError(`Invalid JSON: ${err.message}`)
     }
@@ -18,6 +37,7 @@ export default function JsonSchemaImport({ onSchemaLoad }) {
   const handleClear = () => {
     setJsonInput('')
     setError(null)
+    setIsValidJson(false)
   }
 
   return (
@@ -77,16 +97,16 @@ export default function JsonSchemaImport({ onSchemaLoad }) {
           )}
 
           <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-            <button 
+            <button
               onClick={handleLoadSchema}
-              disabled={!jsonInput.trim()}
+              disabled={!isValidJson}
               style={{
                 padding: '0.5rem 1rem',
-                backgroundColor: jsonInput.trim() ? '#4CAF50' : '#ccc',
+                backgroundColor: isValidJson ? '#4CAF50' : '#ccc',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
-                cursor: jsonInput.trim() ? 'pointer' : 'not-allowed',
+                cursor: isValidJson ? 'pointer' : 'not-allowed',
                 fontWeight: 'bold'
               }}
             >
