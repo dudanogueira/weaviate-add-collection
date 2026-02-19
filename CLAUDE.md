@@ -50,11 +50,29 @@ All logic lives in three files:
    ```js
    { value: 'myOption', label: 'My Option', featureId: 'myNewFeature' }
    ```
-3. Filter the options in the component:
+3. Use `useVersionFilteredOptions` in the component:
    ```js
    const filtered = useVersionFilteredOptions(myOptionsArray)
    // use filtered in the <select>
    ```
+   Unavailable options are kept but rendered with `disabled` and `"— Requires Weaviate ≥ X.Y.Z"` appended to the label.
+
+**To gate an entire collapsible section:**
+1. Add an entry to `src/constants/versionFeatures.js`.
+2. Replace the `<div className="collapsible">...</div>` block with `VersionGatedSection`:
+   ```jsx
+   import { VersionGatedSection } from '../context/VersionContext'
+
+   <VersionGatedSection
+     featureId="myNewFeature"
+     title="Section Title"
+     isOpen={openState}
+     onToggle={() => setOpenState(s => !s)}
+   >
+     <MySection ... />
+   </VersionGatedSection>
+   ```
+   When unavailable, the toggle button is shown disabled with `"— Requires Weaviate ≥ X.Y.Z"` in the title. Panel content is not rendered.
 
 **Tooltip CSS** is in `src/styles.css` under `/* ── Version-gated tooltip */`.
 The `data-version-tooltip` attribute drives the CSS `::after` tooltip — no JS library needed.

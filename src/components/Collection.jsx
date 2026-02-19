@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { VersionProvider } from '../context/VersionContext'
+import { VersionProvider, VersionGatedSection } from '../context/VersionContext'
 import PropertySection from './PropertySection'
 import VectorConfigSection from './VectorConfigSection'
 import InvertedIndexConfigSection from './InvertedIndexConfigSection'
@@ -1214,22 +1214,14 @@ export default function Collection({
       </div>
 
       {/* Multi Tenancy Config collapsible section */}
-      <div className="collapsible">
-        <button
-          className="collapsible-toggle"
-          aria-expanded={openMultiTenancyConfig}
-          onClick={() => setOpenMultiTenancyConfig((s) => !s)}
-        >
-          <span>Multi Tenancy Configuration</span>
-          <span className="chev">{openMultiTenancyConfig ? '▾' : '▸'}</span>
-        </button>
-
-        {openMultiTenancyConfig && (
-          <div className="collapsible-panel">
-            <MultiTenancyConfigSection config={multiTenancyConfig} setConfig={setMultiTenancyConfig} />
-          </div>
-        )}
-      </div>
+      <VersionGatedSection
+        featureId="multiTenancy"
+        title="Multi Tenancy Configuration"
+        isOpen={openMultiTenancyConfig}
+        onToggle={() => setOpenMultiTenancyConfig((s) => !s)}
+      >
+        <MultiTenancyConfigSection config={multiTenancyConfig} setConfig={setMultiTenancyConfig} />
+      </VersionGatedSection>
 
       {/* Replication Config collapsible section */}
       <div className="collapsible">

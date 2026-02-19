@@ -10,6 +10,7 @@
  */
 export const VERSION_FEATURES = {
   // Multi-tenancy
+  multiTenancy:                '1.20.0',
   autoTenantCreation:          '1.25.2',
   autoTenantActivation:        '1.25.2',
 

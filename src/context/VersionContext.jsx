@@ -80,6 +80,61 @@ export function useVersionFilteredOptions(options) {
 }
 
 /**
+ * VersionGatedSection — wraps a collapsible section.
+ *
+ * Renders a standard `.collapsible` toggle + panel. When the feature is NOT
+ * available the toggle button is disabled and the version requirement is
+ * appended inline to the title (same convention as disabled dropdown options).
+ * The panel content is not rendered at all when unavailable.
+ *
+ * When available (or version is unconstrained) it behaves exactly like the
+ * hand-written collapsible markup in Collection.jsx.
+ *
+ * Props:
+ *   featureId {string}   - key from VERSION_FEATURES
+ *   title     {string}   - section heading shown in the toggle button
+ *   isOpen    {boolean}  - controlled open state (ignored when unavailable)
+ *   onToggle  {function} - called when the user clicks the toggle
+ *   children  {node}     - panel content
+ */
+export function VersionGatedSection({ featureId, title, isOpen, onToggle, children }) {
+  const { available, tooltip } = useVersionFeature(featureId)
+
+  if (available) {
+    return (
+      <div className="collapsible">
+        <button
+          className="collapsible-toggle"
+          aria-expanded={isOpen}
+          onClick={onToggle}
+        >
+          <span>{title}</span>
+          <span className="chev">{isOpen ? '▾' : '▸'}</span>
+        </button>
+        {isOpen && (
+          <div className="collapsible-panel">
+            {children}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="collapsible">
+      <button
+        className="collapsible-toggle"
+        disabled
+        aria-expanded={false}
+        style={{ cursor: 'not-allowed', opacity: 0.5 }}
+      >
+        <span>{title}{tooltip ? ` — ${tooltip}` : ''}</span>
+      </button>
+    </div>
+  )
+}
+
+/**
  * VersionGated — wraps any field or section.
  *
  * When the feature is NOT available:
