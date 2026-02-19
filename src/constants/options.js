@@ -25,7 +25,7 @@ export const dataTypeOptions = [
 export const indexTypeOptions = [
   { value: 'hnsw', label: 'HNSW (Recommended)', description: 'Hierarchical Navigable Small World graph' },
   { value: 'flat', label: 'Flat', description: 'Flat index for brute-force search' },
-  { value: 'dynamic', label: 'Dynamic', description: 'Dynamically switches between HNSW and Flat' }
+  { value: 'dynamic', label: 'Dynamic', description: 'Dynamically switches between HNSW and Flat', featureId: 'dynamicIndexType' }
 ]
 
 // All available modules from Weaviate

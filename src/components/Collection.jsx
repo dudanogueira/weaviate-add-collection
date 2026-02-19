@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { VersionProvider } from '../context/VersionContext'
 import PropertySection from './PropertySection'
 import VectorConfigSection from './VectorConfigSection'
 import InvertedIndexConfigSection from './InvertedIndexConfigSection'
@@ -17,13 +18,14 @@ import { validateCollectionName, sanitizeCollectionName } from '../utils/collect
 //         optional `hideCreateButton` boolean to hide the "Create Collection" button (useful when using hooks)
 // Outputs: Programmatic access to schema via onChange/onSubmit callbacks instead of DOM scraping.
 
-export default function Collection({ 
-  initialJson = null, 
-  availableModules = null, 
+export default function Collection({
+  initialJson = null,
+  availableModules = null,
   nodesNumber = null,
   onChange = null,
   onSubmit = null,
-  hideCreateButton = false
+  hideCreateButton = false,
+  weaviateVersion = null
 }) {
   const [name, setName] = useState(
     initialJson ? (initialJson.name ?? initialJson.class ?? '') : ''
@@ -1039,6 +1041,7 @@ export default function Collection({
   }
 
   return (
+    <VersionProvider weaviateVersion={weaviateVersion}>
     <div className="card">
       <div className="card-section-header">
         <h3>
@@ -1291,5 +1294,6 @@ export default function Collection({
         )}
       </div>
     </div>
+    </VersionProvider>
   )
 }

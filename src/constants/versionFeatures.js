@@ -1,0 +1,27 @@
+/**
+ * Central registry: featureId -> minimum Weaviate version string.
+ *
+ * When a weaviateVersion prop is set on <Collection>, any VersionGated
+ * component or useVersionFilteredOptions call referencing one of these IDs
+ * will be disabled/filtered if the running version is below the minimum.
+ *
+ * Add new entries here whenever a Weaviate release introduces a new field,
+ * section, or dropdown option.
+ */
+export const VERSION_FEATURES = {
+  // Multi-tenancy
+  autoTenantCreation:          '1.25.2',
+  autoTenantActivation:        '1.25.2',
+
+  // Replication
+  replicationAsyncEnabled:     '1.29.0',
+  replicationDeletionStrategy: '1.28.0',
+
+  // Vector index types & compression
+  dynamicIndexType:            '1.25.0',
+  rqQuantizationHnsw:          '1.32.0',  // RQ for HNSW index
+  rqQuantizationFlat:          '1.35.0',  // RQ for Flat index
+
+  // Property indexing
+  indexRangeFilters:           '1.24.0',
+}

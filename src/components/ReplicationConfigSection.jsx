@@ -1,4 +1,5 @@
 import React from 'react';
+import { VersionGated } from '../context/VersionContext';
 
 const defaultConfig = {
   factor: 1,
@@ -38,27 +39,31 @@ const ReplicationConfigSection = ({ config, setConfig, nodesNumber = null }) => 
       </div>
       {config.factor !== null && config.factor >= 2 && (
         <>
-          <div className="field">
-            <label>Async Enabled:</label>
-            <input 
-              type="checkbox" 
-              checked={config.asyncEnabled} 
-              onChange={e => update('asyncEnabled', e.target.checked)}
-            />
-          </div>
-          {config.asyncEnabled && (
+          <VersionGated featureId="replicationAsyncEnabled">
             <div className="field">
-              <label>Deletion Strategy:</label>
-              <select 
-                value={config.deletionStrategy} 
-                onChange={e => update('deletionStrategy', e.target.value)}
-              >
-                <option value="NoAutomatedResolution">NoAutomatedResolution</option>
-                <option value="DeleteOnConflict">DeleteOnConflict</option>
-                <option value="TimeBasedResolution">TimeBasedResolution</option>
-              </select>
+              <label>Async Enabled:</label>
+              <input
+                type="checkbox"
+                checked={config.asyncEnabled}
+                onChange={e => update('asyncEnabled', e.target.checked)}
+              />
             </div>
-          )}
+          </VersionGated>
+          <VersionGated featureId="replicationDeletionStrategy">
+            {config.asyncEnabled && (
+              <div className="field">
+                <label>Deletion Strategy:</label>
+                <select
+                  value={config.deletionStrategy}
+                  onChange={e => update('deletionStrategy', e.target.value)}
+                >
+                  <option value="NoAutomatedResolution">NoAutomatedResolution</option>
+                  <option value="DeleteOnConflict">DeleteOnConflict</option>
+                  <option value="TimeBasedResolution">TimeBasedResolution</option>
+                </select>
+              </div>
+            )}
+          </VersionGated>
         </>
       )}
     </div>

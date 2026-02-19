@@ -6,6 +6,7 @@ export default function App() {
   const [importedJson, setImportedJson] = useState(null)
   const [currentSchema, setCurrentSchema] = useState(null)
   const [nodesNumber, setNodesNumber] = useState(null)
+  const [weaviateVersion, setWeaviateVersion] = useState('')
   // Example: You can pass availableModules from your server
   // const [availableModules, setAvailableModules] = useState(null)
 
@@ -62,6 +63,18 @@ export default function App() {
         <h1>Weaviate — Add Collection</h1>
       </div>
       
+      <div className="card-section">
+        <label className="file-label">Weaviate Server Version (optional):</label>
+        <input
+          type="text"
+          value={weaviateVersion}
+          onChange={(e) => setWeaviateVersion(e.target.value)}
+          placeholder="e.g. 1.24.0 — leave blank to show all features"
+          style={{ width: '280px' }}
+        />
+        <small className="hint">Fields unavailable in this version will be greyed out with a tooltip</small>
+      </div>
+
       <JsonSchemaImport onSchemaLoad={setImportedJson} />
 
       <Collection
@@ -70,6 +83,7 @@ export default function App() {
         onSubmit={handleSubmit}
         nodesNumber={nodesNumber}
         hideCreateButton={true}
+        weaviateVersion={weaviateVersion || null}
         // availableModules={availableModules} // Optional: pass server modules here
       />
     </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { tokenizationOptions, dataTypeOptions } from '../constants/options'
 import { validatePropertyName, sanitizePropertyName } from '../utils/propertyNameValidator'
 import NestedPropertySection from './NestedPropertySection'
+import { VersionGated } from '../context/VersionContext'
 
 export default function PropertyItem({ value, onChange, onDelete, index, isNested = false, depth = 0 }) {
   const [nameValidation, setNameValidation] = useState({ valid: true, error: null, warning: null })
@@ -171,7 +172,9 @@ export default function PropertyItem({ value, onChange, onDelete, index, isNeste
           <label><input type="checkbox" checked={!!value.indexSearchable} onChange={(e) => update('indexSearchable', e.target.checked)} /> indexSearchable</label>
         )}
         {(value.dataType === 'int' || value.dataType === 'number' || value.dataType === 'date') && (
-          <label><input type="checkbox" checked={!!value.indexRangeFilters} onChange={(e) => update('indexRangeFilters', e.target.checked)} /> indexRangeFilters</label>
+          <VersionGated featureId="indexRangeFilters">
+            <label><input type="checkbox" checked={!!value.indexRangeFilters} onChange={(e) => update('indexRangeFilters', e.target.checked)} /> indexRangeFilters</label>
+          </VersionGated>
         )}
       </div>
 

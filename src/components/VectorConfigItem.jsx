@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { indexTypeOptions, getVectorizerModuleOptions } from '../constants/options'
 import ModuleConfigForm from './ModuleConfigForm'
+import { VersionGated, useVersionFilteredOptions } from '../context/VersionContext'
 
-export default function VectorConfigItem({ 
-  value, 
-  onChange, 
-  onDelete, 
+export default function VectorConfigItem({
+  value,
+  onChange,
+  onDelete,
   index,
   availableModules = null,
   properties = []
@@ -13,6 +14,22 @@ export default function VectorConfigItem({
   const [activeTab, setActiveTab] = useState('vectorizer')
   const [dynamicSubTab, setDynamicSubTab] = useState('hnsw')
   const vectorizerOptions = getVectorizerModuleOptions(availableModules)
+
+  // Version-filtered index type options (removes 'dynamic' if below 1.25.0)
+  const filteredIndexTypeOptions = useVersionFilteredOptions(indexTypeOptions)
+  // Whether RQ quantization is available in the current version
+  const filteredFlatQuantizerOptions = useVersionFilteredOptions([
+    { value: 'none', label: 'None' },
+    { value: 'rq', label: 'Rotational Quantization (RQ) - Recommended', featureId: 'rqQuantizationFlat' },
+    { value: 'bq', label: 'Binary Quantization (BQ)' },
+  ])
+  const filteredHnswQuantizerOptions = useVersionFilteredOptions([
+    { value: 'none', label: 'None' },
+    { value: 'rq', label: 'Rotational Quantization (RQ) - Recommended', featureId: 'rqQuantizationHnsw' },
+    { value: 'pq', label: 'Product Quantization (PQ)' },
+    { value: 'bq', label: 'Binary Quantization (BQ)' },
+    { value: 'sq', label: 'Scalar Quantization (SQ)' },
+  ])
 
   function update(field, val) {
     onChange({ ...value, [field]: val })
@@ -303,7 +320,7 @@ export default function VectorConfigItem({
                     value={value.indexType || 'hnsw'}
                     onChange={(e) => update('indexType', e.target.value)}
                   >
-                    {indexTypeOptions.map((opt) => (
+                    {filteredIndexTypeOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
                       </option>
@@ -507,9 +524,9 @@ export default function VectorConfigItem({
                           update('indexConfig', newIndexConfig)
                         }}
                       >
-                        <option value="none">None</option>
-                        <option value="rq">Rotational Quantization (RQ) - Recommended</option>
-                        <option value="bq">Binary Quantization (BQ)</option>
+                        {filteredFlatQuantizerOptions.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
                       </select>
                       <small className="hint">
                         Compression method to reduce memory usage for Flat index
@@ -572,6 +589,7 @@ export default function VectorConfigItem({
                     )}
 
                     {/* RQ Configuration for Flat (regular, non-dynamic) */}
+                    <VersionGated featureId="rqQuantizationFlat">
                     {value.indexConfig?.rq && (
                       <div style={{ marginTop: '12px', padding: '12px', borderRadius: '4px' }} className="quantization-config">
                         <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 500 }}>RQ Settings</h6>
@@ -623,6 +641,7 @@ export default function VectorConfigItem({
                         </div>
                       </div>
                     )}
+                    </VersionGated>
                   </div>
                 )}
 
@@ -888,11 +907,9 @@ export default function VectorConfigItem({
                                   })
                                 }}
                               >
-                                <option value="none">None</option>
-                                <option value="rq">Rotational Quantization (RQ) - Recommended</option>
-                                <option value="pq">Product Quantization (PQ)</option>
-                                <option value="bq">Binary Quantization (BQ)</option>
-                                <option value="sq">Scalar Quantization (SQ)</option>
+                                {filteredHnswQuantizerOptions.map(opt => (
+                                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
                               </select>
                               <small className="hint">Compression method to reduce memory usage for HNSW index</small>
                             </div>
@@ -1143,6 +1160,7 @@ export default function VectorConfigItem({
                             )}
 
                             {/* RQ Configuration for HNSW */}
+                            <VersionGated featureId="rqQuantizationHnsw">
                             {value.indexConfig?.hnsw?.quantizer === 'rq' && (
                               <div style={{ marginTop: '12px', padding: '12px', borderRadius: '4px' }} className="quantization-config">
                                 <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 500 }}>RQ Settings</h6>
@@ -1203,6 +1221,7 @@ export default function VectorConfigItem({
                                 </div>
                               </div>
                             )}
+                            </VersionGated>
                           </div>
                         )}
 
@@ -1271,9 +1290,9 @@ export default function VectorConfigItem({
                                   })
                                 }}
                               >
-                                <option value="none">None</option>
-                                <option value="rq">Rotational Quantization (RQ) - Recommended</option>
-                                <option value="bq">Binary Quantization (BQ)</option>
+                                {filteredFlatQuantizerOptions.map(opt => (
+                                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
                               </select>
                               <small className="hint">
                                 Compression method to reduce memory usage for Flat index
@@ -1345,6 +1364,7 @@ export default function VectorConfigItem({
                             )}
 
                             {/* RQ Configuration for Flat */}
+                            <VersionGated featureId="rqQuantizationFlat">
                             {value.indexConfig?.flat?.quantizer === 'rq' && (
                               <div style={{ marginTop: '12px', padding: '12px', borderRadius: '4px' }} className="quantization-config">
                                 <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 500 }}>RQ Settings</h6>
@@ -1405,6 +1425,7 @@ export default function VectorConfigItem({
                                 </div>
                               </div>
                             )}
+                            </VersionGated>
                           </div>
                         )}
                       </div>
@@ -1446,11 +1467,9 @@ export default function VectorConfigItem({
                       update('indexConfig', newIndexConfig)
                     }}
                   >
-                    <option value="none">None</option>
-                    <option value="rq">Rotational Quantization (RQ) - Recommended</option>
-                    <option value="pq">Product Quantization (PQ)</option>
-                    <option value="bq">Binary Quantization (BQ)</option>
-                    <option value="sq">Scalar Quantization (SQ)</option>
+                    {filteredHnswQuantizerOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
                   </select>
                   <small className="hint">Compression method to reduce memory usage</small>
                 </div>
@@ -1684,6 +1703,7 @@ export default function VectorConfigItem({
                 )}
 
                 {/* Rotational Quantization Configuration */}
+                <VersionGated featureId="rqQuantizationHnsw">
                 {value.indexConfig?.rq && (
                   <div style={{ marginTop: '16px' }}>
                     <h5 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 600 }}>Rotational Quantization Settings</h5>
@@ -1760,6 +1780,7 @@ export default function VectorConfigItem({
                     </div>
                   </div>
                 )}
+                </VersionGated>
 
                 {!value.indexConfig?.pq && !value.indexConfig?.bq && !value.indexConfig?.sq && !value.indexConfig?.rq && (
                   <div style={{ marginTop: '16px', padding: '16px', background: '#f9fafb', borderRadius: '6px' }}>
