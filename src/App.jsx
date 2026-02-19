@@ -21,21 +21,6 @@ export default function App() {
     }
   }, [])
 
-  function handleFileImport(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(reader.result)
-        setImportedJson(parsed)
-      } catch (err) {
-        alert('Invalid JSON file')
-      }
-    }
-    reader.readAsText(file)
-  }
-
   // Example: onChange callback to track schema changes
   const handleSchemaChange = (schema) => {
     setCurrentSchema(schema)
@@ -78,16 +63,6 @@ export default function App() {
       </div>
       
       <JsonSchemaImport onSchemaLoad={setImportedJson} />
-      
-      <div className="card-section">
-        <div className="import-row">
-          <div>
-            <label className="file-label">Import JSON schema from file:</label>
-            <small className="hint">You can also pass JSON directly as a prop to the component.</small>
-          </div>
-          <input type="file" accept="application/json" onChange={handleFileImport} />
-        </div>
-      </div>
 
       <Collection
         initialJson={importedJson}

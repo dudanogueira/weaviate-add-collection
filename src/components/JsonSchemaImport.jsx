@@ -6,6 +6,18 @@ export default function JsonSchemaImport({ onSchemaLoad }) {
   const [error, setError] = useState(null)
   const [isValidJson, setIsValidJson] = useState(false)
 
+  const handleFileImport = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      setJsonInput(reader.result)
+    }
+    reader.readAsText(file)
+    // Reset so the same file can be re-imported if needed
+    e.target.value = ''
+  }
+
   useEffect(() => {
     if (!jsonInput.trim()) {
       setIsValidJson(false)
@@ -27,6 +39,7 @@ export default function JsonSchemaImport({ onSchemaLoad }) {
     try {
       const parsed = JSON.parse(jsonInput)
       setError(null)
+      setJsonInput('')
       onSchemaLoad(parsed)
       setIsExpanded(false)
     } catch (err) {
@@ -52,7 +65,7 @@ export default function JsonSchemaImport({ onSchemaLoad }) {
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <h3 style={{ margin: 0 }}>
+        <h3 style={{ margin: 0, color: isValidJson ? '#4CAF50' : undefined }}>
           {isExpanded ? '▼' : '▶'} Import JSON Schema
         </h3>
         <small className="hint" style={{ cursor: 'pointer' }}>
@@ -62,6 +75,12 @@ export default function JsonSchemaImport({ onSchemaLoad }) {
 
       {isExpanded && (
         <div style={{ marginTop: '1rem' }}>
+          <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <label style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+              Import from file:
+            </label>
+            <input type="file" accept="application/json" onChange={handleFileImport} />
+          </div>
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
               Paste JSON Schema:

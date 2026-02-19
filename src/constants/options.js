@@ -82,6 +82,10 @@ export const allAvailableModules = {
     documentationHref: 'https://docs.x.ai/api',
     name: 'Generative Search - xAI'
   },
+  'multi2vec-cohere': {
+    documentationHref: 'https://docs.cohere.com/docs/embed-2',
+    name: 'Cohere Multimodal Module'
+  },
   'multi2vec-google': {
     documentationHref: 'https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-multimodal-embeddings',
     name: 'Google Multimodal Module'
