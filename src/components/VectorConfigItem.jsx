@@ -321,8 +321,8 @@ export default function VectorConfigItem({
                     onChange={(e) => update('indexType', e.target.value)}
                   >
                     {filteredIndexTypeOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
+                      <option key={opt.value} value={opt.value} disabled={opt.disabled}>
+                        {opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}
                       </option>
                     ))}
                   </select>
@@ -525,7 +525,7 @@ export default function VectorConfigItem({
                         }}
                       >
                         {filteredFlatQuantizerOptions.map(opt => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}</option>
                         ))}
                       </select>
                       <small className="hint">
@@ -908,7 +908,7 @@ export default function VectorConfigItem({
                                 }}
                               >
                                 {filteredHnswQuantizerOptions.map(opt => (
-                                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                  <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}</option>
                                 ))}
                               </select>
                               <small className="hint">Compression method to reduce memory usage for HNSW index</small>
@@ -1291,7 +1291,7 @@ export default function VectorConfigItem({
                                 }}
                               >
                                 {filteredFlatQuantizerOptions.map(opt => (
-                                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                  <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}</option>
                                 ))}
                               </select>
                               <small className="hint">
@@ -1468,7 +1468,7 @@ export default function VectorConfigItem({
                     }}
                   >
                     {filteredHnswQuantizerOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}</option>
                     ))}
                   </select>
                   <small className="hint">Compression method to reduce memory usage</small>

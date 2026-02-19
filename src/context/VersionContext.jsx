@@ -49,10 +49,11 @@ export function useVersionFeature(featureId) {
 }
 
 /**
- * Hook: filters an options array, removing entries whose `featureId` requires
- * a higher version than the current weaviateVersion.
+ * Hook: returns all options, marking unavailable entries (whose `featureId`
+ * requires a higher version than weaviateVersion) with `disabled: true` and
+ * a `helpText` field explaining the requirement.
  *
- * Options without a `featureId` are always kept.
+ * Options without a `featureId` are always available.
  * When weaviateVersion is null/empty, the array is returned unchanged.
  *
  * @param {Array<{ featureId?: string, [key: string]: any }>} options
@@ -65,11 +66,16 @@ export function useVersionFilteredOptions(options) {
 
   const actual = parseVersion(weaviateVersion)
 
-  return options.filter(opt => {
-    if (!opt.featureId) return true
+  return options.map(opt => {
+    if (!opt.featureId) return opt
     const minVersion = VERSION_FEATURES[opt.featureId]
-    if (!minVersion) return true
-    return isVersionAtLeast(actual, parseVersion(minVersion))
+    if (!minVersion) return opt
+    if (isVersionAtLeast(actual, parseVersion(minVersion))) return opt
+    return {
+      ...opt,
+      disabled: true,
+      helpText: `Requires Weaviate \u2265 ${minVersion}`,
+    }
   })
 }
 
