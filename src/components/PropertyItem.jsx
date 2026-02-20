@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { tokenizationOptions, dataTypeOptions } from '../constants/options'
 import { validatePropertyName, sanitizePropertyName } from '../utils/propertyNameValidator'
 import NestedPropertySection from './NestedPropertySection'
-import { VersionGated } from '../context/VersionContext'
+import { VersionGated, useVersionFilteredOptions } from '../context/VersionContext'
 
 export default function PropertyItem({ value, onChange, onDelete, index, isNested = false, depth = 0 }) {
+  const filteredTokenizationOptions = useVersionFilteredOptions(tokenizationOptions)
   const [nameValidation, setNameValidation] = useState({ valid: true, error: null, warning: null })
   
   useEffect(() => {
@@ -131,8 +132,10 @@ export default function PropertyItem({ value, onChange, onDelete, index, isNeste
           <div className="field">
             <label>Tokenization</label>
             <select value={value.tokenization || 'word'} onChange={(e) => update('tokenization', e.target.value)}>
-              {tokenizationOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              {filteredTokenizationOptions.map((opt) => (
+                <option key={opt.value} value={opt.value} disabled={opt.disabled}>
+                  {opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}
+                </option>
               ))}
             </select>
             <small className="help-text">

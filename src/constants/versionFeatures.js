@@ -25,4 +25,13 @@ export const VERSION_FEATURES = {
 
   // Property indexing
   indexRangeFilters:           '1.24.0',
+
+  // Object TTL
+  objectTtl:                   '1.35.0',
+
+  // Tokenization methods
+  tokenizationGse:             '1.24.0',
+  tokenizationTrigram:         '1.24.0',
+  tokenizationKagomeKr:        '1.25.7',
+  tokenizationKagomeJa:        '1.28.0',
 }

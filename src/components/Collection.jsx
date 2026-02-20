@@ -4,6 +4,7 @@ import PropertySection from './PropertySection'
 import VectorConfigSection from './VectorConfigSection'
 import InvertedIndexConfigSection from './InvertedIndexConfigSection'
 import MultiTenancyConfigSection from './MultiTenancyConfigSection'
+import ObjectTtlConfigSection from './ObjectTtlConfigSection'
 import ReplicationConfigSection from './ReplicationConfigSection'
 import GenerativeConfigSection from './GenerativeConfigSection'
 import RerankerConfigSection from './RerankerConfigSection'
@@ -71,6 +72,8 @@ export default function Collection({
   const [openVectorConfig, setOpenVectorConfig] = useState(false)
   const [openInvertedIndexConfig, setOpenInvertedIndexConfig] = useState(false)
   const [openMultiTenancyConfig, setOpenMultiTenancyConfig] = useState(false)
+  const [objectTtlConfig, setObjectTtlConfig] = useState({ mode: 'none', timeToLive: '', filterExpiredObjects: false, propertyName: '' })
+  const [openObjectTtlConfig, setOpenObjectTtlConfig] = useState(false)
   const [openReplicationConfig, setOpenReplicationConfig] = useState(false)
   const [openGenerativeConfig, setOpenGenerativeConfig] = useState(false)
   const [openRerankerConfig, setOpenRerankerConfig] = useState(false)
@@ -172,6 +175,19 @@ export default function Collection({
         enabled: cfg.enabled ?? false,
         autoTenantCreation: cfg.autoTenantCreation ?? false,
         autoTenantActivation: cfg.autoTenantActivation ?? false,
+      })
+    }
+    // Load objectTtlConfig from imported JSON if present
+    if (initialJson?.objectTtlConfig && typeof initialJson.objectTtlConfig === 'object') {
+      const cfg = initialJson.objectTtlConfig
+      const deleteOn = cfg.deleteOn ?? ''
+      const isNamedMode = deleteOn === 'creationTime' || deleteOn === 'updateTime'
+      setObjectTtlConfig({
+        // deleteOn is either a fixed mode or a property name (dateProperty)
+        mode: isNamedMode ? deleteOn : (deleteOn ? 'dateProperty' : 'none'),
+        timeToLive: cfg.timeToLive ?? '',
+        filterExpiredObjects: cfg.filterExpiredObjects ?? false,
+        propertyName: isNamedMode ? '' : deleteOn,
       })
     }
     // Load replicationConfig from imported JSON if present
@@ -565,6 +581,31 @@ export default function Collection({
       return { ...prev, multiTenancyConfig: multiTenancyJson };
     });
   }, [multiTenancyConfig]);
+
+  // Update JSON with object TTL configuration
+  useEffect(() => {
+    setGeneratedJson((prev) => {
+      if (!objectTtlConfig.mode || objectTtlConfig.mode === 'none') {
+        const { objectTtlConfig: _, ...rest } = prev
+        return rest
+      }
+      // For 'dateProperty' mode, deleteOn is the actual property name chosen by the user
+      const deleteOn = objectTtlConfig.mode === 'dateProperty'
+        ? objectTtlConfig.propertyName
+        : objectTtlConfig.mode
+      if (!deleteOn) {
+        const { objectTtlConfig: _, ...rest } = prev
+        return rest
+      }
+      const ttlJson = {
+        enabled: true,
+        deleteOn,
+        timeToLive: objectTtlConfig.timeToLive === '' ? 0 : objectTtlConfig.timeToLive,
+        filterExpiredObjects: objectTtlConfig.filterExpiredObjects,
+      }
+      return { ...prev, objectTtlConfig: ttlJson }
+    })
+  }, [objectTtlConfig])
 
   // Update JSON with replication configuration
   useEffect(() => {
@@ -1221,6 +1262,20 @@ export default function Collection({
         onToggle={() => setOpenMultiTenancyConfig((s) => !s)}
       >
         <MultiTenancyConfigSection config={multiTenancyConfig} setConfig={setMultiTenancyConfig} />
+      </VersionGatedSection>
+
+      {/* Object TTL Config collapsible section */}
+      <VersionGatedSection
+        featureId="objectTtl"
+        title="Object Time to Live"
+        isOpen={openObjectTtlConfig}
+        onToggle={() => setOpenObjectTtlConfig((s) => !s)}
+      >
+        <ObjectTtlConfigSection
+          config={objectTtlConfig}
+          setConfig={setObjectTtlConfig}
+          properties={properties}
+        />
       </VersionGatedSection>
 
       {/* Replication Config collapsible section */}
