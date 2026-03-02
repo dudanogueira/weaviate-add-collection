@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { VersionProvider, VersionGatedSection } from '../context/VersionContext'
+import DOC_LINKS from '../constants/docLinks.json'
 import PropertySection from './PropertySection'
 import VectorConfigSection from './VectorConfigSection'
 import InvertedIndexConfigSection from './InvertedIndexConfigSection'
@@ -1238,15 +1239,24 @@ export default function Collection({
 
       {/* Inverted Index Config collapsible section */}
       <div className="collapsible">
-        <button
-          className="collapsible-toggle"
-          aria-expanded={openInvertedIndexConfig}
-          onClick={() => setOpenInvertedIndexConfig((s) => !s)}
-        >
-          <span>Inverted Index Configuration</span>
-          <span className="chev">{openInvertedIndexConfig ? '▾' : '▸'}</span>
-        </button>
-
+        <div className="collapsible-header">
+          <button
+            className="collapsible-toggle"
+            aria-expanded={openInvertedIndexConfig}
+            onClick={() => setOpenInvertedIndexConfig((s) => !s)}
+          >
+            <span>Inverted Index Configuration</span>
+            <span className="chev">{openInvertedIndexConfig ? '▾' : '▸'}</span>
+          </button>
+          {DOC_LINKS.invertedIndex && (
+            <a href={DOC_LINKS.invertedIndex} target="_blank" rel="noopener noreferrer" className="doc-link" title="View documentation">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="View documentation">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </a>
+          )}
+        </div>
         {openInvertedIndexConfig && (
           <div className="collapsible-panel">
             <InvertedIndexConfigSection config={invertedIndexConfig} setConfig={setInvertedIndexConfig} />
@@ -1280,15 +1290,25 @@ export default function Collection({
 
       {/* Replication Config collapsible section */}
       <div className="collapsible">
-        <button
-          className="collapsible-toggle"
-          aria-expanded={openReplicationConfig}
-          onClick={() => setOpenReplicationConfig((s) => !s)}
-          disabled={nodesNumber === 1}
-        >
-          <span>Replication Configuration</span>
-          <span className="chev">{openReplicationConfig ? '▾' : '▸'}</span>
-        </button>
+        <div className="collapsible-header">
+          <button
+            className="collapsible-toggle"
+            aria-expanded={openReplicationConfig}
+            onClick={() => setOpenReplicationConfig((s) => !s)}
+            disabled={nodesNumber === 1}
+          >
+            <span>Replication Configuration</span>
+            <span className="chev">{openReplicationConfig ? '▾' : '▸'}</span>
+          </button>
+          {DOC_LINKS.replication && (
+            <a href={DOC_LINKS.replication} target="_blank" rel="noopener noreferrer" className="doc-link" title="View documentation">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="View documentation">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </a>
+          )}
+        </div>
 
         {openReplicationConfig && nodesNumber !== 1 && (
           <div className="collapsible-panel">

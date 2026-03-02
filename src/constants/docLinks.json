@@ -1,0 +1,7 @@
+{
+  "multiTenancy": "https://docs.weaviate.io/weaviate/manage-collections/multi-tenancy",
+  "objectTtl": "https://docs.weaviate.io/weaviate/manage-collections/time-to-live",
+  "invertedIndex": "https://docs.weaviate.io/weaviate/manage-collections/inverted-index",
+  "replication": "https://docs.weaviate.io/weaviate/manage-collections/multi-node-setup",
+  "replicationAsyncEnabled": "https://docs.weaviate.io/deploy/configuration/replication#async-replication-settings"
+}

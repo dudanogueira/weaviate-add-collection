@@ -104,6 +104,11 @@ body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Rob
 .collapsible-toggle:focus{outline:3px solid rgba(37,99,235,0.12);background:linear-gradient(180deg,#f0f8ff,#e6f0fe)}
 .collapsible-toggle .chev{color:var(--text-secondary);margin-left:var(--spacing-md);transition:transform 0.2s ease;font-size:16px}
 .collapsible-toggle[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.collapsible-header{display:flex;align-items:stretch;background:linear-gradient(180deg,#fff,#fbfdff)}
+.collapsible-header .collapsible-toggle{flex:1;width:auto;background:none}
+.collapsible-header .collapsible-toggle:hover{background:linear-gradient(180deg,#f8fafc,#f1f5f9)}
+.doc-link{display:flex;align-items:center;justify-content:center;padding:0 var(--spacing-xl);color:var(--accent);text-decoration:none;border-left:1px solid var(--border);transition:background 0.2s ease,color 0.2s ease}
+.doc-link:hover{background:#f0f8ff;color:#1d4ed8}
 .collapsible-panel{padding:var(--spacing-xl);border-top:1px solid var(--section-bg);background:#fff;animation:slideDown 0.3s ease-out}
 .collapsible-panel .field{margin-bottom:var(--spacing-lg)}
 .collapsible-panel .field input, .collapsible-panel .field textarea, .collapsible-panel .field select{background:transparent;border-radius:0}

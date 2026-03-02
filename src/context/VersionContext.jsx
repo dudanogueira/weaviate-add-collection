@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react'
 import { parseVersion, isVersionAtLeast } from '../utils/versionUtils'
 import { VERSION_FEATURES } from '../constants/versionFeatures'
+import DOC_LINKS from '../constants/docLinks.json'
 
 /**
  * Context value: { weaviateVersion: string|null }
@@ -99,18 +100,35 @@ export function useVersionFilteredOptions(options) {
  */
 export function VersionGatedSection({ featureId, title, isOpen, onToggle, children }) {
   const { available, tooltip } = useVersionFeature(featureId)
+  const docUrl = DOC_LINKS[featureId]
 
   if (available) {
     return (
       <div className="collapsible">
-        <button
-          className="collapsible-toggle"
-          aria-expanded={isOpen}
-          onClick={onToggle}
-        >
-          <span>{title}</span>
-          <span className="chev">{isOpen ? '▾' : '▸'}</span>
-        </button>
+        <div className="collapsible-header">
+          <button
+            className="collapsible-toggle"
+            aria-expanded={isOpen}
+            onClick={onToggle}
+          >
+            <span>{title}</span>
+            <span className="chev">{isOpen ? '▾' : '▸'}</span>
+          </button>
+          {docUrl && (
+            <a
+              href={docUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="doc-link"
+              title="View documentation"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="View documentation">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </a>
+          )}
+        </div>
         {isOpen && (
           <div className="collapsible-panel">
             {children}

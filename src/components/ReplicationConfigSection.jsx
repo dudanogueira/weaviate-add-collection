@@ -1,5 +1,6 @@
 import React from 'react';
 import { VersionGated } from '../context/VersionContext';
+import DOC_LINKS from '../constants/docLinks.json';
 
 const defaultConfig = {
   factor: 1,
@@ -41,7 +42,17 @@ const ReplicationConfigSection = ({ config, setConfig, nodesNumber = null }) => 
         <>
           <VersionGated featureId="replicationAsyncEnabled">
             <div className="field">
-              <label>Async Enabled:</label>
+              <label>
+                Async Enabled:
+                {DOC_LINKS.replicationAsyncEnabled && (
+                  <a href={DOC_LINKS.replicationAsyncEnabled} target="_blank" rel="noopener noreferrer" title="View documentation" style={{ marginLeft: '6px', verticalAlign: 'middle' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="View documentation">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                  </a>
+                )}
+              </label>
               <input
                 type="checkbox"
                 checked={config.asyncEnabled}
