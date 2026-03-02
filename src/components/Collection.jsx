@@ -335,8 +335,16 @@ export default function Collection({
             } else if (indexConfig.rq) {
               processedIndexConfig.quantizer = 'rq'
             }
+          } else if (indexType === 'hfresh') {
+            // Map distance → distanceMetric for UI consistency
+            if (indexConfig.distance && !indexConfig.distanceMetric) {
+              processedIndexConfig.distanceMetric = indexConfig.distance
+              delete processedIndexConfig.distance
+            }
+            // rq is always-on and immutable — remove from state (no UI toggle)
+            delete processedIndexConfig.rq
           }
-          
+
           indexConfig = processedIndexConfig
         }
         // Heuristic: if both hnsw and flat configs exist or threshold is present, treat as dynamic
@@ -461,8 +469,16 @@ export default function Collection({
             } else if (indexConfig.rq) {
               processedIndexConfig.quantizer = 'rq'
             }
+          } else if (indexType === 'hfresh') {
+            // Map distance → distanceMetric for UI consistency
+            if (indexConfig.distance && !indexConfig.distanceMetric) {
+              processedIndexConfig.distanceMetric = indexConfig.distance
+              delete processedIndexConfig.distance
+            }
+            // rq is always-on and immutable — remove from state (no UI toggle)
+            delete processedIndexConfig.rq
           }
-          
+
           indexConfig = processedIndexConfig
         }
         // Heuristic: infer dynamic if structure suggests so
@@ -979,6 +995,21 @@ export default function Collection({
             if (Object.keys(flatConfig).length > 0) {
               indexConfig.flat = flatConfig
             }
+          }
+        } else if (config.indexType === 'hfresh') {
+          // HFresh uses its own parameter names; rq is always-on and never emitted
+          const ic = config.indexConfig
+          if (ic.distanceMetric && ic.distanceMetric !== 'cosine') {
+            indexConfig.distance = ic.distanceMetric
+          }
+          if (ic.maxPostingSizeKB !== undefined && ic.maxPostingSizeKB !== 48) {
+            indexConfig.maxPostingSizeKB = ic.maxPostingSizeKB
+          }
+          if (ic.replicas !== undefined && ic.replicas !== 4) {
+            indexConfig.replicas = ic.replicas
+          }
+          if (ic.searchProbe !== undefined && ic.searchProbe !== 64) {
+            indexConfig.searchProbe = ic.searchProbe
           }
         } else {
           // For non-dynamic index types (e.g., hnsw, flat), include known keys and skip defaults

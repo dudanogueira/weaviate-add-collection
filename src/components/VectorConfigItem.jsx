@@ -248,8 +248,8 @@ export default function VectorConfigItem({
             >
               Index Configuration
             </button>
-            {/* Hide Compression/Quantization tab for dynamic and flat index types */}
-            {value.indexType !== 'dynamic' && value.indexType !== 'flat' && (
+            {/* Hide Compression/Quantization tab for dynamic, flat, and hfresh index types */}
+            {value.indexType !== 'dynamic' && value.indexType !== 'flat' && value.indexType !== 'hfresh' && (
               <button
                 type="button"
                 className={`tab-button ${activeTab === 'compression' ? 'active' : ''}`}
@@ -642,6 +642,75 @@ export default function VectorConfigItem({
                       </div>
                     )}
                     </VersionGated>
+                  </div>
+                )}
+
+                {/* HFresh Index Configuration */}
+                {value.indexType === 'hfresh' && (
+                  <div style={{ marginTop: '16px' }}>
+                    <h5 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 600 }}>HFresh Parameters</h5>
+
+                    {/* RQ always-on banner */}
+                    <div style={{
+                      padding: '10px 14px',
+                      marginBottom: '16px',
+                      borderRadius: '4px',
+                      background: '#f0f9ff',
+                      border: '1px solid #bae6fd',
+                      fontSize: '13px',
+                      color: '#0369a1'
+                    }}>
+                      <strong>Rotational Quantization (RQ) is always enabled</strong> for HFresh indexes and cannot be disabled. It is built-in and immutable.
+                    </div>
+
+                    <div className="field">
+                      <label>Distance Metric <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 400 }}>(immutable after creation)</span></label>
+                      <select
+                        value={value.indexConfig?.distanceMetric || 'cosine'}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, distanceMetric: e.target.value })}
+                      >
+                        <option value="cosine">Cosine</option>
+                        <option value="l2-squared">L2 Squared</option>
+                      </select>
+                      <small className="hint">Only cosine and l2-squared are supported for HFresh</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Max Posting Size (KB)</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.maxPostingSizeKB ?? 48}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, maxPostingSizeKB: parseInt(e.target.value) || 48 })}
+                        placeholder="48"
+                        min="8"
+                        max="1024"
+                      />
+                      <small className="hint">Maximum size in KB for a posting list. Range: 8–1024 (default: 48)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Replicas <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 400 }}>(immutable after creation)</span></label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.replicas ?? 4}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, replicas: parseInt(e.target.value) || 4 })}
+                        placeholder="4"
+                        min="1"
+                        max="10"
+                      />
+                      <small className="hint">Number of posting lists in which a vector is added. Range: 1–10 (default: 4)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Search Probe</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.searchProbe ?? 64}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, searchProbe: parseInt(e.target.value) || 64 })}
+                        placeholder="64"
+                      />
+                      <small className="hint">Number of posting lists to search during a query (default: 64)</small>
+                    </div>
                   </div>
                 )}
 

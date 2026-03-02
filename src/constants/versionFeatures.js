@@ -20,6 +20,7 @@ export const VERSION_FEATURES = {
 
   // Vector index types & compression
   dynamicIndexType:            '1.25.0',
+  hfreshIndexType:             '1.36.0',  // HFresh cluster-based index (preview)
   rqQuantizationHnsw:          '1.35.0',  // RQ for HNSW index
   rqQuantizationFlat:          '1.35.0',  // RQ for Flat index
 
