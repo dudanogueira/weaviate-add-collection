@@ -22,7 +22,7 @@
   "dependencies": {
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "weaviate-client": "^3.9.0"
+    "weaviate-client": "^3.11.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
