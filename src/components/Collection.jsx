@@ -1228,14 +1228,24 @@ export default function Collection({
 
       {/* Generative Config collapsible section */}
       <div className="collapsible">
-        <button
-          className="collapsible-toggle"
-          aria-expanded={openGenerativeConfig}
-          onClick={() => setOpenGenerativeConfig((s) => !s)}
-        >
-          <span>Generative Configuration</span>
-          <span className="chev">{openGenerativeConfig ? '▾' : '▸'}</span>
-        </button>
+        <div className="collapsible-header">
+          <button
+            className="collapsible-toggle"
+            aria-expanded={openGenerativeConfig}
+            onClick={() => setOpenGenerativeConfig((s) => !s)}
+          >
+            <span>Generative Configuration</span>
+            <span className="chev">{openGenerativeConfig ? '▾' : '▸'}</span>
+          </button>
+          {DOC_LINKS.generative && (
+            <a href={DOC_LINKS.generative} target="_blank" rel="noopener noreferrer" className="doc-link" title="View documentation">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="View documentation">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </a>
+          )}
+        </div>
 
         {openGenerativeConfig && (
           <div className="collapsible-panel">
@@ -1249,14 +1259,24 @@ export default function Collection({
 
       {/* Reranker Config collapsible section */}
       <div className="collapsible">
-        <button
-          className="collapsible-toggle"
-          aria-expanded={openRerankerConfig}
-          onClick={() => setOpenRerankerConfig((s) => !s)}
-        >
-          <span>Reranker Configuration</span>
-          <span className="chev">{openRerankerConfig ? '▾' : '▸'}</span>
-        </button>
+        <div className="collapsible-header">
+          <button
+            className="collapsible-toggle"
+            aria-expanded={openRerankerConfig}
+            onClick={() => setOpenRerankerConfig((s) => !s)}
+          >
+            <span>Reranker Configuration</span>
+            <span className="chev">{openRerankerConfig ? '▾' : '▸'}</span>
+          </button>
+          {DOC_LINKS.reranker && (
+            <a href={DOC_LINKS.reranker} target="_blank" rel="noopener noreferrer" className="doc-link" title="View documentation">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="View documentation">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </a>
+          )}
+        </div>
 
         {openRerankerConfig && (
           <div className="collapsible-panel">

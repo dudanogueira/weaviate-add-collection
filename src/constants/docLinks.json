@@ -1,7 +1,9 @@
 {
   "multiTenancy": "https://docs.weaviate.io/weaviate/manage-collections/multi-tenancy",
   "objectTtl": "https://docs.weaviate.io/weaviate/manage-collections/time-to-live",
-  "invertedIndex": "https://docs.weaviate.io/weaviate/manage-collections/inverted-index",
+  "invertedIndex": "https://docs.weaviate.io/weaviate/config-refs/indexing/inverted-index#inverted-index-parameters",
   "replication": "https://docs.weaviate.io/weaviate/manage-collections/multi-node-setup",
-  "replicationAsyncEnabled": "https://docs.weaviate.io/deploy/configuration/replication#async-replication-settings"
+  "replicationAsyncEnabled": "https://docs.weaviate.io/deploy/configuration/replication#async-replication-settings",
+  "reranker": "https://docs.weaviate.io/weaviate/search/rerank#rerank-vector-search-results",
+  "generative": "https://docs.weaviate.io/weaviate/manage-collections/generative-reranker-models#specify-a-generative-model-integration"
 }

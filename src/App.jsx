@@ -64,15 +64,19 @@ export default function App() {
       </div>
       
       <div className="card-section">
-        <label className="file-label">Weaviate Server Version (optional):</label>
-        <input
-          type="text"
-          value={weaviateVersion}
-          onChange={(e) => setWeaviateVersion(e.target.value)}
-          placeholder="e.g. 1.24.0 — leave blank to show all features"
-          style={{ width: '280px' }}
-        />
-        <small className="hint">Fields unavailable in this version will be greyed out with a tooltip</small>
+        <div className="field version-field">
+          <label>
+            Weaviate Server Version
+            <span className="label-hint">(optional)</span>
+          </label>
+          <input
+            type="text"
+            value={weaviateVersion}
+            onChange={(e) => setWeaviateVersion(e.target.value)}
+            placeholder="e.g. 1.24.0 — leave blank to show all features"
+          />
+          <small className="hint">Fields unavailable in this version will be greyed out with a tooltip</small>
+        </div>
       </div>
 
       <JsonSchemaImport onSchemaLoad={setImportedJson} />
