@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { tokenizationOptions, dataTypeOptions } from '../constants/options'
+import DOC_LINKS from '../constants/docLinks.json'
 import { validatePropertyName, sanitizePropertyName } from '../utils/propertyNameValidator'
 import NestedPropertySection from './NestedPropertySection'
 import { VersionGated, useVersionFilteredOptions } from '../context/VersionContext'
-import DOC_LINKS from '../constants/docLinks.json'
 
 export default function PropertyItem({ value, onChange, onDelete, index, isNested = false, depth = 0 }) {
   const filteredTokenizationOptions = useVersionFilteredOptions(tokenizationOptions)
@@ -46,7 +46,7 @@ export default function PropertyItem({ value, onChange, onDelete, index, isNeste
       isArray: value.isArray,
       indexFilterable: value.indexFilterable
     }
-    
+
     // Only add properties relevant to the new data type
     if (val === 'text') {
       newValue.tokenization = 'word'
@@ -54,11 +54,14 @@ export default function PropertyItem({ value, onChange, onDelete, index, isNeste
     } else if (val === 'int' || val === 'number' || val === 'date') {
       newValue.indexRangeFilters = false
     } else if (val === 'object') {
-      // Initialize empty nestedProperties array for object type
       newValue.nestedProperties = []
       newValue.indexSearchable = false
+    } else if (val === 'cross-reference') {
+      newValue.crossReferenceTarget = ''
+      newValue.isArray = false
+      newValue.indexFilterable = false
     }
-    
+
     onChange(newValue)
   }
 
@@ -120,13 +123,38 @@ export default function PropertyItem({ value, onChange, onDelete, index, isNeste
             ))}
           </select>
         </div>
-        <div className="array-group">
-          <label className="array-label">
-            <input type="checkbox" checked={!!value.isArray} onChange={(e) => update('isArray', e.target.checked)} />
-            <span>array</span>
-          </label>
-        </div>
+        {value.dataType !== 'cross-reference' && (
+          <div className="array-group">
+            <label className="array-label">
+              <input type="checkbox" checked={!!value.isArray} onChange={(e) => update('isArray', e.target.checked)} />
+              <span>array</span>
+            </label>
+          </div>
+        )}
       </div>
+      <small className="hint">
+        {(() => {
+          const opt = dataTypeOptions.find(o => o.value === (value.dataType || 'text'))
+          const href = (opt?.docKey && DOC_LINKS[opt.docKey]) || DOC_LINKS.dataType
+          return (<>{opt?.description}{' '}<a href={href} target="_blank" rel="noopener noreferrer">View documentation ↗</a></>)
+        })()}
+      </small>
+
+      {value.dataType === 'cross-reference' && (
+        <div className="field" style={{ marginTop: '12px' }}>
+          <label>Target Collection</label>
+          <input
+            type="text"
+            value={value.crossReferenceTarget || ''}
+            onChange={(e) => update('crossReferenceTarget', e.target.value)}
+            placeholder="e.g. Article, Author"
+          />
+          <small className="hint">
+            The name of the collection this property links to. Must start with an uppercase letter and exist previously.{' '}
+            <a href={DOC_LINKS.crossReference} target="_blank" rel="noopener noreferrer">View documentation ↗</a>
+          </small>
+        </div>
+      )}
 
       {value.dataType === 'text' && (
         <>
@@ -171,17 +199,19 @@ export default function PropertyItem({ value, onChange, onDelete, index, isNeste
 
 
 
-      <div className="row">
-        <label><input type="checkbox" checked={!!value.indexFilterable} onChange={(e) => update('indexFilterable', e.target.checked)} /> indexFilterable</label>
-        {value.dataType === 'text' && (
-          <label><input type="checkbox" checked={!!value.indexSearchable} onChange={(e) => update('indexSearchable', e.target.checked)} /> indexSearchable</label>
-        )}
-        {(value.dataType === 'int' || value.dataType === 'number' || value.dataType === 'date') && (
-          <VersionGated featureId="indexRangeFilters">
-            <label><input type="checkbox" checked={!!value.indexRangeFilters} onChange={(e) => update('indexRangeFilters', e.target.checked)} /> indexRangeFilters</label>
-          </VersionGated>
-        )}
-      </div>
+      {value.dataType !== 'cross-reference' && (
+        <div className="row">
+          <label><input type="checkbox" checked={!!value.indexFilterable} onChange={(e) => update('indexFilterable', e.target.checked)} /> indexFilterable</label>
+          {value.dataType === 'text' && (
+            <label><input type="checkbox" checked={!!value.indexSearchable} onChange={(e) => update('indexSearchable', e.target.checked)} /> indexSearchable</label>
+          )}
+          {(value.dataType === 'int' || value.dataType === 'number' || value.dataType === 'date') && (
+            <VersionGated featureId="indexRangeFilters">
+              <label><input type="checkbox" checked={!!value.indexRangeFilters} onChange={(e) => update('indexRangeFilters', e.target.checked)} /> indexRangeFilters</label>
+            </VersionGated>
+          )}
+        </div>
+      )}
 
       {value.dataType === 'object' && (
         <NestedPropertySection 

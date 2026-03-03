@@ -10,17 +10,23 @@ export const tokenizationOptions = [
 ]
 
 export const dataTypeOptions = [
-  { value: 'text', label: 'text' },
-  { value: 'int', label: 'int' },
-  { value: 'number', label: 'number' },
-  { value: 'boolean', label: 'boolean' },
-  { value: 'date', label: 'date' },
-  { value: 'geoCoordinates', label: 'geoCoordinates' },
-  { value: 'phoneNumber', label: 'phoneNumber' },
-  { value: 'uuid', label: 'uuid' },
-  { value: 'blob', label: 'blob' },
-  { value: 'object', label: 'object' }
+  { value: 'text', label: 'text', description: 'Text data for vectorization and keyword search.', docKey: 'dataTypeText' },
+  { value: 'int', label: 'int', description: '64-bit integer values.', docKey: 'dataTypeBooleanIntNumber' },
+  { value: 'number', label: 'number', description: 'Floating-point values.', docKey: 'dataTypeBooleanIntNumber' },
+  { value: 'boolean', label: 'boolean', description: 'True/false values.', docKey: 'dataTypeBooleanIntNumber' },
+  { value: 'date', label: 'date', description: 'RFC 3339 timestamps (e.g. 1985-04-12T23:20:50.52Z).', docKey: 'dataTypeDate' },
+  { value: 'uuid', label: 'uuid', description: '128-bit universally unique identifiers.', docKey: 'dataTypeUuid' },
+  { value: 'geoCoordinates', label: 'geoCoordinates', description: 'Latitude/longitude for location-based queries. Does not support arrays.', docKey: 'dataTypeGeoCoordinates' },
+  { value: 'phoneNumber', label: 'phoneNumber', description: 'Validated and normalized phone numbers with country codes. Does not support arrays.', docKey: 'dataTypePhoneNumber' },
+  { value: 'blob', label: 'blob', description: 'Base64-encoded binary data (images, files, etc.). Does not support arrays.', docKey: 'dataTypeBlob' },
+  { value: 'object', label: 'object', description: 'Nested JSON objects with arbitrary depth.', docKey: 'dataTypeObject' },
+  { value: 'cross-reference', label: 'cross-reference', description: 'Links this property to objects in another collection.', docKey: 'crossReference' }
 ]
+
+export const PRIMITIVE_DATA_TYPES = new Set([
+  'text', 'int', 'number', 'boolean', 'date', 'uuid',
+  'geoCoordinates', 'phoneNumber', 'blob', 'object'
+])
 
 export const indexTypeOptions = [
   { value: 'hnsw', label: 'HNSW (Recommended)', description: 'Graph-based ANN index. Scales well and delivers fast queries, at the cost of higher memory usage.', docKey: 'indexHnsw' },

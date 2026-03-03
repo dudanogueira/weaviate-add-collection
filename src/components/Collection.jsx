@@ -117,6 +117,22 @@ export default function Collection({
       }
       const isArrayType = dataTypeValue ? dataTypeValue.includes('[]') : false
       const baseDataType = dataTypeValue ? dataTypeValue.replace('[]', '') : 'text'
+
+      // Detect cross-references: a dataType that is not a known primitive starts with uppercase
+      const primitiveTypes = new Set(['text', 'int', 'number', 'boolean', 'date', 'uuid', 'geoCoordinates', 'phoneNumber', 'blob', 'object'])
+      const isCrossRef = baseDataType && !primitiveTypes.has(baseDataType) && /^[A-Z]/.test(baseDataType)
+
+      if (isCrossRef) {
+        return {
+          name: p.name || '',
+          description: p.description || '',
+          dataType: 'cross-reference',
+          crossReferenceTarget: baseDataType,
+          isArray: false,
+          indexFilterable: false
+        }
+      }
+
       let vectorizePropertyName
       if (baseDataType === 'text' && ((p.moduleConfig && typeof p.moduleConfig === 'object') || (p.vectorizerConfig && typeof p.vectorizerConfig === 'object'))) {
         try {
@@ -128,7 +144,7 @@ export default function Collection({
           if (anyTrue) vectorizePropertyName = true
         } catch (_) {}
       }
-      
+
       const result = {
         name: p.name || '',
         dataType: baseDataType,
@@ -140,12 +156,12 @@ export default function Collection({
         tokenization: p.tokenization || 'word',
         ...(vectorizePropertyName === true ? { vectorizePropertyName: true } : {})
       }
-      
+
       // Process nested properties recursively for object type
       if (baseDataType === 'object' && p.nestedProperties && Array.isArray(p.nestedProperties)) {
         result.nestedProperties = p.nestedProperties.map(processProperty)
       }
-      
+
       return result
     }
     
@@ -760,14 +776,26 @@ export default function Collection({
   useEffect(() => {
     // Helper function to recursively transform properties including nested properties
     const transformProperty = (p, idx) => {
+      const placeholderName = `new_property${idx + 1}`
+      const placeholderDescription = `Description for ${placeholderName}`
+
+      // Cross-reference: output dataType as [TargetCollection]
+      if (p.dataType === 'cross-reference') {
+        const target = (p.crossReferenceTarget || '').trim() || 'TargetCollection'
+        const result = {
+          name: p.name && p.name.trim() !== '' ? p.name : placeholderName,
+          dataType: [target]
+        }
+        if (p.description && p.description.trim() !== '' && p.description !== placeholderDescription) {
+          result.description = p.description
+        }
+        return result
+      }
+
       // Extract base type and ensure it doesn't contain []
       let rawBaseType = typeof p.dataType === 'string' ? p.dataType : (Array.isArray(p.dataType) ? p.dataType[0] : 'text')
       const baseType = rawBaseType ? rawBaseType.replace('[]', '') : 'text'
       const typeValue = p.isArray ? `${baseType}[]` : baseType
-      // placeholders when not provided
-      // placeholder name per-property: new_property1, new_property2, ...
-      const placeholderName = `new_property${idx + 1}`
-      const placeholderDescription = `Description for ${placeholderName}`
       const placeholderDataType = 'text'
       const placeholderTokenization = 'word'
 
@@ -1187,14 +1215,24 @@ export default function Collection({
 
       {/* Properties collapsible section */}
       <div className="collapsible">
-        <button
-          className="collapsible-toggle"
-          aria-expanded={openProperties}
-          onClick={() => setOpenProperties((s) => !s)}
-        >
-          <span>Properties</span>
-          <span className="chev">{openProperties ? '▾' : '▸'}</span>
-        </button>
+        <div className="collapsible-header">
+          <button
+            className="collapsible-toggle"
+            aria-expanded={openProperties}
+            onClick={() => setOpenProperties((s) => !s)}
+          >
+            <span>Properties</span>
+            <span className="chev">{openProperties ? '▾' : '▸'}</span>
+          </button>
+          {DOC_LINKS.properties && (
+            <a href={DOC_LINKS.properties} target="_blank" rel="noopener noreferrer" className="doc-link" title="View documentation">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="View documentation">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </a>
+          )}
+        </div>
 
         {openProperties && (
           <div className="collapsible-panel">
