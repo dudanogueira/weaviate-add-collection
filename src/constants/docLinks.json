@@ -6,5 +6,13 @@
   "replicationAsyncEnabled": "https://docs.weaviate.io/deploy/configuration/replication#async-replication-settings",
   "reranker": "https://docs.weaviate.io/weaviate/search/rerank#rerank-vector-search-results",
   "generative": "https://docs.weaviate.io/weaviate/manage-collections/generative-reranker-models#specify-a-generative-model-integration",
-  "vectorConfig": "https://docs.weaviate.io/weaviate/manage-collections/vector-config"
+  "vectorConfig": "https://docs.weaviate.io/weaviate/manage-collections/vector-config",
+  "compressionRq": "https://docs.weaviate.io/weaviate/configuration/compression/rq-compression#rq-parameters",
+  "compressionPq": "https://docs.weaviate.io/weaviate/configuration/compression/pq-compression#pq-parameters",
+  "compressionBq": "https://docs.weaviate.io/weaviate/configuration/compression/bq-compression#bq-parameters",
+  "compressionSq": "https://docs.weaviate.io/weaviate/configuration/compression/sq-compression#sq-parameters",
+  "indexHnsw": "https://docs.weaviate.io/weaviate/config-refs/indexing/vector-index#hnsw-index",
+  "indexFlat": "https://docs.weaviate.io/weaviate/config-refs/indexing/vector-index#flat-index",
+  "indexDynamic": "https://docs.weaviate.io/weaviate/config-refs/indexing/vector-index#dynamic-index",
+  "indexHfresh": "https://docs.weaviate.io/weaviate/config-refs/indexing/vector-index#hfresh-index"
 }

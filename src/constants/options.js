@@ -23,10 +23,10 @@ export const dataTypeOptions = [
 ]
 
 export const indexTypeOptions = [
-  { value: 'hnsw', label: 'HNSW (Recommended)', description: 'Hierarchical Navigable Small World graph' },
-  { value: 'flat', label: 'Flat', description: 'Flat index for brute-force search' },
-  { value: 'dynamic', label: 'Dynamic', description: 'Dynamically switches between HNSW and Flat', featureId: 'dynamicIndexType' },
-  { value: 'hfresh', label: 'HFresh (Preview)', description: 'Cluster-based index with built-in RQ compression — optimized for large, high-dimensional collections', featureId: 'hfreshIndexType' }
+  { value: 'hnsw', label: 'HNSW (Recommended)', description: 'Graph-based ANN index. Scales well and delivers fast queries, at the cost of higher memory usage.', docKey: 'indexHnsw' },
+  { value: 'flat', label: 'Flat', description: 'Brute-force index. Best for small collections or multi-tenant setups with few objects per tenant.', docKey: 'indexFlat' },
+  { value: 'dynamic', label: 'Dynamic', description: 'Starts as a Flat index and automatically switches to HNSW once the object count exceeds a threshold.', featureId: 'dynamicIndexType', docKey: 'indexDynamic' },
+  { value: 'hfresh', label: 'HFresh (Preview)', description: 'Cluster-based index with built-in RQ compression — optimized for large, high-dimensional collections.', featureId: 'hfreshIndexType', docKey: 'indexHfresh' }
 ]
 
 // All available modules from Weaviate

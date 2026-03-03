@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { indexTypeOptions, getVectorizerModuleOptions } from '../constants/options'
 import ModuleConfigForm from './ModuleConfigForm'
 import { VersionGated, useVersionFilteredOptions } from '../context/VersionContext'
+import DOC_LINKS from '../constants/docLinks.json'
 
 export default function VectorConfigItem({
   value,
@@ -20,15 +21,39 @@ export default function VectorConfigItem({
   // Whether RQ quantization is available in the current version
   const filteredFlatQuantizerOptions = useVersionFilteredOptions([
     { value: 'none', label: 'None' },
-    { value: 'rq', label: 'Rotational Quantization (RQ) - Recommended', featureId: 'rqQuantizationFlat' },
-    { value: 'bq', label: 'Binary Quantization (BQ)' },
+    {
+      value: 'rq', label: 'Rotational Quantization (RQ) — Recommended', featureId: 'rqQuantizationFlat',
+      description: 'Recommended. Applies orthogonal rotations to preserve vector relationships with minimal recall loss.',
+      docKey: 'compressionRq'
+    },
+    {
+      value: 'bq', label: 'Binary Quantization (BQ)',
+      description: 'Extreme compression by encoding each dimension as a single bit (~32× reduction). Works best with high-dimensional vectors.',
+      docKey: 'compressionBq'
+    },
   ])
   const filteredHnswQuantizerOptions = useVersionFilteredOptions([
     { value: 'none', label: 'None' },
-    { value: 'rq', label: 'Rotational Quantization (RQ) - Recommended', featureId: 'rqQuantizationHnsw' },
-    { value: 'pq', label: 'Product Quantization (PQ)' },
-    { value: 'bq', label: 'Binary Quantization (BQ)' },
-    { value: 'sq', label: 'Scalar Quantization (SQ)' },
+    {
+      value: 'rq', label: 'Rotational Quantization (RQ) — Recommended', featureId: 'rqQuantizationHnsw',
+      description: 'Recommended. Applies orthogonal rotations to preserve vector relationships with minimal recall loss.',
+      docKey: 'compressionRq'
+    },
+    {
+      value: 'pq', label: 'Product Quantization (PQ)',
+      description: 'Splits vectors into sub-vectors and encodes each segment separately. Requires a training phase. Good for large datasets.',
+      docKey: 'compressionPq'
+    },
+    {
+      value: 'bq', label: 'Binary Quantization (BQ)',
+      description: 'Extreme compression by encoding each dimension as a single bit (~32× reduction). Works best with high-dimensional vectors.',
+      docKey: 'compressionBq'
+    },
+    {
+      value: 'sq', label: 'Scalar Quantization (SQ)',
+      description: 'Compresses each dimension to 8 bits (~4× reduction). Good balance between recall, speed, and memory savings.',
+      docKey: 'compressionSq'
+    },
   ])
 
   function update(field, val) {
@@ -326,9 +351,15 @@ export default function VectorConfigItem({
                       </option>
                     ))}
                   </select>
-                  <small className="hint">
-                    {indexTypeOptions.find(opt => opt.value === (value.indexType || 'hnsw'))?.description}
-                  </small>
+                  {(() => {
+                    const opt = filteredIndexTypeOptions.find(o => o.value === (value.indexType || 'hnsw'))
+                    return (
+                      <small className="hint">
+                        {opt?.description}
+                        {opt?.docKey && DOC_LINKS[opt.docKey] && <>{' '}<a href={DOC_LINKS[opt.docKey]} target="_blank" rel="noopener noreferrer">View documentation ↗</a></>}
+                      </small>
+                    )
+                  })()}
                 </div>
 
                 {/* HNSW Configuration */}
@@ -528,9 +559,16 @@ export default function VectorConfigItem({
                           <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}</option>
                         ))}
                       </select>
-                      <small className="hint">
-                        Compression method to reduce memory usage for Flat index
-                      </small>
+                      {(() => {
+                        const qType = value.indexConfig?.bq ? 'bq' : value.indexConfig?.rq ? 'rq' : 'none'
+                        const opt = filteredFlatQuantizerOptions.find(o => o.value === qType)
+                        return (
+                          <small className="hint">
+                            {opt?.description || 'Quantization compresses vectors to reduce memory usage.'}
+                            {opt?.docKey && DOC_LINKS[opt.docKey] && <>{' '}<a href={DOC_LINKS[opt.docKey]} target="_blank" rel="noopener noreferrer">View documentation ↗</a></>}
+                          </small>
+                        )
+                      })()}
                     </div>
 
                     {/* BQ Configuration for Flat */}
@@ -980,7 +1018,16 @@ export default function VectorConfigItem({
                                   <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}</option>
                                 ))}
                               </select>
-                              <small className="hint">Compression method to reduce memory usage for HNSW index</small>
+                              {(() => {
+                                const qType = value.indexConfig?.hnsw?.quantizer || 'none'
+                                const opt = filteredHnswQuantizerOptions.find(o => o.value === qType)
+                                return (
+                                  <small className="hint">
+                                    {opt?.description || 'Quantization compresses vectors to reduce memory usage.'}
+                                    {opt?.docKey && DOC_LINKS[opt.docKey] && <>{' '}<a href={DOC_LINKS[opt.docKey]} target="_blank" rel="noopener noreferrer">View documentation ↗</a></>}
+                                  </small>
+                                )
+                              })()}
                             </div>
 
                             {/* PQ Configuration for HNSW */}
@@ -1214,16 +1261,33 @@ export default function VectorConfigItem({
                                   <input
                                     type="number"
                                     value={value.indexConfig?.hnsw?.sq?.trainingLimit || 100000}
-                                    onChange={(e) => update('indexConfig', { 
-                                      ...value.indexConfig, 
-                                      hnsw: { 
-                                        ...(value.indexConfig?.hnsw || {}), 
+                                    onChange={(e) => update('indexConfig', {
+                                      ...value.indexConfig,
+                                      hnsw: {
+                                        ...(value.indexConfig?.hnsw || {}),
                                         sq: { ...(value.indexConfig?.hnsw?.sq || {}), trainingLimit: parseInt(e.target.value) || 100000 }
                                       }
                                     })}
                                     placeholder="100000"
                                   />
                                   <small className="hint">Maximum number of vectors used for training (default: 100000)</small>
+                                </div>
+
+                                <div className="field">
+                                  <label>Vector Cache Max Objects</label>
+                                  <input
+                                    type="number"
+                                    value={value.indexConfig?.hnsw?.sq?.vectorCacheMaxObjects || 1000000000000}
+                                    onChange={(e) => update('indexConfig', {
+                                      ...value.indexConfig,
+                                      hnsw: {
+                                        ...(value.indexConfig?.hnsw || {}),
+                                        sq: { ...(value.indexConfig?.hnsw?.sq || {}), vectorCacheMaxObjects: parseInt(e.target.value) || 1000000000000 }
+                                      }
+                                    })}
+                                    placeholder="1000000000000"
+                                  />
+                                  <small className="hint">Maximum objects in the memory cache for SQ (default: 1000000000000)</small>
                                 </div>
                               </div>
                             )}
@@ -1363,9 +1427,16 @@ export default function VectorConfigItem({
                                   <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}</option>
                                 ))}
                               </select>
-                              <small className="hint">
-                                Compression method to reduce memory usage for Flat index
-                              </small>
+                              {(() => {
+                                const qType = value.indexConfig?.flat?.quantizer || 'none'
+                                const opt = filteredFlatQuantizerOptions.find(o => o.value === qType)
+                                return (
+                                  <small className="hint">
+                                    {opt?.description || 'Quantization compresses vectors to reduce memory usage.'}
+                                    {opt?.docKey && DOC_LINKS[opt.docKey] && <>{' '}<a href={DOC_LINKS[opt.docKey]} target="_blank" rel="noopener noreferrer">View documentation ↗</a></>}
+                                  </small>
+                                )
+                              })()}
                             </div>
 
                             {/* BQ Configuration for Flat */}
@@ -1540,7 +1611,16 @@ export default function VectorConfigItem({
                       <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}</option>
                     ))}
                   </select>
-                  <small className="hint">Compression method to reduce memory usage</small>
+                  {(() => {
+                    const qType = value.indexConfig?.pq ? 'pq' : value.indexConfig?.bq ? 'bq' : value.indexConfig?.sq ? 'sq' : value.indexConfig?.rq ? 'rq' : 'none'
+                    const opt = filteredHnswQuantizerOptions.find(o => o.value === qType)
+                    return (
+                      <small className="hint">
+                        {opt?.description || 'Quantization compresses vectors to reduce memory usage at the cost of some recall accuracy.'}
+                        {opt?.docKey && DOC_LINKS[opt.docKey] && <>{' '}<a href={DOC_LINKS[opt.docKey]} target="_blank" rel="noopener noreferrer">View documentation ↗</a></>}
+                      </small>
+                    )
+                  })()}
                 </div>
 
                 {/* Product Quantization Configuration */}
