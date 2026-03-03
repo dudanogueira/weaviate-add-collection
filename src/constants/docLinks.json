@@ -11,6 +11,7 @@
   "compressionPq": "https://docs.weaviate.io/weaviate/configuration/compression/pq-compression#pq-parameters",
   "compressionBq": "https://docs.weaviate.io/weaviate/configuration/compression/bq-compression#bq-parameters",
   "compressionSq": "https://docs.weaviate.io/weaviate/configuration/compression/sq-compression#sq-parameters",
+  "tokenization": "https://docs.weaviate.io/weaviate/concepts/indexing/inverted-index#tokenization-and-the-inverted-index",
   "indexHnsw": "https://docs.weaviate.io/weaviate/config-refs/indexing/vector-index#hnsw-index",
   "indexFlat": "https://docs.weaviate.io/weaviate/config-refs/indexing/vector-index#flat-index",
   "indexDynamic": "https://docs.weaviate.io/weaviate/config-refs/indexing/vector-index#dynamic-index",

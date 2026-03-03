@@ -1,12 +1,12 @@
 export const tokenizationOptions = [
-  { value: 'word', label: 'Word', description: 'Tokenize by word' },
-  { value: 'field', label: 'Field', description: 'Tokenize by field' },
-  { value: 'whitespace', label: 'Whitespace', description: 'Tokenize by whitespace' },
-  { value: 'lowercase', label: 'Lowercase', description: 'Tokenize by lowercase' },
-  { value: 'gse', label: 'GSE', description: 'Tokenize using GSE (Chinese/Japanese) - requires server support', featureId: 'tokenizationGse' },
-  { value: 'trigram', label: 'Trigram', description: 'Tokenize into trigrams - requires server support', featureId: 'tokenizationTrigram' },
-  { value: 'kagome_ja', label: 'Kagome JA', description: 'Tokenize using Kagome (Japanese) - requires server support', featureId: 'tokenizationKagomeJa' },
-  { value: 'kagome_kr', label: 'Kagome KR', description: 'Tokenize using Kagome (Korean) - requires server support', featureId: 'tokenizationKagomeKr' }
+  { value: 'word', label: 'Word', description: 'Splits on non-alphanumeric characters and lowercases. Best for typical text searches.' },
+  { value: 'lowercase', label: 'Lowercase', description: 'Splits on whitespace and lowercases. Preserves symbols like @, _, and -.' },
+  { value: 'whitespace', label: 'Whitespace', description: 'Splits on whitespace, preserves case and symbols. Use for case-sensitive data.' },
+  { value: 'field', label: 'Field', description: 'No splitting — the entire value is one token. Use for exact-match fields.' },
+  { value: 'gse', label: 'GSE', description: 'Chinese text segmentation using the Jieba algorithm. For languages without word boundaries.', featureId: 'tokenizationGse' },
+  { value: 'trigram', label: 'Trigram', description: 'Divides text into character trigrams. Designed for CJK (Chinese, Japanese, Korean) languages.', featureId: 'tokenizationTrigram' },
+  { value: 'kagome_ja', label: 'Kagome JA', description: 'Japanese morphological analysis for accurate Japanese text segmentation.', featureId: 'tokenizationKagomeJa' },
+  { value: 'kagome_kr', label: 'Kagome KR', description: 'Korean morphological analysis for accurate Korean text segmentation.', featureId: 'tokenizationKagomeKr' }
 ]
 
 export const dataTypeOptions = [

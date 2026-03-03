@@ -3,6 +3,7 @@ import { tokenizationOptions, dataTypeOptions } from '../constants/options'
 import { validatePropertyName, sanitizePropertyName } from '../utils/propertyNameValidator'
 import NestedPropertySection from './NestedPropertySection'
 import { VersionGated, useVersionFilteredOptions } from '../context/VersionContext'
+import DOC_LINKS from '../constants/docLinks.json'
 
 export default function PropertyItem({ value, onChange, onDelete, index, isNested = false, depth = 0 }) {
   const filteredTokenizationOptions = useVersionFilteredOptions(tokenizationOptions)
@@ -139,7 +140,8 @@ export default function PropertyItem({ value, onChange, onDelete, index, isNeste
               ))}
             </select>
             <small className="help-text">
-              {tokenizationOptions.find(opt => opt.value === (value.tokenization || 'word'))?.description}
+              {filteredTokenizationOptions.find(opt => opt.value === (value.tokenization || 'word'))?.description}
+              {DOC_LINKS.tokenization && <>{' '}<a href={DOC_LINKS.tokenization} target="_blank" rel="noopener noreferrer">View documentation ↗</a></>}
             </small>
           </div>
 
