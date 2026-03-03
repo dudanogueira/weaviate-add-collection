@@ -116,7 +116,21 @@ export default function PropertyItem({ value, onChange, onDelete, index, isNeste
 
       <div className="field field--row">
         <div className="data-type-group">
-          <label className="data-type-label">Data Type</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <label className="data-type-label" style={{ margin: 0 }}>Data Type</label>
+            {(() => {
+              const opt = dataTypeOptions.find(o => o.value === (value.dataType || 'text'))
+              const href = (opt?.docKey && DOC_LINKS[opt.docKey]) || DOC_LINKS.dataType
+              return (
+                <a href={href} target="_blank" rel="noopener noreferrer" className="doc-link" title="View documentation">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="View documentation">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                  </svg>
+                </a>
+              )
+            })()}
+          </div>
           <select className="data-type-select" value={value.dataType || 'text'} onChange={(e) => updateDataType(e.target.value)}>
             {dataTypeOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -132,13 +146,6 @@ export default function PropertyItem({ value, onChange, onDelete, index, isNeste
           </div>
         )}
       </div>
-      <small className="hint">
-        {(() => {
-          const opt = dataTypeOptions.find(o => o.value === (value.dataType || 'text'))
-          const href = (opt?.docKey && DOC_LINKS[opt.docKey]) || DOC_LINKS.dataType
-          return (<>{opt?.description}{' '}<a href={href} target="_blank" rel="noopener noreferrer">View documentation ↗</a></>)
-        })()}
-      </small>
 
       {value.dataType === 'cross-reference' && (
         <div className="field" style={{ marginTop: '12px' }}>
