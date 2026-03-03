@@ -273,8 +273,8 @@ export default function VectorConfigItem({
             >
               Index Configuration
             </button>
-            {/* Hide Compression/Quantization tab for dynamic, flat, and hfresh index types */}
-            {value.indexType !== 'dynamic' && value.indexType !== 'flat' && value.indexType !== 'hfresh' && (
+            {/* Hide Compression/Quantization tab for dynamic and hfresh index types */}
+            {value.indexType !== 'dynamic' && value.indexType !== 'hfresh' && (
               <button
                 type="button"
                 className={`tab-button ${activeTab === 'compression' ? 'active' : ''}`}
@@ -527,6 +527,17 @@ export default function VectorConfigItem({
                         <option value="hamming">Hamming</option>
                       </select>
                       <small className="hint">Distance metric for vector comparison</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Vector Cache Max Objects</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.vectorCacheMaxObjects || 1000000000000}
+                        onChange={(e) => update('indexConfig', { ...value.indexConfig, vectorCacheMaxObjects: parseInt(e.target.value) || 1000000000000 })}
+                        placeholder="1000000000000"
+                      />
+                      <small className="hint">Maximum objects in the vector cache (default: 1000000000000)</small>
                     </div>
 
                     {/* Flat Quantization - BQ and RQ available */}
@@ -1218,10 +1229,10 @@ export default function VectorConfigItem({
                                       id={`hnsw-bq-enabled-${index}`}
                                       type="checkbox"
                                       checked={value.indexConfig?.hnsw?.bq?.enabled !== false}
-                                      onChange={(e) => update('indexConfig', { 
-                                        ...value.indexConfig, 
-                                        hnsw: { 
-                                          ...(value.indexConfig?.hnsw || {}), 
+                                      onChange={(e) => update('indexConfig', {
+                                        ...value.indexConfig,
+                                        hnsw: {
+                                          ...(value.indexConfig?.hnsw || {}),
                                           bq: { ...(value.indexConfig?.hnsw?.bq || {}), enabled: e.target.checked }
                                         }
                                       })}
@@ -1230,6 +1241,23 @@ export default function VectorConfigItem({
                                     Enabled
                                   </label>
                                   <small className="hint">Enable Binary Quantization (default: true)</small>
+                                </div>
+
+                                <div className="field">
+                                  <label>Vector Cache Max Objects</label>
+                                  <input
+                                    type="number"
+                                    value={value.indexConfig?.hnsw?.bq?.vectorCacheMaxObjects || 1000000000000}
+                                    onChange={(e) => update('indexConfig', {
+                                      ...value.indexConfig,
+                                      hnsw: {
+                                        ...(value.indexConfig?.hnsw || {}),
+                                        bq: { ...(value.indexConfig?.hnsw?.bq || {}), vectorCacheMaxObjects: parseInt(e.target.value) || 1000000000000 }
+                                      }
+                                    })}
+                                    placeholder="1000000000000"
+                                  />
+                                  <small className="hint">Maximum objects in the memory cache for BQ (default: 1000000000000)</small>
                                 </div>
                               </div>
                             )}
@@ -1271,6 +1299,26 @@ export default function VectorConfigItem({
                                     placeholder="100000"
                                   />
                                   <small className="hint">Maximum number of vectors used for training (default: 100000)</small>
+                                </div>
+
+                                <div className="field">
+                                  <label htmlFor={`hnsw-sq-cache-${index}`}>
+                                    <input
+                                      id={`hnsw-sq-cache-${index}`}
+                                      type="checkbox"
+                                      checked={value.indexConfig?.hnsw?.sq?.cache || false}
+                                      onChange={(e) => update('indexConfig', {
+                                        ...value.indexConfig,
+                                        hnsw: {
+                                          ...(value.indexConfig?.hnsw || {}),
+                                          sq: { ...(value.indexConfig?.hnsw?.sq || {}), cache: e.target.checked }
+                                        }
+                                      })}
+                                      style={{ width: 'auto', marginRight: '8px' }}
+                                    />
+                                    Cache
+                                  </label>
+                                  <small className="hint">Cache vectors in memory (default: false)</small>
                                 </div>
 
                                 <div className="field">
@@ -1339,10 +1387,10 @@ export default function VectorConfigItem({
                                       id={`hnsw-rq-enabled-${index}`}
                                       type="checkbox"
                                       checked={value.indexConfig?.hnsw?.rq?.enabled !== false}
-                                      onChange={(e) => update('indexConfig', { 
-                                        ...value.indexConfig, 
-                                        hnsw: { 
-                                          ...(value.indexConfig?.hnsw || {}), 
+                                      onChange={(e) => update('indexConfig', {
+                                        ...value.indexConfig,
+                                        hnsw: {
+                                          ...(value.indexConfig?.hnsw || {}),
                                           rq: { ...(value.indexConfig?.hnsw?.rq || {}), enabled: e.target.checked }
                                         }
                                       })}
@@ -1351,6 +1399,43 @@ export default function VectorConfigItem({
                                     Enabled
                                   </label>
                                   <small className="hint">Enable Rotational Quantization (default: true)</small>
+                                </div>
+
+                                <div className="field">
+                                  <label htmlFor={`hnsw-rq-cache-${index}`}>
+                                    <input
+                                      id={`hnsw-rq-cache-${index}`}
+                                      type="checkbox"
+                                      checked={value.indexConfig?.hnsw?.rq?.cache || false}
+                                      onChange={(e) => update('indexConfig', {
+                                        ...value.indexConfig,
+                                        hnsw: {
+                                          ...(value.indexConfig?.hnsw || {}),
+                                          rq: { ...(value.indexConfig?.hnsw?.rq || {}), cache: e.target.checked }
+                                        }
+                                      })}
+                                      style={{ width: 'auto', marginRight: '8px' }}
+                                    />
+                                    Cache
+                                  </label>
+                                  <small className="hint">Cache vectors in memory (default: false)</small>
+                                </div>
+
+                                <div className="field">
+                                  <label>Vector Cache Max Objects</label>
+                                  <input
+                                    type="number"
+                                    value={value.indexConfig?.hnsw?.rq?.vectorCacheMaxObjects || 1000000000000}
+                                    onChange={(e) => update('indexConfig', {
+                                      ...value.indexConfig,
+                                      hnsw: {
+                                        ...(value.indexConfig?.hnsw || {}),
+                                        rq: { ...(value.indexConfig?.hnsw?.rq || {}), vectorCacheMaxObjects: parseInt(e.target.value) || 1000000000000 }
+                                      }
+                                    })}
+                                    placeholder="1000000000000"
+                                  />
+                                  <small className="hint">Maximum objects in the memory cache for RQ (default: 1000000000000)</small>
                                 </div>
                               </div>
                             )}
@@ -1580,45 +1665,40 @@ export default function VectorConfigItem({
               <div className="tab-panel">
                 <div className="field">
                   <label htmlFor={`compression-quantizer-${index}`}>Quantization Type</label>
-                  <select
-                    id={`compression-quantizer-${index}`}
-                    value={
-                      value.indexConfig?.pq ? 'pq' :
-                      value.indexConfig?.bq ? 'bq' :
-                      value.indexConfig?.sq ? 'sq' :
-                      value.indexConfig?.rq ? 'rq' :
-                      'none'
-                    }
-                    onChange={(e) => {
-                      const newType = e.target.value
-                      const newIndexConfig = { ...value.indexConfig }
-                      
-                      // Remove all quantizer configs
-                      delete newIndexConfig.pq
-                      delete newIndexConfig.bq
-                      delete newIndexConfig.sq
-                      delete newIndexConfig.rq
-                      
-                      // Add the new quantizer config if not 'none'
-                      if (newType !== 'none') {
-                        newIndexConfig[newType] = { enabled: true }
-                      }
-                      
-                      update('indexConfig', newIndexConfig)
-                    }}
-                  >
-                    {filteredHnswQuantizerOptions.map(opt => (
-                      <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}</option>
-                    ))}
-                  </select>
                   {(() => {
-                    const qType = value.indexConfig?.pq ? 'pq' : value.indexConfig?.bq ? 'bq' : value.indexConfig?.sq ? 'sq' : value.indexConfig?.rq ? 'rq' : 'none'
-                    const opt = filteredHnswQuantizerOptions.find(o => o.value === qType)
+                    const isFlatIndex = value.indexType === 'flat'
+                    const quantizerOptions = isFlatIndex ? filteredFlatQuantizerOptions : filteredHnswQuantizerOptions
+                    const qType = isFlatIndex
+                      ? (value.indexConfig?.bq ? 'bq' : value.indexConfig?.rq ? 'rq' : 'none')
+                      : (value.indexConfig?.pq ? 'pq' : value.indexConfig?.bq ? 'bq' : value.indexConfig?.sq ? 'sq' : value.indexConfig?.rq ? 'rq' : 'none')
+                    const selectedOpt = quantizerOptions.find(o => o.value === qType)
                     return (
-                      <small className="hint">
-                        {opt?.description || 'Quantization compresses vectors to reduce memory usage at the cost of some recall accuracy.'}
-                        {opt?.docKey && DOC_LINKS[opt.docKey] && <>{' '}<a href={DOC_LINKS[opt.docKey]} target="_blank" rel="noopener noreferrer">View documentation ↗</a></>}
-                      </small>
+                      <>
+                        <select
+                          id={`compression-quantizer-${index}`}
+                          value={qType}
+                          onChange={(e) => {
+                            const newType = e.target.value
+                            const newIndexConfig = { ...value.indexConfig }
+                            delete newIndexConfig.pq
+                            delete newIndexConfig.bq
+                            delete newIndexConfig.sq
+                            delete newIndexConfig.rq
+                            if (newType !== 'none') {
+                              newIndexConfig[newType] = { enabled: true }
+                            }
+                            update('indexConfig', newIndexConfig)
+                          }}
+                        >
+                          {quantizerOptions.map(opt => (
+                            <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}{opt.helpText ? ` — ${opt.helpText}` : ''}</option>
+                          ))}
+                        </select>
+                        <small className="hint">
+                          {selectedOpt?.description || 'Quantization compresses vectors to reduce memory usage at the cost of some recall accuracy.'}
+                          {selectedOpt?.docKey && DOC_LINKS[selectedOpt.docKey] && <>{' '}<a href={DOC_LINKS[selectedOpt.docKey]} target="_blank" rel="noopener noreferrer">View documentation ↗</a></>}
+                        </small>
+                      </>
                     )
                   })()}
                 </div>
@@ -1627,14 +1707,31 @@ export default function VectorConfigItem({
                 {value.indexConfig?.pq && (
                   <div style={{ marginTop: '16px' }}>
                     <h5 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 600 }}>Product Quantization Settings</h5>
-                    
+
+                    <div className="field">
+                      <label htmlFor={`pq-enabled-${index}`}>
+                        <input
+                          id={`pq-enabled-${index}`}
+                          type="checkbox"
+                          checked={value.indexConfig?.pq?.enabled !== false}
+                          onChange={(e) => update('indexConfig', {
+                            ...value.indexConfig,
+                            pq: { ...(value.indexConfig?.pq || {}), enabled: e.target.checked }
+                          })}
+                          style={{ width: 'auto', marginRight: '8px' }}
+                        />
+                        Enabled
+                      </label>
+                      <small className="hint">Enable Product Quantization (default: true)</small>
+                    </div>
+
                     <div className="field">
                       <label>Segments</label>
                       <input
                         type="number"
                         value={value.indexConfig?.pq?.segments || 0}
-                        onChange={(e) => update('indexConfig', { 
-                          ...value.indexConfig, 
+                        onChange={(e) => update('indexConfig', {
+                          ...value.indexConfig,
                           pq: { ...(value.indexConfig?.pq || {}), segments: parseInt(e.target.value) || 0 }
                         })}
                         placeholder="0 (auto)"
@@ -1647,8 +1744,8 @@ export default function VectorConfigItem({
                       <input
                         type="number"
                         value={value.indexConfig?.pq?.centroids || 256}
-                        onChange={(e) => update('indexConfig', { 
-                          ...value.indexConfig, 
+                        onChange={(e) => update('indexConfig', {
+                          ...value.indexConfig,
                           pq: { ...(value.indexConfig?.pq || {}), centroids: parseInt(e.target.value) || 256 }
                         })}
                         placeholder="256"
@@ -1664,14 +1761,14 @@ export default function VectorConfigItem({
                           checked={value.indexConfig?.pq?.trainingLimit !== undefined}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              update('indexConfig', { 
-                                ...value.indexConfig, 
+                              update('indexConfig', {
+                                ...value.indexConfig,
                                 pq: { ...(value.indexConfig?.pq || {}), trainingLimit: 100000 }
                               })
                             } else {
                               const { trainingLimit, ...rest } = value.indexConfig?.pq || {}
-                              update('indexConfig', { 
-                                ...value.indexConfig, 
+                              update('indexConfig', {
+                                ...value.indexConfig,
                                 pq: rest
                               })
                             }
@@ -1684,38 +1781,51 @@ export default function VectorConfigItem({
                         <input
                           type="number"
                           value={value.indexConfig?.pq?.trainingLimit || 100000}
-                          onChange={(e) => update('indexConfig', { 
-                            ...value.indexConfig, 
+                          onChange={(e) => update('indexConfig', {
+                            ...value.indexConfig,
                             pq: { ...(value.indexConfig?.pq || {}), trainingLimit: parseInt(e.target.value) || 100000 }
                           })}
                           placeholder="100000"
                           style={{ marginTop: '8px' }}
                         />
                       )}
-                      <small className="hint">Maximum number of vectors used for training</small>
+                      <small className="hint">Maximum number of vectors used for training (default: 100000)</small>
                     </div>
 
                     <div className="field">
-                      <label htmlFor={`pq-encoder-distribution-${index}`}>
-                        <input
-                          id={`pq-encoder-distribution-${index}`}
-                          type="checkbox"
-                          checked={value.indexConfig?.pq?.encoder?.distribution || false}
-                          onChange={(e) => update('indexConfig', { 
-                            ...value.indexConfig, 
-                            pq: { 
-                              ...(value.indexConfig?.pq || {}),
-                              encoder: { 
-                                ...(value.indexConfig?.pq?.encoder || {}),
-                                distribution: e.target.checked ? 'log-normal' : undefined 
-                              }
-                            }
-                          })}
-                          style={{ width: 'auto', marginRight: '8px' }}
-                        />
-                        Use Log-Normal Distribution
-                      </label>
-                      <small className="hint">Enable for data with log-normal distribution</small>
+                      <label>Encoder Type</label>
+                      <select
+                        value={value.indexConfig?.pq?.encoder?.type || 'kmeans'}
+                        onChange={(e) => update('indexConfig', {
+                          ...value.indexConfig,
+                          pq: {
+                            ...(value.indexConfig?.pq || {}),
+                            encoder: { ...(value.indexConfig?.pq?.encoder || {}), type: e.target.value }
+                          }
+                        })}
+                      >
+                        <option value="kmeans">K-means</option>
+                        <option value="tile">Tile</option>
+                      </select>
+                      <small className="hint">Encoder used to fit the centroids (default: kmeans)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Encoder Distribution</label>
+                      <select
+                        value={value.indexConfig?.pq?.encoder?.distribution || 'log-normal'}
+                        onChange={(e) => update('indexConfig', {
+                          ...value.indexConfig,
+                          pq: {
+                            ...(value.indexConfig?.pq || {}),
+                            encoder: { ...(value.indexConfig?.pq?.encoder || {}), distribution: e.target.value }
+                          }
+                        })}
+                      >
+                        <option value="log-normal">Log-normal</option>
+                        <option value="normal">Normal</option>
+                      </select>
+                      <small className="hint">Data distribution assumed by the tile encoder (default: log-normal)</small>
                     </div>
                   </div>
                 )}
@@ -1724,7 +1834,24 @@ export default function VectorConfigItem({
                 {value.indexConfig?.bq && (
                   <div style={{ marginTop: '16px' }}>
                     <h5 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 600 }}>Binary Quantization Settings</h5>
-                    
+
+                    <div className="field">
+                      <label htmlFor={`bq-enabled-tab3-${index}`}>
+                        <input
+                          id={`bq-enabled-tab3-${index}`}
+                          type="checkbox"
+                          checked={value.indexConfig?.bq?.enabled !== false}
+                          onChange={(e) => update('indexConfig', {
+                            ...value.indexConfig,
+                            bq: { ...(value.indexConfig?.bq || {}), enabled: e.target.checked }
+                          })}
+                          style={{ width: 'auto', marginRight: '8px' }}
+                        />
+                        Enabled
+                      </label>
+                      <small className="hint">Enable Binary Quantization (default: true)</small>
+                    </div>
+
                     <div className="field">
                       <label htmlFor={`bq-rescore-limit-${index}`}>
                         <input
@@ -1733,14 +1860,14 @@ export default function VectorConfigItem({
                           checked={value.indexConfig?.bq?.rescoreLimit !== undefined}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              update('indexConfig', { 
-                                ...value.indexConfig, 
+                              update('indexConfig', {
+                                ...value.indexConfig,
                                 bq: { ...(value.indexConfig?.bq || {}), rescoreLimit: -1 }
                               })
                             } else {
                               const { rescoreLimit, ...rest } = value.indexConfig?.bq || {}
-                              update('indexConfig', { 
-                                ...value.indexConfig, 
+                              update('indexConfig', {
+                                ...value.indexConfig,
                                 bq: rest
                               })
                             }
@@ -1753,15 +1880,46 @@ export default function VectorConfigItem({
                         <input
                           type="number"
                           value={value.indexConfig?.bq?.rescoreLimit || -1}
-                          onChange={(e) => update('indexConfig', { 
-                            ...value.indexConfig, 
+                          onChange={(e) => update('indexConfig', {
+                            ...value.indexConfig,
                             bq: { ...(value.indexConfig?.bq || {}), rescoreLimit: parseInt(e.target.value) }
                           })}
                           placeholder="-1 (unlimited)"
                           style={{ marginTop: '8px' }}
                         />
                       )}
-                      <small className="hint">Number of candidates to rescore (-1 = unlimited)</small>
+                      <small className="hint">Number of candidates to rescore (-1 = unlimited, default: -1)</small>
+                    </div>
+
+                    <div className="field">
+                      <label htmlFor={`bq-cache-tab3-${index}`}>
+                        <input
+                          id={`bq-cache-tab3-${index}`}
+                          type="checkbox"
+                          checked={value.indexConfig?.bq?.cache || false}
+                          onChange={(e) => update('indexConfig', {
+                            ...value.indexConfig,
+                            bq: { ...(value.indexConfig?.bq || {}), cache: e.target.checked }
+                          })}
+                          style={{ width: 'auto', marginRight: '8px' }}
+                        />
+                        Cache
+                      </label>
+                      <small className="hint">Cache vectors in memory (default: false)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Vector Cache Max Objects</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.bq?.vectorCacheMaxObjects || 1000000000000}
+                        onChange={(e) => update('indexConfig', {
+                          ...value.indexConfig,
+                          bq: { ...(value.indexConfig?.bq || {}), vectorCacheMaxObjects: parseInt(e.target.value) || 1000000000000 }
+                        })}
+                        placeholder="1000000000000"
+                      />
+                      <small className="hint">Maximum objects in the memory cache for BQ (default: 1000000000000)</small>
                     </div>
                   </div>
                 )}
@@ -1846,7 +2004,21 @@ export default function VectorConfigItem({
                           style={{ marginTop: '8px' }}
                         />
                       )}
-                      <small className="hint">Maximum number of vectors used for training</small>
+                      <small className="hint">Maximum number of vectors used for training (default: 100000)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Vector Cache Max Objects</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.sq?.vectorCacheMaxObjects || 1000000000000}
+                        onChange={(e) => update('indexConfig', {
+                          ...value.indexConfig,
+                          sq: { ...(value.indexConfig?.sq || {}), vectorCacheMaxObjects: parseInt(e.target.value) || 1000000000000 }
+                        })}
+                        placeholder="1000000000000"
+                      />
+                      <small className="hint">Maximum objects in the memory cache for SQ (default: 1000000000000)</small>
                     </div>
                   </div>
                 )}
@@ -1917,8 +2089,8 @@ export default function VectorConfigItem({
                           id={`rq-enabled-${index}`}
                           type="checkbox"
                           checked={value.indexConfig?.rq?.enabled !== false}
-                          onChange={(e) => update('indexConfig', { 
-                            ...value.indexConfig, 
+                          onChange={(e) => update('indexConfig', {
+                            ...value.indexConfig,
                             rq: { ...(value.indexConfig?.rq || {}), enabled: e.target.checked }
                           })}
                           style={{ width: 'auto', marginRight: '8px' }}
@@ -1926,6 +2098,37 @@ export default function VectorConfigItem({
                         Enabled
                       </label>
                       <small className="hint">Enable Rotational Quantization (default: true)</small>
+                    </div>
+
+                    <div className="field">
+                      <label htmlFor={`rq-cache-tab3-${index}`}>
+                        <input
+                          id={`rq-cache-tab3-${index}`}
+                          type="checkbox"
+                          checked={value.indexConfig?.rq?.cache || false}
+                          onChange={(e) => update('indexConfig', {
+                            ...value.indexConfig,
+                            rq: { ...(value.indexConfig?.rq || {}), cache: e.target.checked }
+                          })}
+                          style={{ width: 'auto', marginRight: '8px' }}
+                        />
+                        Cache
+                      </label>
+                      <small className="hint">Cache vectors in memory (default: false)</small>
+                    </div>
+
+                    <div className="field">
+                      <label>Vector Cache Max Objects</label>
+                      <input
+                        type="number"
+                        value={value.indexConfig?.rq?.vectorCacheMaxObjects || 1000000000000}
+                        onChange={(e) => update('indexConfig', {
+                          ...value.indexConfig,
+                          rq: { ...(value.indexConfig?.rq || {}), vectorCacheMaxObjects: parseInt(e.target.value) || 1000000000000 }
+                        })}
+                        placeholder="1000000000000"
+                      />
+                      <small className="hint">Maximum objects in the memory cache for RQ (default: 1000000000000)</small>
                     </div>
                   </div>
                 )}
