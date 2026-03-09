@@ -2,7 +2,9 @@
 
 A minimal React app (Vite) with a Collection component to compose a Weaviate collection JSON.
 
-**✨ New Feature**: Programmatic schema access via `onChange` and `onSubmit` callbacks - no more DOM scraping needed!
+**✨ New**: Programmatic schema access via `onChange` and `onSubmit` callbacks — no more DOM scraping needed!
+
+**✨ New**: Version-aware UI via the `weaviateVersion` prop — fields, options, and sections are automatically shown or hidden based on what your Weaviate instance supports. Unavailable options are disabled with a tooltip indicating the minimum required version.
 
 ## Quick Start (macOS, zsh)
 
@@ -36,10 +38,11 @@ function App() {
   return (
     <div>
       <h1>My Weaviate Collection Builder</h1>
-      <Collection 
+      <Collection
         initialJson={{ name: 'MyCollection', description: 'A sample collection' }}
         availableModules={serverModules}
         nodesNumber={3}
+        weaviateVersion="1.36.0"
       />
     </div>
   );
@@ -53,6 +56,7 @@ The `Collection` component accepts the following props:
 - **`initialJson`** (optional): JSON object to prepopulate the form with `name` and `description`
 - **`availableModules`** (optional): Object containing available vectorizer modules from the server. If not provided, all default modules are available.
 - **`nodesNumber`** (optional): Number representing the number of nodes (used as max for replication factor)
+- **`weaviateVersion`** (optional): Semver string (e.g. `"1.36.0"`) representing the target Weaviate instance version. Controls which fields, options, and sections are shown based on version availability. Defaults to the latest supported version when omitted. See [Version-Gated UI](#version-gated-ui) below.
 - **`onChange`** (optional): Callback function `(schema: object) => void` called whenever the schema changes. Provides programmatic access to the current JSON schema without DOM scraping.
 - **`onSubmit`** (optional): Callback function `(schema: object) => void` called when the "Create Collection" button is clicked. If provided, a submit button will be displayed below the JSON preview.
 
@@ -90,10 +94,11 @@ function App() {
   return (
     <div>
       <h1>My Weaviate Collection Builder</h1>
-      <Collection 
+      <Collection
         initialJson={{ name: 'MyCollection', description: 'A sample collection' }}
         availableModules={serverModules}
         nodesNumber={3}
+        weaviateVersion="1.36.0"
         onChange={handleSchemaChange}
         onSubmit={handleSubmit}
       />
@@ -101,6 +106,47 @@ function App() {
   );
 }
 ```
+
+## Version-Gated UI
+
+The `weaviateVersion` prop enables version-aware rendering: fields, dropdown options, and entire sections are shown, disabled, or hidden based on whether the target Weaviate instance supports them.
+
+Pass the version of the Weaviate instance your user is connecting to:
+
+```jsx
+<Collection weaviateVersion="1.36.0" ... />
+```
+
+When `weaviateVersion` is omitted the component behaves as if the latest supported version is in use, showing all features.
+
+### How it works
+
+| Element | Behaviour when unavailable |
+|---------|---------------------------|
+| Individual field / checkbox | Hidden entirely |
+| Dropdown option | Kept in list but `disabled`, label appended with `— Requires Weaviate ≥ X.Y.Z` |
+| Collapsible section | Toggle button shown but disabled, same tooltip |
+
+### Version feature registry
+
+All version gates are centralised in [`src/constants/versionFeatures.js`](src/constants/versionFeatures.js). Each entry maps a feature identifier to the minimum Weaviate version that introduced it:
+
+```js
+// src/constants/versionFeatures.js
+export const versionFeatures = {
+  dynamicIndexType: '1.25.0',
+  rerankerSection:  '1.26.0',
+  // ...
+}
+```
+
+To add a new gate, add an entry there and use one of the gating helpers from [`src/context/VersionContext.jsx`](src/context/VersionContext.jsx):
+
+- **`<VersionGated featureId="…">`** — wraps any JSX; renders nothing when unavailable.
+- **`<VersionGatedSection featureId="…" title="…">`** — wraps a collapsible section; disables the toggle when unavailable.
+- **`useVersionFilteredOptions(opts)`** — filters/disables option arrays for `<select>` elements.
+
+See `CLAUDE.md` for step-by-step instructions on adding new version-gated fields, options, and sections.
 
 ## Testing
 
@@ -367,29 +413,82 @@ The vector configurations are output in the `vectorConfig` object with module-sp
 ```json
 {
   "class": "MyCollection",
-  "description": "A Brand new collection",
+  "description": "This is a demo collection",
+  "properties": [
+    {
+      "name": "property1",
+      "dataType": [
+        "text"
+      ],
+      "indexFilterable": true,
+      "indexSearchable": true,
+      "tokenization": "word",
+      "indexRangeFilters": false
+    },
+    {
+      "name": "original_id",
+      "dataType": [
+        "text"
+      ],
+      "indexFilterable": true,
+      "indexSearchable": true,
+      "tokenization": "field",
+      "indexRangeFilters": false
+    }
+  ],
   "vectorConfig": {
     "default": {
       "vectorizer": {
         "text2vec-openai": {
-          "model": "text-embedding-ada-002",
-          "vectorizeClassName": false,
-          "dimensions": 1536
+          "properties": [
+            "property1"
+          ],
+          "model": "text-embedding-3-small"
         }
       },
-      "vectorIndexType": "hnsw"
-    },
-    "semantic": {
-      "vectorizer": {
-        "text2vec-google": {
-          "projectId": "my-gcp-project",
-          "location": "us-central1",
-          "model": "textembedding-gecko@001",
-          "vectorizeClassName": true
+      "vectorIndexType": "dynamic",
+      "vectorIndexConfig": {
+        "hnsw": {
+          "rq": {
+            "enabled": true
+          }
+        },
+        "flat": {
+          "rq": {
+            "enabled": true
+          }
         }
-      },
-      "vectorIndexType": "flat"
+      }
     }
+  },
+  "moduleConfig": {
+    "generative-cohere": {},
+    "reranker-cohere": {}
+  },
+  "invertedIndexConfig": {
+    "indexNullState": true,
+    "indexTimestamps": true,
+    "stopwords": {
+      "additions": [
+        "something"
+      ]
+    }
+  },
+  "multiTenancyConfig": {
+    "enabled": true,
+    "autoTenantCreation": true,
+    "autoTenantActivation": true
+  },
+  "objectTtlConfig": {
+    "enabled": true,
+    "deleteOn": "creationTime",
+    "timeToLive": 400,
+    "filterExpiredObjects": true
+  },
+  "replicationConfig": {
+    "factor": 3,
+    "asyncEnabled": true,
+    "deletionStrategy": "DeleteOnConflict"
   }
 }
 ```
