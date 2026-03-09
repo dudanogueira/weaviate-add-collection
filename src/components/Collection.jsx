@@ -217,17 +217,15 @@ export default function Collection({
       })
     }
     // Load generativeConfig from imported JSON if present
-    if (initialJson?.generative && typeof initialJson.generative === 'object') {
-      const gen = initialJson.generative
-      // Extract the module name (first key in generative object, excluding 'generative' itself)
-      const moduleKey = Object.keys(gen).find(key => key.startsWith('generative-'))
-      if (moduleKey) {
-        setGenerativeConfig({
-          enabled: true,
-          module: moduleKey,
-          moduleConfig: gen[moduleKey] || {},
-        })
-      }
+    // Support both moduleConfig.generative-* (current) and legacy top-level generative key
+    const genSource = initialJson?.moduleConfig || initialJson?.generative || {}
+    const genModuleKey = Object.keys(genSource).find(key => key.startsWith('generative-'))
+    if (genModuleKey) {
+      setGenerativeConfig({
+        enabled: true,
+        module: genModuleKey,
+        moduleConfig: genSource[genModuleKey] || {},
+      })
     }
     // Load rerankerConfig from imported JSON if present
     if (initialJson?.moduleConfig && typeof initialJson.moduleConfig === 'object') {
@@ -682,7 +680,19 @@ export default function Collection({
     if (!generativeConfig.enabled || !generativeConfig.module) {
       // Remove generative config if disabled or no module selected
       setGeneratedJson((prev) => {
-        const { generative, ...rest } = prev;
+        const { moduleConfig, ...rest } = prev;
+        if (moduleConfig) {
+          const cleanModuleConfig = { ...moduleConfig };
+          Object.keys(cleanModuleConfig).forEach(key => {
+            if (key.startsWith('generative-')) {
+              delete cleanModuleConfig[key];
+            }
+          });
+          if (Object.keys(cleanModuleConfig).length === 0) {
+            return rest;
+          }
+          return { ...rest, moduleConfig: cleanModuleConfig };
+        }
         return rest;
       });
       return;
@@ -707,7 +717,9 @@ export default function Collection({
     generativeJson[generativeConfig.module] = Object.keys(cleanConfig).length > 0 ? cleanConfig : {};
 
     setGeneratedJson((prev) => {
-      return { ...prev, generative: generativeJson };
+      const { generative, moduleConfig: prevModuleConfig, ...rest } = prev;
+      const mergedModuleConfig = { ...(prevModuleConfig || {}), ...generativeJson };
+      return { ...rest, moduleConfig: mergedModuleConfig };
     });
   }, [generativeConfig]);
 
