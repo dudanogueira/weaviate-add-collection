@@ -2,6 +2,8 @@
 
 A minimal React app (Vite) with a Collection component to compose a Weaviate collection JSON.
 
+[This project is used in Weaviate Studio](https://github.com/muleyprasad/weaviate-studio/)
+
 **✨ New**: Programmatic schema access via `onChange` and `onSubmit` callbacks — no more DOM scraping needed!
 
 **✨ New**: Version-aware UI via the `weaviateVersion` prop — fields, options, and sections are automatically shown or hidden based on what your Weaviate instance supports. Unavailable options are disabled with a tooltip indicating the minimum required version.
