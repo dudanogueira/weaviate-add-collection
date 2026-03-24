@@ -18,7 +18,7 @@ const defaultConfig = {
   },
 };
 
-const ReplicationConfigSection = ({ config, setConfig, nodesNumber = null }) => {
+const ReplicationConfigSection = ({ config = defaultConfig, setConfig, nodesNumber = null }) => {
   const update = (field, value) => {
     setConfig({ ...config, [field]: value });
   };
