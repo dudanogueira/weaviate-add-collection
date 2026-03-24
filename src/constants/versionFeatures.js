@@ -17,6 +17,7 @@ export const VERSION_FEATURES = {
   // Replication
   replicationAsyncEnabled:     '1.29.0',
   replicationDeletionStrategy: '1.28.0',
+  replicationAsyncConfig:      '1.36.0',
 
   // Vector index types & compression
   dynamicIndexType:            '1.25.0',

@@ -57,6 +57,16 @@ export default function Collection({
     factor: null,
     asyncEnabled: false,
     deletionStrategy: 'NoAutomatedResolution',
+    asyncConfig: {
+      maxWorkers: '',
+      hashtreeHeight: '',
+      frequency: '',
+      frequencyWhilePropagating: '',
+      diffBatchSize: '',
+      propagationTimeout: '',
+      propagationLimit: '',
+      propagationConcurrency: '',
+    },
   })
   const [generativeConfig, setGenerativeConfig] = useState({
     enabled: false,
@@ -210,10 +220,21 @@ export default function Collection({
     // Load replicationConfig from imported JSON if present
     if (initialJson?.replicationConfig && typeof initialJson.replicationConfig === 'object') {
       const cfg = initialJson.replicationConfig
+      const ac = cfg.asyncConfig || {}
       setReplicationConfig({
         factor: cfg.factor ?? 1,
         asyncEnabled: cfg.asyncEnabled ?? false,
         deletionStrategy: cfg.deletionStrategy ?? 'NoAutomatedResolution',
+        asyncConfig: {
+          maxWorkers: ac.maxWorkers != null ? ac.maxWorkers : '',
+          hashtreeHeight: ac.hashtreeHeight != null ? ac.hashtreeHeight : '',
+          frequency: ac.frequency != null ? ac.frequency : '',
+          frequencyWhilePropagating: ac.frequencyWhilePropagating != null ? ac.frequencyWhilePropagating : '',
+          diffBatchSize: ac.diffBatchSize != null ? ac.diffBatchSize : '',
+          propagationTimeout: ac.propagationTimeout != null ? ac.propagationTimeout : '',
+          propagationLimit: ac.propagationLimit != null ? ac.propagationLimit : '',
+          propagationConcurrency: ac.propagationConcurrency != null ? ac.propagationConcurrency : '',
+        },
       })
     }
     // Load generativeConfig from imported JSON if present
@@ -668,6 +689,23 @@ export default function Collection({
     // Only include deletionStrategy if asyncEnabled is true and factor >= 2
     if (replicationConfig.factor >= 2 && replicationConfig.asyncEnabled && replicationConfig.deletionStrategy !== defaults.deletionStrategy) {
       replicationJson.deletionStrategy = replicationConfig.deletionStrategy;
+    }
+
+    // Only include asyncConfig if asyncEnabled is true and at least one field is set
+    if (replicationConfig.factor >= 2 && replicationConfig.asyncEnabled) {
+      const ac = replicationConfig.asyncConfig || {};
+      const asyncConfigJson = {};
+      if (ac.maxWorkers !== '') asyncConfigJson.maxWorkers = parseInt(ac.maxWorkers, 10);
+      if (ac.hashtreeHeight !== '') asyncConfigJson.hashtreeHeight = parseInt(ac.hashtreeHeight, 10);
+      if (ac.frequency !== '') asyncConfigJson.frequency = parseInt(ac.frequency, 10);
+      if (ac.frequencyWhilePropagating !== '') asyncConfigJson.frequencyWhilePropagating = parseInt(ac.frequencyWhilePropagating, 10);
+      if (ac.diffBatchSize !== '') asyncConfigJson.diffBatchSize = parseInt(ac.diffBatchSize, 10);
+      if (ac.propagationTimeout !== '') asyncConfigJson.propagationTimeout = parseInt(ac.propagationTimeout, 10);
+      if (ac.propagationLimit !== '') asyncConfigJson.propagationLimit = parseInt(ac.propagationLimit, 10);
+      if (ac.propagationConcurrency !== '') asyncConfigJson.propagationConcurrency = parseInt(ac.propagationConcurrency, 10);
+      if (Object.keys(asyncConfigJson).length > 0) {
+        replicationJson.asyncConfig = asyncConfigJson;
+      }
     }
 
     setGeneratedJson((prev) => {
