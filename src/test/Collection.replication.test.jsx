@@ -340,6 +340,164 @@ describe('Collection Component - Replication Configuration', () => {
     }, { timeout: 3000 })
   })
 
+  // ── asyncConfig import ────────────────────────────────────────────────────
+
+  it('should import all asyncConfig fields from replicationConfig', async () => {
+    const importedJson = {
+      class: 'AsyncConfigImport',
+      replicationConfig: {
+        factor: 3,
+        asyncEnabled: true,
+        asyncConfig: {
+          maxWorkers: 5,
+          hashtreeHeight: 12,
+          frequency: 15000,
+          frequencyWhilePropagating: 1500,
+          diffBatchSize: 500,
+          propagationTimeout: 30,
+          propagationLimit: 5000,
+          propagationConcurrency: 3,
+        },
+      },
+      properties: [],
+      vectorConfig: { default: { vectorizer: { none: {} }, vectorIndexType: 'hnsw' } },
+    }
+
+    const { container } = render(<Collection initialJson={importedJson} />)
+    await waitFor(() => expect(container.querySelector('.json-block')).toBeTruthy(), { timeout: 3000 })
+
+    const generatedJson = JSON.parse(container.querySelector('.json-block').textContent)
+    const ac = generatedJson.replicationConfig?.asyncConfig
+    expect(ac).toBeDefined()
+    expect(ac.maxWorkers).toBe(5)
+    expect(ac.hashtreeHeight).toBe(12)
+    expect(ac.frequency).toBe(15000)
+    expect(ac.frequencyWhilePropagating).toBe(1500)
+    expect(ac.diffBatchSize).toBe(500)
+    expect(ac.propagationTimeout).toBe(30)
+    expect(ac.propagationLimit).toBe(5000)
+    expect(ac.propagationConcurrency).toBe(3)
+  })
+
+  it('should import partial asyncConfig, omitting fields that were not provided', async () => {
+    const importedJson = {
+      class: 'PartialAsyncConfig',
+      replicationConfig: {
+        factor: 2,
+        asyncEnabled: true,
+        asyncConfig: { maxWorkers: 10, frequency: 20000 },
+      },
+      properties: [],
+      vectorConfig: { default: { vectorizer: { none: {} }, vectorIndexType: 'hnsw' } },
+    }
+
+    const { container } = render(<Collection initialJson={importedJson} />)
+    await waitFor(() => expect(container.querySelector('.json-block')).toBeTruthy(), { timeout: 3000 })
+
+    const ac = JSON.parse(container.querySelector('.json-block').textContent).replicationConfig?.asyncConfig
+    expect(ac).toBeDefined()
+    expect(ac.maxWorkers).toBe(10)
+    expect(ac.frequency).toBe(20000)
+    expect(ac.hashtreeHeight).toBeUndefined()
+    expect(ac.diffBatchSize).toBeUndefined()
+    expect(ac.propagationConcurrency).toBeUndefined()
+  })
+
+  it('should not emit asyncConfig when no asyncConfig fields are populated', async () => {
+    const importedJson = {
+      class: 'NoAsyncConfigFields',
+      replicationConfig: { factor: 2, asyncEnabled: true },
+      properties: [],
+      vectorConfig: { default: { vectorizer: { none: {} }, vectorIndexType: 'hnsw' } },
+    }
+
+    const { container } = render(<Collection initialJson={importedJson} />)
+    await waitFor(() => expect(container.querySelector('.json-block')).toBeTruthy(), { timeout: 3000 })
+
+    const rc = JSON.parse(container.querySelector('.json-block').textContent).replicationConfig
+    expect(rc.asyncEnabled).toBe(true)
+    expect(rc.asyncConfig).toBeUndefined()
+  })
+
+  it('should not emit asyncConfig when asyncEnabled is false, even if asyncConfig is in the import', async () => {
+    const importedJson = {
+      class: 'AsyncDisabled',
+      replicationConfig: {
+        factor: 3,
+        asyncEnabled: false,
+        asyncConfig: { maxWorkers: 5 },
+      },
+      properties: [],
+      vectorConfig: { default: { vectorizer: { none: {} }, vectorIndexType: 'hnsw' } },
+    }
+
+    const { container } = render(<Collection initialJson={importedJson} />)
+    await waitFor(() => expect(container.querySelector('.json-block')).toBeTruthy(), { timeout: 3000 })
+
+    const rc = JSON.parse(container.querySelector('.json-block').textContent).replicationConfig
+    expect(rc.asyncConfig).toBeUndefined()
+  })
+
+  // ── asyncConfig version gating (replicationAsyncConfig, >= 1.36.0) ─────────
+
+  it('should show asyncConfig section without version gate when no version is set', async () => {
+    const user = userEvent.setup()
+    const importedJson = {
+      class: 'AsyncGateNoVersion',
+      replicationConfig: { factor: 2, asyncEnabled: true },
+      properties: [],
+      vectorConfig: { default: { vectorizer: { none: {} }, vectorIndexType: 'hnsw' } },
+    }
+
+    const { container } = render(<Collection initialJson={importedJson} />)
+    await waitFor(() => expect(container.querySelector('.json-block')).toBeTruthy(), { timeout: 3000 })
+
+    await user.click(screen.getByText('Replication Configuration').closest('button'))
+
+    await waitFor(() => expect(screen.queryByText('Async Replication Config')).toBeTruthy())
+    const heading = screen.getByText('Async Replication Config')
+    expect(heading.closest('[data-version-tooltip]')).toBeNull()
+  })
+
+  it('should show asyncConfig section without version gate when version >= 1.36.0', async () => {
+    const user = userEvent.setup()
+    const importedJson = {
+      class: 'AsyncGateAbove',
+      replicationConfig: { factor: 2, asyncEnabled: true },
+      properties: [],
+      vectorConfig: { default: { vectorizer: { none: {} }, vectorIndexType: 'hnsw' } },
+    }
+
+    const { container } = render(<Collection weaviateVersion="1.36.0" initialJson={importedJson} />)
+    await waitFor(() => expect(container.querySelector('.json-block')).toBeTruthy(), { timeout: 3000 })
+
+    await user.click(screen.getByText('Replication Configuration').closest('button'))
+
+    await waitFor(() => expect(screen.queryByText('Async Replication Config')).toBeTruthy())
+    const heading = screen.getByText('Async Replication Config')
+    expect(heading.closest('[data-version-tooltip]')).toBeNull()
+  })
+
+  it('should show asyncConfig section with version gate overlay when version < 1.36.0', async () => {
+    const user = userEvent.setup()
+    const importedJson = {
+      class: 'AsyncGateBelow',
+      replicationConfig: { factor: 2, asyncEnabled: true },
+      properties: [],
+      vectorConfig: { default: { vectorizer: { none: {} }, vectorIndexType: 'hnsw' } },
+    }
+
+    const { container } = render(<Collection weaviateVersion="1.35.9" initialJson={importedJson} />)
+    await waitFor(() => expect(container.querySelector('.json-block')).toBeTruthy(), { timeout: 3000 })
+
+    await user.click(screen.getByText('Replication Configuration').closest('button'))
+
+    await waitFor(() => expect(screen.queryByText('Async Replication Config')).toBeTruthy())
+    const heading = screen.getByText('Async Replication Config')
+    expect(heading.closest('[data-version-tooltip]')).not.toBeNull()
+    expect(heading.closest('[data-version-tooltip]').dataset.versionTooltip).toMatch(/1\.36\.0/)
+  })
+
   it('should handle complex replication configuration from import', async () => {
     const importedJson = {
       class: 'ComplexReplication',
