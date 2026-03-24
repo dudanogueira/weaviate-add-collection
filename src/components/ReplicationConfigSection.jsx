@@ -92,7 +92,7 @@ const ReplicationConfigSection = ({ config = defaultConfig, setConfig, nodesNumb
           <VersionGated featureId="replicationAsyncConfig">
             {config.asyncEnabled && (
               <div className="nested-section">
-                <label className="nested-section-title">
+                <div className="nested-section-title">
                   Async Replication Config
                   {DOC_LINKS.replicationAsyncConfig && (
                     <a href={DOC_LINKS.replicationAsyncConfig} target="_blank" rel="noopener noreferrer" title="View documentation" style={{ marginLeft: '6px', verticalAlign: 'middle' }}>
@@ -102,7 +102,7 @@ const ReplicationConfigSection = ({ config = defaultConfig, setConfig, nodesNumb
                       </svg>
                     </a>
                   )}
-                </label>
+                </div>
                 <div className="field">
                   <label>Max Workers:</label>
                   <input
