@@ -10,14 +10,24 @@ export default function App() {
   // Example: You can pass availableModules from your server
   // const [availableModules, setAvailableModules] = useState(null)
 
-  // Read nodesNumber from URL query parameter
+  // Read nodesNumber and jsonschema from URL query parameters
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
+
     const nodes = params.get('nodesNumber')
     if (nodes) {
       const parsed = parseInt(nodes, 10)
       if (!isNaN(parsed) && parsed > 0) {
         setNodesNumber(parsed)
+      }
+    }
+
+    const jsonschema = params.get('jsonschema')
+    if (jsonschema) {
+      try {
+        setImportedJson(JSON.parse(jsonschema))
+      } catch (err) {
+        console.error('Invalid jsonschema URL parameter:', err)
       }
     }
   }, [])
