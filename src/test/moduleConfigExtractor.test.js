@@ -49,6 +49,63 @@ describe('vectorizer dropdown ↔ field-table parity', () => {
   })
 })
 
+// ─── Modules present in the client union but missing from both repo files ─────
+
+describe('multi2multivec-weaviate (Multi2MultivecWeaviateConfig)', () => {
+  it('exposes baseURL, model and imageFields', () => {
+    const byName = Object.fromEntries(
+      getModuleConfigFields('multi2multivec-weaviate').map(f => [f.name, f])
+    )
+
+    expect(byName.baseURL?.type).toBe('string')
+    expect(byName.model?.type).toBe('string')
+    expect(byName.imageFields?.type).toBe('string[]')
+  })
+
+  it('does not declare textFields — this module vectorizes images only', () => {
+    const names = getModuleConfigFields('multi2multivec-weaviate').map(f => f.name)
+    expect(names).not.toContain('textFields')
+  })
+})
+
+describe('text2vec-google-gemini (Text2VecGoogleGeminiConfig)', () => {
+  it('exposes model and titleProperty', () => {
+    const byName = Object.fromEntries(
+      getModuleConfigFields('text2vec-google-gemini').map(f => [f.name, f])
+    )
+
+    expect(byName.model?.type).toBe('string')
+    expect(byName.titleProperty?.type).toBe('string')
+  })
+
+  it('matches the deprecated text2vec-google-ai-studio it replaces', () => {
+    const gemini = getModuleConfigFields('text2vec-google-gemini').map(f => f.name).sort()
+    const aiStudio = getModuleConfigFields('text2vec-google-ai-studio').map(f => f.name).sort()
+
+    expect(gemini).toEqual(aiStudio)
+  })
+})
+
+describe('multi2vec-google-gemini (Multi2VecGoogleGeminiConfig)', () => {
+  // The client types this as Omit<Multi2VecGoogleConfig, 'location' | 'projectId' | 'apiEndpoint'>.
+  it('drops the GCP-only fields from multi2vec-google', () => {
+    const names = getModuleConfigFields('multi2vec-google-gemini').map(f => f.name)
+
+    expect(names).not.toContain('location')
+    expect(names).not.toContain('projectId')
+    expect(names).not.toContain('apiEndpoint')
+  })
+
+  it('keeps every other multi2vec-google field', () => {
+    const gemini = new Set(getModuleConfigFields('multi2vec-google-gemini').map(f => f.name))
+    const inherited = getModuleConfigFields('multi2vec-google')
+      .map(f => f.name)
+      .filter(n => !['location', 'projectId', 'apiEndpoint'].includes(n))
+
+    expect(inherited.filter(n => !gemini.has(n))).toEqual([])
+  })
+})
+
 // ─── v3.12.0 PR #398: baseURL on reranker-cohere ──────────────────────────────
 
 describe('reranker-cohere — baseURL (TS client v3.12.0 PR #398)', () => {

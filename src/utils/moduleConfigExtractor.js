@@ -132,6 +132,19 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'weights', type: 'object', description: 'The weights of the fields used for vectorization.' }
     ]
   },
+  // Same shape as multi2vec-google minus location/projectId/apiEndpoint: the
+  // Gemini API is keyed rather than tied to a GCP project and region.
+  'multi2vec-google-gemini': {
+    fields: [
+      { name: 'imageFields', type: 'string[]', description: 'The image fields used when vectorizing.' },
+      { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' },
+      { name: 'videoFields', type: 'string[]', description: 'The video fields used when vectorizing.' },
+      { name: 'videoIntervalSeconds', type: 'number', description: 'Length of a video interval in seconds.' },
+      { name: 'model', type: 'string', description: 'The model ID in use.' },
+      { name: 'dimensions', type: 'number', description: 'The dimensionality of the vector once embedded.' },
+      { name: 'weights', type: 'object', description: 'The weights of the fields used for vectorization.' }
+    ]
+  },
   'multi2vec-jinaai': {
     fields: [
       { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
@@ -256,7 +269,15 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'titleProperty', type: 'string', description: 'The Weaviate property name to use as the title.' },
     ]
   },
+  // Deprecated in the client in favour of text2vec-google-gemini, which has an
+  // identical shape. Kept so existing schemas still round-trip.
   'text2vec-google-ai-studio': {
+    fields: [
+      { name: 'model', type: 'string', description: 'The model ID to use.' },
+      { name: 'titleProperty', type: 'string', description: 'The Weaviate property name to use as the title.' }
+    ]
+  },
+  'text2vec-google-gemini': {
     fields: [
       { name: 'model', type: 'string', description: 'The model ID to use.' },
       { name: 'titleProperty', type: 'string', description: 'The Weaviate property name to use as the title.' }
@@ -295,6 +316,13 @@ const VECTORIZER_CONFIG_FIELDS = {
     fields: [
       { name: 'imageFields', type: 'string[]', description: 'The image fields used when vectorizing.' },
       { name: 'textFields', type: 'string[]', description: 'The text fields used when vectorizing.' }
+    ]
+  },
+  'multi2multivec-weaviate': {
+    fields: [
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },
+      { name: 'model', type: 'string', description: 'The model to use (e.g., ModernVBERT/colmodernvbert).' },
+      { name: 'imageFields', type: 'string[]', description: 'The image fields used when vectorizing.' }
     ]
   },
   'text2vec-morph': {

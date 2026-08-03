@@ -102,6 +102,10 @@ export const allAvailableModules = {
     documentationHref: 'https://docs.weaviate.io/weaviate/model-providers/jinaai/embeddings-colbert',
     name: 'JinaAI Multimodal Multi-Vector Module'
   },
+  'multi2multivec-weaviate': {
+    documentationHref: 'https://docs.weaviate.io/weaviate/model-providers/weaviate/embeddings-multimodal',
+    name: 'Weaviate Multimodal Multi-Vector Module'
+  },
   'multi2vec-aws': {
     documentationHref: 'https://docs.weaviate.io/weaviate/model-providers/aws/embeddings',
     name: 'AWS Multimodal Module'
@@ -121,6 +125,10 @@ export const allAvailableModules = {
   'multi2vec-google': {
     documentationHref: 'https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-multimodal-embeddings',
     name: 'Google Multimodal Module'
+  },
+  'multi2vec-google-gemini': {
+    documentationHref: 'https://docs.weaviate.io/weaviate/model-providers/google/embeddings-multimodal',
+    name: 'Google Gemini Multimodal Module'
   },
   'multi2vec-jinaai': {
     documentationHref: 'https://docs.weaviate.io/weaviate/model-providers/jinaai/embeddings-multimodal',
@@ -196,7 +204,11 @@ export const allAvailableModules = {
   },
   'text2vec-google-ai-studio': {
     documentationHref: 'https://docs.weaviate.io/weaviate/model-providers/google/embeddings',
-    name: 'Google AI Studio Module'
+    name: 'Google AI Studio Module (deprecated — use Google Gemini)'
+  },
+  'text2vec-google-gemini': {
+    documentationHref: 'https://docs.weaviate.io/weaviate/model-providers/google/embeddings',
+    name: 'Google Gemini Module'
   },
   'text2vec-gpt4all': {
     documentationHref: 'https://docs.weaviate.io/weaviate/model-providers/gpt4all/embeddings',
