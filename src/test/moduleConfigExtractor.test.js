@@ -10,7 +10,44 @@ import {
   hasGenerativeConfigOptions,
   getRerankerConfigFields,
   hasRerankerConfigOptions,
+  getAllModuleConfigs,
 } from '../utils/moduleConfigExtractor'
+import { getVectorizerModuleOptions } from '../constants/options'
+
+// ─── Dropdown/field-table parity ──────────────────────────────────────────────
+
+/**
+ * Module support lives in two hand-maintained files that have to agree:
+ * VECTORIZER_CONFIG_FIELDS in moduleConfigExtractor.js says what a module can
+ * be configured with, and allAvailableModules in constants/options.js decides
+ * whether it can be picked at all. They had drifted badly enough that 17
+ * modules with complete field definitions were unreachable from the UI, which
+ * is invisible from either file alone.
+ */
+describe('vectorizer dropdown ↔ field-table parity', () => {
+  // qna-openai is a question-answering module, not a vectorizer. It predates
+  // this test and is surfaced by getVectorizerModuleOptions only because the
+  // filter there excludes backup-/generative-/reranker- prefixes and nothing
+  // else. Tracked separately; excluded here so the parity check stays honest
+  // about everything else.
+  const KNOWN_NON_VECTORIZERS = new Set(['qna-openai'])
+
+  it('every module with field definitions is selectable in the dropdown', () => {
+    const selectable = new Set(getVectorizerModuleOptions().map(o => o.value))
+    const unreachable = Object.keys(getAllModuleConfigs()).filter(m => !selectable.has(m))
+
+    expect(unreachable).toEqual([])
+  })
+
+  it('every selectable vectorizer has field definitions', () => {
+    const defined = new Set(Object.keys(getAllModuleConfigs()))
+    const undefinedFields = getVectorizerModuleOptions()
+      .map(o => o.value)
+      .filter(m => !defined.has(m) && !KNOWN_NON_VECTORIZERS.has(m))
+
+    expect(undefinedFields).toEqual([])
+  })
+})
 
 // ─── v3.12.0 PR #398: baseURL on reranker-cohere ──────────────────────────────
 
