@@ -3,7 +3,8 @@ export const tokenizationOptions = [
   { value: 'lowercase', label: 'Lowercase', description: 'Splits on whitespace and lowercases. Preserves symbols like @, _, and -.' },
   { value: 'whitespace', label: 'Whitespace', description: 'Splits on whitespace, preserves case and symbols. Use for case-sensitive data.' },
   { value: 'field', label: 'Field', description: 'No splitting — the entire value is one token. Use for exact-match fields.' },
-  { value: 'gse', label: 'GSE', description: 'Chinese text segmentation using the Jieba algorithm. For languages without word boundaries.', featureId: 'tokenizationGse' },
+  { value: 'gse', label: 'GSE', description: 'Segmentation for languages without word boundaries. Requires ENABLE_TOKENIZER_GSE=true on the server.', featureId: 'tokenizationGse' },
+  { value: 'gse_ch', label: 'GSE CH', description: 'GSE segmentation with Chinese dictionaries, loaded separately from GSE. Requires ENABLE_TOKENIZER_GSE_CH=true on the server.', featureId: 'tokenizationGseCh' },
   { value: 'trigram', label: 'Trigram', description: 'Divides text into character trigrams. Designed for CJK (Chinese, Japanese, Korean) languages.', featureId: 'tokenizationTrigram' },
   { value: 'kagome_ja', label: 'Kagome JA', description: 'Japanese morphological analysis for accurate Japanese text segmentation.', featureId: 'tokenizationKagomeJa' },
   { value: 'kagome_kr', label: 'Kagome KR', description: 'Korean morphological analysis for accurate Korean text segmentation.', featureId: 'tokenizationKagomeKr' }
