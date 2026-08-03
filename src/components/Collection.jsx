@@ -188,6 +188,7 @@ export default function Collection({
         index_null_state: cfg.indexNullState ?? d.index_null_state,
         index_property_length: cfg.indexPropertyLength ?? d.index_property_length,
         index_timestamps: cfg.indexTimestamps ?? d.index_timestamps,
+        using_block_max_wand: typeof cfg.usingBlockMaxWAND === 'boolean' ? cfg.usingBlockMaxWAND : null,
         stopwords_preset: cfg.stopwords?.preset ?? d.stopwords_preset,
         stopwords_additions: cfg.stopwords?.additions ?? [],
         stopwords_removals: cfg.stopwords?.removals ?? [],
@@ -587,6 +588,12 @@ export default function Collection({
     if (invertedIndexConfig.index_null_state !== defaults.index_null_state) invertedIndexJson.indexNullState = invertedIndexConfig.index_null_state;
     if (invertedIndexConfig.index_property_length !== defaults.index_property_length) invertedIndexJson.indexPropertyLength = invertedIndexConfig.index_property_length;
     if (invertedIndexConfig.index_timestamps !== defaults.index_timestamps) invertedIndexJson.indexTimestamps = invertedIndexConfig.index_timestamps;
+    // Note the wire key capitalises WAND. Emitted only when explicitly chosen,
+    // since null means "let the server decide" -- and false is a real choice
+    // here, not a default, so it must be emitted.
+    if (typeof invertedIndexConfig.using_block_max_wand === 'boolean') {
+      invertedIndexJson.usingBlockMaxWAND = invertedIndexConfig.using_block_max_wand;
+    }
     if (Object.keys(stopwords).length > 0) invertedIndexJson.stopwords = stopwords;
 
     // User-defined stopword presets (Weaviate >= 1.37.2). The server rejects

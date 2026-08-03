@@ -28,6 +28,9 @@ export const VERSION_FEATURES = {
   // Property indexing
   indexRangeFilters:           '1.24.0',
 
+  // Inverted index
+  usingBlockMaxWand:           '1.30.0',
+
   // Object TTL
   objectTtl:                   '1.35.0',
 

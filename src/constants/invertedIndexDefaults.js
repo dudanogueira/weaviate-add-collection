@@ -17,6 +17,11 @@ export const DEFAULT_INVERTED_INDEX_CONFIG = {
   index_timestamps: false,
   index_property_length: false,
   index_null_state: false,
+  // Tri-state: null means "leave it to the server". A plain boolean cannot
+  // express that, and the server default is version-dependent -- false before
+  // 1.30, true for collections created after -- so there is no single correct
+  // value to default to. Only an explicit true/false is emitted.
+  using_block_max_wand: null,
   stopwords_preset: 'en',
   stopwords_additions: [],
   stopwords_removals: [],

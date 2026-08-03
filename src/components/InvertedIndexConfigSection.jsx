@@ -47,6 +47,29 @@ const InvertedIndexConfigSection = ({ config = DEFAULT_INVERTED_INDEX_CONFIG, se
         <label>Index Null State:</label>
         <input type="checkbox" checked={config.index_null_state} onChange={e => update('index_null_state', e.target.checked)} />
       </div>
+      <VersionGated featureId="usingBlockMaxWand">
+        <div className="field">
+          <label>Using BlockMax WAND:</label>
+          <select
+            value={config.using_block_max_wand === null || config.using_block_max_wand === undefined
+              ? ''
+              : String(config.using_block_max_wand)}
+            onChange={e => update(
+              'using_block_max_wand',
+              e.target.value === '' ? null : e.target.value === 'true'
+            )}
+          >
+            <option value="">Server default</option>
+            <option value="true">true</option>
+            <option value="false">false</option>
+          </select>
+          <small className="hint">
+            BlockMax WAND speeds up BM25 and hybrid queries. Leave on “Server default” unless you
+            need to pin it: Weaviate enables it automatically for collections created on 1.30 and
+            later, so the effective default depends on the server version.
+          </small>
+        </div>
+      </VersionGated>
       <div className="field">
         <label>Stopwords Preset:</label>
         <select value={config.stopwords_preset} onChange={e => update('stopwords_preset', e.target.value)}>
