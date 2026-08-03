@@ -1,16 +1,5 @@
 import React, { useState } from 'react';
-
-const defaultConfig = {
-  bm25_b: 0.75,
-  bm25_k1: 1.2,
-  cleanup_interval_seconds: 60,
-  index_timestamps: false,
-  index_property_length: false,
-  index_null_state: false,
-  stopwords_preset: 'en',
-  stopwords_additions: [],
-  stopwords_removals: [],
-};
+import { DEFAULT_INVERTED_INDEX_CONFIG } from '../constants/invertedIndexDefaults';
 
 function TagInput({ tags, setTags, label }) {
   const [input, setInput] = useState('');
@@ -83,7 +72,7 @@ function TagInput({ tags, setTags, label }) {
   );
 }
 
-const InvertedIndexConfigSection = ({ config, setConfig }) => {
+const InvertedIndexConfigSection = ({ config = DEFAULT_INVERTED_INDEX_CONFIG, setConfig }) => {
   const update = (field, value) => {
     setConfig({ ...config, [field]: value });
   };

@@ -11,6 +11,7 @@ import GenerativeConfigSection from './GenerativeConfigSection'
 import RerankerConfigSection from './RerankerConfigSection'
 import { validateCollectionName, sanitizeCollectionName } from '../utils/collectionNameValidator'
 import { DEFAULT_REPLICATION_ASYNC_CONFIG } from '../constants/replicationDefaults'
+import { DEFAULT_INVERTED_INDEX_CONFIG, createDefaultInvertedIndexConfig } from '../constants/invertedIndexDefaults'
 
 // Contract:
 // Inputs: optional `initialJson` object with { name, description }
@@ -38,17 +39,7 @@ export default function Collection({
   )
   const [nameValidation, setNameValidation] = useState({ valid: true, error: null, warning: null })
   const [generatedJson, setGeneratedJson] = useState({})
-  const [invertedIndexConfig, setInvertedIndexConfig] = useState({
-    bm25_b: 0.75,
-    bm25_k1: 1.2,
-    cleanup_interval_seconds: 60,
-    index_timestamps: false,
-    index_property_length: false,
-    index_null_state: false,
-    stopwords_preset: 'en',
-    stopwords_additions: [],
-    stopwords_removals: [],
-  })
+  const [invertedIndexConfig, setInvertedIndexConfig] = useState(createDefaultInvertedIndexConfig)
   const [multiTenancyConfig, setMultiTenancyConfig] = useState({
     enabled: false,
     autoTenantCreation: false,
@@ -558,17 +549,7 @@ export default function Collection({
 
   // Update JSON with inverted index configuration, only including non-default values
   useEffect(() => {
-    const defaults = {
-      bm25_b: 0.75,
-      bm25_k1: 1.2,
-      cleanup_interval_seconds: 60,
-      index_timestamps: false,
-      index_property_length: false,
-      index_null_state: false,
-      stopwords_preset: 'en',
-      stopwords_additions: [],
-      stopwords_removals: [],
-    };
+    const defaults = DEFAULT_INVERTED_INDEX_CONFIG;
 
     const bm25 = {};
     if (invertedIndexConfig.bm25_b !== defaults.bm25_b) bm25.b = invertedIndexConfig.bm25_b;
