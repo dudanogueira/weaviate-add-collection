@@ -147,7 +147,16 @@ export default function Collection({
         indexSearchable: p.indexSearchable ?? true,
         isArray: isArrayType,
         tokenization: p.tokenization || 'word',
-        ...(vectorizePropertyName === true ? { vectorizePropertyName: true } : {})
+        ...(vectorizePropertyName === true ? { vectorizePropertyName: true } : {}),
+        ...(p.textAnalyzer && typeof p.textAnalyzer === 'object'
+          ? {
+              textAnalyzer: {
+                asciiFold: p.textAnalyzer.asciiFold ?? false,
+                asciiFoldIgnore: Array.isArray(p.textAnalyzer.asciiFoldIgnore) ? p.textAnalyzer.asciiFoldIgnore : [],
+                stopwordPreset: p.textAnalyzer.stopwordPreset ?? '',
+              }
+            }
+          : {})
       }
 
       // Process nested properties recursively for object type
@@ -850,6 +859,27 @@ export default function Collection({
         result.indexSearchable = p.indexSearchable ?? true
         // Always include tokenization for text type
         result.tokenization = p.tokenization || 'word'
+
+        // textAnalyzer (Weaviate >= 1.37.2). Emitted in the flat wire shape,
+        // and only for the parts that differ from the server defaults:
+        //   - asciiFold: false is the default, so never emit it
+        //   - asciiFoldIgnore is meaningless without asciiFold: true
+        //   - stopwordPreset is only honoured for 'word' tokenization
+        const textAnalyzer = {}
+        if (p.textAnalyzer?.asciiFold === true) {
+          textAnalyzer.asciiFold = true
+          const ignore = p.textAnalyzer.asciiFoldIgnore
+          if (Array.isArray(ignore) && ignore.length > 0) {
+            textAnalyzer.asciiFoldIgnore = ignore
+          }
+        }
+        const stopwordPreset = (p.textAnalyzer?.stopwordPreset || '').trim()
+        if (stopwordPreset && result.tokenization === 'word') {
+          textAnalyzer.stopwordPreset = stopwordPreset
+        }
+        if (Object.keys(textAnalyzer).length > 0) {
+          result.textAnalyzer = textAnalyzer
+        }
       } else {
         // If not text type, set indexSearchable to false
         result.indexSearchable = false

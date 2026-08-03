@@ -38,6 +38,10 @@ export const VERSION_FEATURES = {
   tokenizationKagomeJa:        '1.28.0',
   tokenizationGseCh:           '1.34.0',
 
+  // v1.37 tokenization config
+  textAnalyzer:                '1.37.2',
+  stopwordPresets:             '1.37.2',
+
   // Modules
   generativeContextualai:      '1.34.0',
   rerankerContextualai:        '1.34.0',
