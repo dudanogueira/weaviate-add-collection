@@ -233,6 +233,14 @@ const VECTORIZER_CONFIG_FIELDS = {
       { name: 'truncate', type: 'boolean', description: 'Whether to truncate when vectorising.' },
     ]
   },
+  // model is required: the server has no default, and the client's factory
+  // makes opts mandatory for the same reason.
+  'text2vec-digitalocean': {
+    fields: [
+      { name: 'model', type: 'string', required: true, description: 'The model to use (e.g., qwen3-embedding-0.6b).' },
+      { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go. Defaults to https://inference.do-ai.run.' },
+    ]
+  },
   'text2vec-mistral': {
     fields: [
       { name: 'baseURL', type: 'string', description: 'The base URL to use where API requests should go.' },

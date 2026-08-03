@@ -195,6 +195,11 @@ export const allAvailableModules = {
     documentationHref: 'https://docs.weaviate.io/weaviate/modules/text2vec-contextionary',
     name: 'Contextionary Module'
   },
+  'text2vec-digitalocean': {
+    documentationHref: 'https://docs.weaviate.io/weaviate/model-providers/digitalocean/embeddings',
+    name: 'DigitalOcean Module',
+    featureId: 'vectorizerDigitalocean'
+  },
   'text2vec-databricks': {
     documentationHref: 'https://docs.weaviate.io/weaviate/model-providers/databricks/embeddings',
     name: 'Databricks Module'

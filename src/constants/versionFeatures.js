@@ -41,4 +41,5 @@ export const VERSION_FEATURES = {
   // Modules
   generativeContextualai:      '1.34.0',
   rerankerContextualai:        '1.34.0',
+  vectorizerDigitalocean:      '1.38.0',
 }
