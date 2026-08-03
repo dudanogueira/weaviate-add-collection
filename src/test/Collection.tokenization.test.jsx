@@ -299,6 +299,111 @@ describe('Collection — textAnalyzer version gating', () => {
   })
 })
 
+// ─── Collection-level stopwordPresets (Weaviate >= 1.37.2) ────────────────────
+
+async function openInvertedIndex(user) {
+  await user.click(screen.getByRole('button', { name: /inverted index configuration/i }))
+}
+
+describe('Collection — invertedIndexConfig.stopwordPresets', () => {
+  it('survives an import unchanged', async () => {
+    const { container } = render(
+      <Collection initialJson={{
+        class: 'Article',
+        invertedIndexConfig: {
+          stopwordPresets: { fr: ['le', 'la', 'les'], de: ['der', 'die', 'das'] },
+        },
+      }} />
+    )
+    await waitForRender(container)
+
+    expect(readJson(container).invertedIndexConfig.stopwordPresets).toEqual({
+      fr: ['le', 'la', 'les'],
+      de: ['der', 'die', 'das'],
+    })
+  })
+
+  it('is omitted when there are no presets', async () => {
+    const { container } = render(<Collection />)
+    await waitForRender(container)
+
+    expect(readJson(container)).not.toHaveProperty('invertedIndexConfig')
+  })
+
+  it('drops a preset with a whitespace-only name rather than emitting it', async () => {
+    const { container } = render(
+      <Collection initialJson={{
+        class: 'Article',
+        invertedIndexConfig: { stopwordPresets: { '   ': ['le'], fr: ['la'] } },
+      }} />
+    )
+    await waitForRender(container)
+
+    expect(readJson(container).invertedIndexConfig.stopwordPresets).toEqual({ fr: ['la'] })
+  })
+
+  it('drops a preset with an empty word list', async () => {
+    const { container } = render(
+      <Collection initialJson={{
+        class: 'Article',
+        invertedIndexConfig: { stopwordPresets: { empty: [], fr: ['la'] } },
+      }} />
+    )
+    await waitForRender(container)
+
+    expect(readJson(container).invertedIndexConfig.stopwordPresets).toEqual({ fr: ['la'] })
+  })
+
+  it('drops the whole invertedIndexConfig when the only preset is invalid', async () => {
+    const { container } = render(
+      <Collection initialJson={{
+        class: 'Article',
+        invertedIndexConfig: { stopwordPresets: { empty: [] } },
+      }} />
+    )
+    await waitForRender(container)
+
+    expect(readJson(container)).not.toHaveProperty('invertedIndexConfig')
+  })
+
+  it('can be built and removed through the UI', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<Collection />)
+    await waitForRender(container)
+    await openInvertedIndex(user)
+
+    await user.click(screen.getByRole('button', { name: /add preset/i }))
+    await user.type(screen.getByPlaceholderText('e.g. fr'), 'fr')
+    // Enter commits the tag; the "Add" button is ambiguous here because every
+    // TagInput on the section renders one.
+    await user.type(screen.getByPlaceholderText('Add stopword'), 'le{Enter}')
+
+    await waitFor(() => {
+      expect(readJson(container).invertedIndexConfig.stopwordPresets).toEqual({ fr: ['le'] })
+    })
+
+    await user.click(screen.getByRole('button', { name: /delete preset/i }))
+    await waitFor(() => {
+      expect(readJson(container)).not.toHaveProperty('invertedIndexConfig')
+    })
+  })
+
+  it('emits nothing while a preset row is still half-typed', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<Collection />)
+    await waitForRender(container)
+    await openInvertedIndex(user)
+
+    // A named preset with no words yet is not valid schema.
+    await user.click(screen.getByRole('button', { name: /add preset/i }))
+    await user.type(screen.getByPlaceholderText('e.g. fr'), 'fr')
+
+    await waitFor(() => {
+      expect(readJson(container)).not.toHaveProperty('invertedIndexConfig')
+    })
+  })
+})
+
 // ─── Round-trip ───────────────────────────────────────────────────────────────
 
 describe('Collection — gse_ch round-trip', () => {

@@ -175,16 +175,23 @@ export default function Collection({
     // Load invertedIndexConfig from imported JSON if present
     if (initialJson?.invertedIndexConfig && typeof initialJson.invertedIndexConfig === 'object') {
       const cfg = initialJson.invertedIndexConfig
+      const d = DEFAULT_INVERTED_INDEX_CONFIG
       setInvertedIndexConfig({
-        bm25_b: cfg.bm25?.b ?? 0.75,
-        bm25_k1: cfg.bm25?.k1 ?? 1.2,
-        cleanup_interval_seconds: cfg.cleanupIntervalSeconds ?? 60,
-        index_null_state: cfg.indexNullState ?? false,
-        index_property_length: cfg.indexPropertyLength ?? false,
-        index_timestamps: cfg.indexTimestamps ?? false,
-        stopwords_preset: cfg.stopwords?.preset ?? 'en',
+        bm25_b: cfg.bm25?.b ?? d.bm25_b,
+        bm25_k1: cfg.bm25?.k1 ?? d.bm25_k1,
+        cleanup_interval_seconds: cfg.cleanupIntervalSeconds ?? d.cleanup_interval_seconds,
+        index_null_state: cfg.indexNullState ?? d.index_null_state,
+        index_property_length: cfg.indexPropertyLength ?? d.index_property_length,
+        index_timestamps: cfg.indexTimestamps ?? d.index_timestamps,
+        stopwords_preset: cfg.stopwords?.preset ?? d.stopwords_preset,
         stopwords_additions: cfg.stopwords?.additions ?? [],
         stopwords_removals: cfg.stopwords?.removals ?? [],
+        stopwords_presets: cfg.stopwordPresets && typeof cfg.stopwordPresets === 'object'
+          ? Object.entries(cfg.stopwordPresets).map(([name, words]) => ({
+              name,
+              words: Array.isArray(words) ? words : [],
+            }))
+          : [],
       })
     }
     // Load multiTenancyConfig from imported JSON if present
@@ -576,6 +583,20 @@ export default function Collection({
     if (invertedIndexConfig.index_property_length !== defaults.index_property_length) invertedIndexJson.indexPropertyLength = invertedIndexConfig.index_property_length;
     if (invertedIndexConfig.index_timestamps !== defaults.index_timestamps) invertedIndexJson.indexTimestamps = invertedIndexConfig.index_timestamps;
     if (Object.keys(stopwords).length > 0) invertedIndexJson.stopwords = stopwords;
+
+    // User-defined stopword presets (Weaviate >= 1.37.2). The server rejects
+    // empty or whitespace-only preset names, empty word lists, and empty words,
+    // so half-finished rows are dropped here rather than emitted as invalid
+    // schema. A later row with the same name wins, matching object semantics.
+    const stopwordPresets = {};
+    (invertedIndexConfig.stopwords_presets || []).forEach(({ name, words }) => {
+      const presetName = (name || '').trim();
+      const presetWords = (Array.isArray(words) ? words : [])
+        .map(word => (word || '').trim())
+        .filter(Boolean);
+      if (presetName && presetWords.length > 0) stopwordPresets[presetName] = presetWords;
+    });
+    if (Object.keys(stopwordPresets).length > 0) invertedIndexJson.stopwordPresets = stopwordPresets;
 
     setGeneratedJson((prev) => {
       // Remove invertedIndexConfig if nothing is set

@@ -20,6 +20,12 @@ export const DEFAULT_INVERTED_INDEX_CONFIG = {
   stopwords_preset: 'en',
   stopwords_additions: [],
   stopwords_removals: [],
+  // User-defined stopword presets (Weaviate >= 1.37.2), held as an ordered list
+  // of { name, words } rows rather than the wire format's { [name]: words }
+  // object. An object cannot represent a half-typed row -- there is no valid
+  // empty key, and renaming a preset would lose its position and its words.
+  // Serialization converts to the object shape and drops invalid rows.
+  stopwords_presets: [],
 }
 
 /**
@@ -33,4 +39,5 @@ export const createDefaultInvertedIndexConfig = () => ({
   ...DEFAULT_INVERTED_INDEX_CONFIG,
   stopwords_additions: [],
   stopwords_removals: [],
+  stopwords_presets: [],
 })
