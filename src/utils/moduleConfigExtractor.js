@@ -1,15 +1,22 @@
 /**
- * This utility extracts configuration options for vectorizer modules
- * directly from the Weaviate client TypeScript definitions.
- * 
- * It dynamically infers the available configuration fields for each
- * vectorizer module based on the TypeScript type definitions.
- * 
+ * Configuration options for vectorizer, generative and reranker modules.
+ *
+ * IMPORTANT: these tables are a HAND-MAINTAINED MIRROR of the weaviate-client
+ * TypeScript definitions. Nothing is read from the `.d.ts` files at build or
+ * runtime — the import below is deliberately commented out. When the client
+ * gains a module or a field, someone has to transcribe it here by hand, so the
+ * tables drift silently. `moduleConfigExtractor.test.js` asserts that every
+ * module defined here is reachable from the dropdown in `constants/options.js`,
+ * which catches one half of that drift; the other half (client gains a module
+ * neither file knows about) still needs a manual audit on each client bump.
+ *
+ * Last transcribed against: weaviate-client 3.14.0.
+ *
  * ## How to Discover Properties for Each Vectorizer Module
- * 
+ *
  * To find the available configuration properties for a vectorizer module,
  * inspect the TypeScript definitions from the weaviate-client package:
- * 
+ *
  * ```bash
  * # Navigate to the weaviate-client package
  * cd node_modules/weaviate-client
