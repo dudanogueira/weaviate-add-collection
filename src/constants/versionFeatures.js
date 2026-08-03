@@ -25,6 +25,10 @@ export const VERSION_FEATURES = {
   rqQuantizationHnsw:          '1.35.0',  // RQ for HNSW index
   rqQuantizationFlat:          '1.35.0',  // RQ for Flat index
 
+  // Multi-vector (HNSW only)
+  multiVectorHnsw:             '1.29.0',  // ColBERT-style multi-vector (preview in 1.29)
+  muveraEncoding:              '1.31.0',  // MUVERA encoding for multi-vector
+
   // Property indexing
   indexRangeFilters:           '1.24.0',
 

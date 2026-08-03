@@ -13,6 +13,42 @@ import { validateCollectionName, sanitizeCollectionName } from '../utils/collect
 import { DEFAULT_REPLICATION_ASYNC_CONFIG } from '../constants/replicationDefaults'
 import { DEFAULT_INVERTED_INDEX_CONFIG, createDefaultInvertedIndexConfig } from '../constants/invertedIndexDefaults'
 
+/**
+ * Build the wire form of vectorIndexConfig.multivector, or undefined when it
+ * should be omitted entirely.
+ *
+ * The shape is the server's own -- nested `enabled` flags rather than the
+ * ergonomic `encoding: { type: 'muvera' }` union the TypeScript client exposes,
+ * because this project emits raw REST schema JSON. Verified against a live
+ * Weaviate instance.
+ *
+ * Numbers use the Number.isFinite + Number.isInteger guard rather than
+ * parseInt, so a partially typed "1.5" or "abc" is dropped instead of being
+ * emitted as a truncated value or as null.
+ */
+function buildMultivectorConfig(raw) {
+  if (!raw || typeof raw !== 'object' || raw.enabled !== true) return undefined
+
+  const multivector = { enabled: true }
+
+  const aggregation = (raw.aggregation || '').trim()
+  if (aggregation) multivector.aggregation = aggregation
+
+  if (raw.muvera && raw.muvera.enabled === true) {
+    const muvera = { enabled: true }
+    for (const key of ['ksim', 'dprojections', 'repetitions']) {
+      const num = Number(raw.muvera[key])
+      if (raw.muvera[key] !== '' && raw.muvera[key] !== undefined && raw.muvera[key] !== null
+          && Number.isFinite(num) && Number.isInteger(num)) {
+        muvera[key] = num
+      }
+    }
+    multivector.muvera = muvera
+  }
+
+  return multivector
+}
+
 // Contract:
 // Inputs: optional `initialJson` object with { name, description }
 //         optional `availableModules` object with available vectorizer modules
@@ -1051,6 +1087,10 @@ export default function Collection({
                 if (key === 'skip' && value === false) return
                 // Skip quantizer field itself, we'll handle it separately
                 if (key === 'quantizer') return
+                // A dynamic index starts flat and switches to HNSW, so it
+                // cannot carry multi-vector config -- the client's serializer
+                // returns before its multivector block for dynamic too.
+                if (key === 'multivector') return
                 hnswConfig[key] = value
               }
             })
@@ -1143,7 +1183,16 @@ export default function Collection({
             if (outKey === 'hnsw' || outKey === 'flat') return
             // Skip quantizer field if present (it's just for UI state)
             if (outKey === 'quantizer') return
-            
+
+            // multivector is HNSW-only -- the server has no such setting on a
+            // flat index, and this branch serves both types.
+            if (outKey === 'multivector') {
+              if (config.indexType !== 'hnsw') return
+              const multivector = buildMultivectorConfig(value)
+              if (multivector) indexConfig.multivector = multivector
+              return
+            }
+
             // Handle quantizer configs (pq, bq, sq, rq) - include them as-is
             if (outKey === 'pq' || outKey === 'bq' || outKey === 'sq' || outKey === 'rq') {
               if (typeof value === 'object' && value !== null) {
