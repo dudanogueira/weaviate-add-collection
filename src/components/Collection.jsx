@@ -7,11 +7,13 @@ import InvertedIndexConfigSection from './InvertedIndexConfigSection'
 import MultiTenancyConfigSection from './MultiTenancyConfigSection'
 import ObjectTtlConfigSection from './ObjectTtlConfigSection'
 import ReplicationConfigSection from './ReplicationConfigSection'
+import ShardingConfigSection from './ShardingConfigSection'
 import GenerativeConfigSection from './GenerativeConfigSection'
 import RerankerConfigSection from './RerankerConfigSection'
 import { validateCollectionName, sanitizeCollectionName } from '../utils/collectionNameValidator'
 import { DEFAULT_REPLICATION_ASYNC_CONFIG } from '../constants/replicationDefaults'
 import { DEFAULT_INVERTED_INDEX_CONFIG, createDefaultInvertedIndexConfig } from '../constants/invertedIndexDefaults'
+import { createDefaultShardingConfig, SHARDING_READ_ONLY_KEYS } from '../constants/shardingDefaults'
 
 /**
  * Build the wire form of vectorIndexConfig.multivector, or undefined when it
@@ -92,6 +94,7 @@ export default function Collection({
     deletionStrategy: 'NoAutomatedResolution',
     asyncConfig: { ...DEFAULT_REPLICATION_ASYNC_CONFIG },
   })
+  const [shardingConfig, setShardingConfig] = useState(createDefaultShardingConfig)
   const [generativeConfig, setGenerativeConfig] = useState({
     enabled: false,
     module: '',
@@ -110,6 +113,7 @@ export default function Collection({
   const [objectTtlConfig, setObjectTtlConfig] = useState({ mode: 'none', timeToLive: '', filterExpiredObjects: false, propertyName: '' })
   const [openObjectTtlConfig, setOpenObjectTtlConfig] = useState(false)
   const [openReplicationConfig, setOpenReplicationConfig] = useState(false)
+  const [openShardingConfig, setOpenShardingConfig] = useState(false)
   const [openGenerativeConfig, setOpenGenerativeConfig] = useState(false)
   const [openRerankerConfig, setOpenRerankerConfig] = useState(false)
 
@@ -271,6 +275,15 @@ export default function Collection({
         deletionStrategy: cfg.deletionStrategy ?? 'NoAutomatedResolution',
         asyncConfig,
       })
+    }
+    // Load shardingConfig from imported JSON if present. Only the three
+    // create-time knobs are kept; the server also returns actualCount,
+    // actualVirtualCount, key, strategy and function, which are read-only.
+    if (initialJson?.shardingConfig && typeof initialJson.shardingConfig === 'object') {
+      const cfg = initialJson.shardingConfig
+      setShardingConfig(Object.fromEntries(
+        Object.keys(createDefaultShardingConfig()).map(key => [key, cfg[key] != null ? cfg[key] : ''])
+      ))
     }
     // Load generativeConfig from imported JSON if present
     // Support both moduleConfig.generative-* (current) and legacy top-level generative key
@@ -770,6 +783,32 @@ export default function Collection({
       return { ...prev, replicationConfig: replicationJson };
     });
   }, [replicationConfig]);
+
+  // Update JSON with sharding configuration
+  useEffect(() => {
+    const toFiniteInt = (value) => {
+      const num = Number(value);
+      return Number.isFinite(num) && Number.isInteger(num) ? num : undefined;
+    };
+
+    const shardingJson = {};
+    Object.entries(shardingConfig).forEach(([key, value]) => {
+      // Read-only server fields are never emitted, even if an imported schema
+      // carried them.
+      if (SHARDING_READ_ONLY_KEYS.includes(key)) return;
+      if (value === '' || value === null || value === undefined) return;
+      const num = toFiniteInt(value);
+      if (num !== undefined) shardingJson[key] = num;
+    });
+
+    setGeneratedJson((prev) => {
+      if (Object.keys(shardingJson).length === 0) {
+        const { shardingConfig: _removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, shardingConfig: shardingJson };
+    });
+  }, [shardingConfig]);
 
   // Update JSON with generative configuration
   useEffect(() => {
@@ -1568,6 +1607,38 @@ export default function Collection({
         {nodesNumber === 1 && (
           <div className="collapsible-panel" style={{ padding: 'var(--spacing-md)', color: 'var(--color-text-secondary)' }}>
             <p>Replication feature requires 2 or more nodes.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Sharding Config collapsible section */}
+      <div className="collapsible">
+        <div className="collapsible-header">
+          <button
+            className="collapsible-toggle"
+            aria-expanded={openShardingConfig}
+            onClick={() => setOpenShardingConfig((s) => !s)}
+          >
+            <span>Sharding Configuration</span>
+            <span className="chev">{openShardingConfig ? '▾' : '▸'}</span>
+          </button>
+          {DOC_LINKS.sharding && (
+            <a href={DOC_LINKS.sharding} target="_blank" rel="noopener noreferrer" className="doc-link" title="View documentation">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="View documentation">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </a>
+          )}
+        </div>
+
+        {openShardingConfig && (
+          <div className="collapsible-panel">
+            <ShardingConfigSection
+              config={shardingConfig}
+              setConfig={setShardingConfig}
+              replicationFactor={replicationConfig.factor}
+            />
           </div>
         )}
       </div>
