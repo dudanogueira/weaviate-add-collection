@@ -220,3 +220,44 @@ export async function exportCollectionSchema(client, collectionName) {
   
   return schema
 }
+
+// ─── Raw REST schema helpers ──────────────────────────────────────────────────
+
+const WEAVIATE_REST = 'http://localhost:8080/v1/schema'
+
+/**
+ * POST a schema to Weaviate exactly as the component emitted it.
+ *
+ * The typed `createCollection` above rebuilds a CollectionConfigCreate by hand
+ * and silently drops anything it does not know about, and the client's read
+ * path rewrites some fields on the way back (asciiFold/asciiFoldIgnore become
+ * an ergonomic union, and NestedPropertyCreate has no textAnalyzer at all).
+ * That makes it the wrong tool for checking what this component produces --
+ * it would test the helper, not the schema. These two send and read the raw
+ * REST payload instead.
+ */
+export async function postRawSchema(collectionJson) {
+  const response = await fetch(WEAVIATE_REST, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(collectionJson),
+  })
+  if (!response.ok) {
+    throw new Error(`Weaviate rejected the schema (${response.status}): ${await response.text()}`)
+  }
+  return response.json()
+}
+
+/** GET a collection's schema as raw JSON. */
+export async function getRawSchema(collectionName) {
+  const response = await fetch(`${WEAVIATE_REST}/${collectionName}`)
+  if (!response.ok) {
+    throw new Error(`Could not read schema for ${collectionName} (${response.status})`)
+  }
+  return response.json()
+}
+
+/** Delete a collection, ignoring "not found" so it is safe in cleanup. */
+export async function deleteRawSchema(collectionName) {
+  await fetch(`${WEAVIATE_REST}/${collectionName}`, { method: 'DELETE' }).catch(() => {})
+}
