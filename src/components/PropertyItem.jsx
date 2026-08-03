@@ -304,9 +304,10 @@ export default function PropertyItem({ value, onChange, onDelete, index, isNeste
 
       {value.dataType === 'object' && (
         <NestedPropertySection 
-          nestedProperties={value.nestedProperties || []} 
+          nestedProperties={value.nestedProperties || []}
           onChange={updateNestedProperties}
           depth={depth + 1}
+          stopwordPresetNames={stopwordPresetNames}
         />
       )}
 

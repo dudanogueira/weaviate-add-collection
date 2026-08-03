@@ -40,6 +40,11 @@ export default function Collection({
   const [nameValidation, setNameValidation] = useState({ valid: true, error: null, warning: null })
   const [generatedJson, setGeneratedJson] = useState({})
   const [invertedIndexConfig, setInvertedIndexConfig] = useState(createDefaultInvertedIndexConfig)
+  // Named presets defined under Inverted Index Configuration, offered to each
+  // text property's Text Analyzer. Only named rows are useful as options.
+  const stopwordPresetNames = (invertedIndexConfig.stopwords_presets || [])
+    .map(preset => (preset.name || '').trim())
+    .filter(Boolean)
   const [multiTenancyConfig, setMultiTenancyConfig] = useState({
     enabled: false,
     autoTenantCreation: false,
@@ -1317,7 +1322,11 @@ export default function Collection({
 
         {openProperties && (
           <div className="collapsible-panel">
-            <PropertySection properties={properties} onChange={setProperties} />
+            <PropertySection
+              properties={properties}
+              onChange={setProperties}
+              stopwordPresetNames={stopwordPresetNames}
+            />
           </div>
         )}
       </div>

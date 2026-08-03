@@ -404,6 +404,96 @@ describe('Collection — invertedIndexConfig.stopwordPresets', () => {
   })
 })
 
+// ─── Presets feeding the per-property picker ──────────────────────────────────
+
+describe('Collection — stopword presets offered to properties', () => {
+  function stopwordPresetSelect() {
+    return screen.getByText('Stopword Preset').parentElement.querySelector('select')
+  }
+
+  it('offers only the built-ins when no presets are defined', async () => {
+    const { container } = render(<Collection initialJson={withTextProperty} />)
+    await waitForRender(container)
+
+    const values = Array.from(stopwordPresetSelect().options).map(o => o.value)
+    expect(values).toEqual(['', 'en', 'none'])
+  })
+
+  it('offers imported user-defined presets alongside the built-ins', async () => {
+    const { container } = render(
+      <Collection initialJson={{
+        class: 'Article',
+        properties: [{ name: 'title', dataType: ['text'] }],
+        invertedIndexConfig: { stopwordPresets: { fr: ['le'], de: ['der'] } },
+      }} />
+    )
+    await waitForRender(container)
+
+    const values = Array.from(stopwordPresetSelect().options).map(o => o.value)
+    expect(values).toEqual(['', 'en', 'none', 'fr', 'de'])
+  })
+
+  it('picks up a preset added through the UI', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<Collection initialJson={withTextProperty} />)
+    await waitForRender(container)
+
+    expect(Array.from(stopwordPresetSelect().options).map(o => o.value)).not.toContain('fr')
+
+    await openInvertedIndex(user)
+    await user.click(screen.getByRole('button', { name: /add preset/i }))
+    await user.type(screen.getByPlaceholderText('e.g. fr'), 'fr')
+
+    await waitFor(() => {
+      expect(Array.from(stopwordPresetSelect().options).map(o => o.value)).toContain('fr')
+    })
+  })
+
+  it('does not offer a preset whose name is still blank', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<Collection initialJson={withTextProperty} />)
+    await waitForRender(container)
+
+    await openInvertedIndex(user)
+    await user.click(screen.getByRole('button', { name: /add preset/i }))
+
+    const values = Array.from(stopwordPresetSelect().options).map(o => o.value)
+    expect(values).toEqual(['', 'en', 'none'])
+  })
+
+  it('does not duplicate a user preset that shadows a built-in', async () => {
+    const { container } = render(
+      <Collection initialJson={{
+        class: 'Article',
+        properties: [{ name: 'title', dataType: ['text'] }],
+        invertedIndexConfig: { stopwordPresets: { en: ['custom'] } },
+      }} />
+    )
+    await waitForRender(container)
+
+    const values = Array.from(stopwordPresetSelect().options).map(o => o.value)
+    expect(values).toEqual(['', 'en', 'none'])
+  })
+
+  it('selecting a user preset emits it on the property', async () => {
+    const user = userEvent.setup()
+    const { container } = render(
+      <Collection initialJson={{
+        class: 'Article',
+        properties: [{ name: 'title', dataType: ['text'] }],
+        invertedIndexConfig: { stopwordPresets: { fr: ['le'] } },
+      }} />
+    )
+    await waitForRender(container)
+
+    await user.selectOptions(stopwordPresetSelect(), 'fr')
+
+    await waitFor(() => {
+      expect(readJson(container).properties[0].textAnalyzer).toEqual({ stopwordPreset: 'fr' })
+    })
+  })
+})
+
 // ─── Round-trip ───────────────────────────────────────────────────────────────
 
 describe('Collection — gse_ch round-trip', () => {
