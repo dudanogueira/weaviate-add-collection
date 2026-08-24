@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { VersionProvider, VersionGatedSection } from '../context/VersionContext'
 import DOC_LINKS from '../constants/docLinks.json'
 import PropertySection from './PropertySection'
@@ -12,7 +12,7 @@ import GenerativeConfigSection from './GenerativeConfigSection'
 import RerankerConfigSection from './RerankerConfigSection'
 import { validateCollectionName, sanitizeCollectionName } from '../utils/collectionNameValidator'
 import { DEFAULT_REPLICATION_ASYNC_CONFIG } from '../constants/replicationDefaults'
-import { DEFAULT_INVERTED_INDEX_CONFIG, createDefaultInvertedIndexConfig } from '../constants/invertedIndexDefaults'
+import { DEFAULT_INVERTED_INDEX_CONFIG, createDefaultInvertedIndexConfig, buildStopwordPresets } from '../constants/invertedIndexDefaults'
 import { createDefaultShardingConfig, SHARDING_READ_ONLY_KEYS } from '../constants/shardingDefaults'
 
 /**
@@ -79,10 +79,15 @@ export default function Collection({
   const [generatedJson, setGeneratedJson] = useState({})
   const [invertedIndexConfig, setInvertedIndexConfig] = useState(createDefaultInvertedIndexConfig)
   // Named presets defined under Inverted Index Configuration, offered to each
-  // text property's Text Analyzer. Only named rows are useful as options.
-  const stopwordPresetNames = (invertedIndexConfig.stopwords_presets || [])
-    .map(preset => (preset.name || '').trim())
-    .filter(Boolean)
+  // text property's Text Analyzer. Derived through the same builder the
+  // serializer uses, so a half-finished row (named but wordless) is never
+  // offered as an option -- selecting one would produce a property pointing at
+  // a preset that is not in the emitted schema. Object keys are unique, so
+  // duplicate rows collapse rather than repeating in the <select>.
+  const stopwordPresetNames = useMemo(
+    () => Object.keys(buildStopwordPresets(invertedIndexConfig.stopwords_presets)),
+    [invertedIndexConfig.stopwords_presets]
+  )
   const [multiTenancyConfig, setMultiTenancyConfig] = useState({
     enabled: false,
     autoTenantCreation: false,
@@ -645,18 +650,9 @@ export default function Collection({
     }
     if (Object.keys(stopwords).length > 0) invertedIndexJson.stopwords = stopwords;
 
-    // User-defined stopword presets (Weaviate >= 1.37.2). The server rejects
-    // empty or whitespace-only preset names, empty word lists, and empty words,
-    // so half-finished rows are dropped here rather than emitted as invalid
-    // schema. A later row with the same name wins, matching object semantics.
-    const stopwordPresets = {};
-    (invertedIndexConfig.stopwords_presets || []).forEach(({ name, words }) => {
-      const presetName = (name || '').trim();
-      const presetWords = (Array.isArray(words) ? words : [])
-        .map(word => (word || '').trim())
-        .filter(Boolean);
-      if (presetName && presetWords.length > 0) stopwordPresets[presetName] = presetWords;
-    });
+    // User-defined stopword presets (Weaviate >= 1.37.2), converted from the
+    // UI's ordered rows and with half-finished rows dropped.
+    const stopwordPresets = buildStopwordPresets(invertedIndexConfig.stopwords_presets);
     if (Object.keys(stopwordPresets).length > 0) invertedIndexJson.stopwordPresets = stopwordPresets;
 
     setGeneratedJson((prev) => {
@@ -973,6 +969,13 @@ export default function Collection({
         //   - asciiFold: false is the default, so never emit it
         //   - asciiFoldIgnore is meaningless without asciiFold: true
         //   - stopwordPreset is only honoured for 'word' tokenization
+        //
+        // A preset name is emitted as configured, even if no matching preset is
+        // defined on the collection. The picker only offers presets that will
+        // be emitted, so this happens only for an imported schema that was
+        // already inconsistent, or for a preset emptied after it was picked --
+        // and in both cases surfacing what the user set (and letting the server
+        // reject it) beats silently dropping it from their schema.
         const textAnalyzer = {}
         if (p.textAnalyzer?.asciiFold === true) {
           textAnalyzer.asciiFold = true

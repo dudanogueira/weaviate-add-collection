@@ -433,7 +433,7 @@ describe('Collection — stopword presets offered to properties', () => {
     expect(values).toEqual(['', 'en', 'none', 'fr', 'de'])
   })
 
-  it('picks up a preset added through the UI', async () => {
+  it('picks up a preset added through the UI once it has a word', async () => {
     const user = userEvent.setup()
     const { container } = render(<Collection initialJson={withTextProperty} />)
     await waitForRender(container)
@@ -444,9 +444,43 @@ describe('Collection — stopword presets offered to properties', () => {
     await user.click(screen.getByRole('button', { name: /add preset/i }))
     await user.type(screen.getByPlaceholderText('e.g. fr'), 'fr')
 
+    // A named but wordless preset is not serialized, so offering it here would
+    // let the user point a property at a preset absent from the schema.
+    expect(Array.from(stopwordPresetSelect().options).map(o => o.value)).not.toContain('fr')
+
+    await user.type(screen.getByPlaceholderText('Add stopword'), 'le{Enter}')
+
     await waitFor(() => {
       expect(Array.from(stopwordPresetSelect().options).map(o => o.value)).toContain('fr')
     })
+  })
+
+  it('offers a duplicate-named preset only once', async () => {
+    const { container } = render(
+      <Collection initialJson={{
+        class: 'Article',
+        properties: [{ name: 'title', dataType: ['text'] }],
+        invertedIndexConfig: { stopwordPresets: { fr: ['le'] } },
+      }} />
+    )
+    await waitForRender(container)
+
+    // Import collapses duplicates, so drive the duplicate in through the UI.
+    const user = userEvent.setup()
+    await openInvertedIndex(user)
+    await user.click(screen.getByRole('button', { name: /add preset/i }))
+    const nameInputs = screen.getAllByPlaceholderText('e.g. fr')
+    await user.type(nameInputs[nameInputs.length - 1], 'fr')
+    const wordInputs = screen.getAllByPlaceholderText('Add stopword')
+    await user.type(wordInputs[wordInputs.length - 1], 'la{Enter}')
+
+    // Both rows serialize, and the later one wins -- but the picker must list
+    // the name once, not once per row.
+    await waitFor(() => {
+      expect(readJson(container).invertedIndexConfig.stopwordPresets).toEqual({ fr: ['la'] })
+    })
+    const values = Array.from(stopwordPresetSelect().options).map(o => o.value)
+    expect(values.filter(v => v === 'fr')).toHaveLength(1)
   })
 
   it('does not offer a preset whose name is still blank', async () => {

@@ -8,8 +8,9 @@
  *
  * Only the three create-time knobs are editable. The server also returns
  * actualCount, actualVirtualCount, key, strategy and function on read; those
- * are accepted on import so a round-tripped schema is not silently altered in
- * the editor, but they are never emitted -- they are outputs, not settings.
+ * are tolerated on import -- a schema carrying them loads without error -- but
+ * they are dropped rather than held in state, and never emitted. They are
+ * outputs, not settings.
  */
 export const DEFAULT_SHARDING_CONFIG = {
   virtualPerPhysical: '',
@@ -17,7 +18,13 @@ export const DEFAULT_SHARDING_CONFIG = {
   desiredVirtualCount: '',
 }
 
-/** Keys the server reports back but that must never be sent. */
+/**
+ * Keys the server reports back but that must never be sent.
+ *
+ * Import already drops these by only reading the create-time keys, so the
+ * serializer's check against this list is a second line of defence for state
+ * set any other way.
+ */
 export const SHARDING_READ_ONLY_KEYS = [
   'actualCount',
   'actualVirtualCount',

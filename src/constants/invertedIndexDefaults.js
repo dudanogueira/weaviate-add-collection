@@ -46,3 +46,27 @@ export const createDefaultInvertedIndexConfig = () => ({
   stopwords_removals: [],
   stopwords_presets: [],
 })
+
+/**
+ * Convert the UI's ordered `{ name, words }` rows into the wire format's
+ * `{ [name]: words }` object.
+ *
+ * The server rejects empty or whitespace-only preset names, empty word lists,
+ * and empty words, so half-finished rows are dropped here rather than emitted
+ * as invalid schema. A later row with the same name wins, matching object
+ * semantics.
+ *
+ * Both the serialization effect and the per-property preset picker go through
+ * this, so the picker can never offer a preset that will not be emitted.
+ */
+export const buildStopwordPresets = (rows) => {
+  const presets = {}
+  ;(Array.isArray(rows) ? rows : []).forEach(({ name, words } = {}) => {
+    const presetName = (name || '').trim()
+    const presetWords = (Array.isArray(words) ? words : [])
+      .map(word => (word || '').trim())
+      .filter(Boolean)
+    if (presetName && presetWords.length > 0) presets[presetName] = presetWords
+  })
+  return presets
+}

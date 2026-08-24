@@ -257,7 +257,16 @@ export async function getRawSchema(collectionName) {
   return response.json()
 }
 
-/** Delete a collection, ignoring "not found" so it is safe in cleanup. */
+/**
+ * Delete a collection, ignoring "not found" so it is safe in cleanup.
+ *
+ * Only 404 is swallowed. A 500 or a connection failure means the collection is
+ * probably still there, and silently ignoring it leaves a stale schema that
+ * makes the next run of the same test fail for an unrelated reason.
+ */
 export async function deleteRawSchema(collectionName) {
-  await fetch(`${WEAVIATE_REST}/${collectionName}`, { method: 'DELETE' }).catch(() => {})
+  const response = await fetch(`${WEAVIATE_REST}/${collectionName}`, { method: 'DELETE' })
+  if (!response.ok && response.status !== 404) {
+    throw new Error(`Could not delete ${collectionName} (${response.status}): ${await response.text()}`)
+  }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 
 /**
  * Editable list of unique short strings, rendered as removable pills.
@@ -7,9 +7,15 @@ import React, { useState } from 'react';
  * lists, and the textAnalyzer asciiFoldIgnore character list. Duplicates are
  * silently ignored rather than rejected, and Enter commits without submitting
  * the surrounding form.
+ *
+ * Several of these render on one page, so the label is tied to its input by a
+ * useId-generated id rather than a hardcoded one, and the per-tag remove
+ * buttons name both the tag and the list -- "×" alone is meaningless to a
+ * screen reader, and "Remove en" is ambiguous when two lists are visible.
  */
 export default function TagInput({ tags, setTags, label, placeholder = 'Add tag' }) {
   const [input, setInput] = useState('');
+  const inputId = useId();
 
   const addTag = () => {
     const value = input.trim();
@@ -25,7 +31,7 @@ export default function TagInput({ tags, setTags, label, placeholder = 'Add tag'
 
   return (
     <div className="tag-input-section">
-      <label>{label}</label>
+      <label htmlFor={inputId}>{label}</label>
       <div className="tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '6px' }}>
         {tags.map(tag => (
           <span key={tag} className="tag" style={{
@@ -39,21 +45,27 @@ export default function TagInput({ tags, setTags, label, placeholder = 'Add tag'
             border: '1px solid #b6c2d6',
           }}>
             {tag}
-            <button type="button" onClick={() => removeTag(tag)} style={{
-              marginLeft: '8px',
-              background: 'none',
-              border: 'none',
-              color: '#6b7a90',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              fontSize: '1em',
-              lineHeight: '1',
-            }}>&times;</button>
+            <button
+              type="button"
+              onClick={() => removeTag(tag)}
+              aria-label={`Remove ${tag}${label ? ` from ${label}` : ''}`}
+              style={{
+                marginLeft: '8px',
+                background: 'none',
+                border: 'none',
+                color: '#6b7a90',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '1em',
+                lineHeight: '1',
+              }}
+            >&times;</button>
           </span>
         ))}
       </div>
       <div style={{ display: 'flex', gap: '6px' }}>
         <input
+          id={inputId}
           type="text"
           value={input}
           onChange={e => setInput(e.target.value)}
@@ -73,7 +85,7 @@ export default function TagInput({ tags, setTags, label, placeholder = 'Add tag'
           background: '#f5f8fa',
           color: '#2a3a4d',
           cursor: 'pointer',
-        }}>Add</button>
+        }} aria-label={label ? `Add to ${label}` : 'Add'}>Add</button>
       </div>
     </div>
   );
